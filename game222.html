@@ -43,15 +43,15 @@
     let waitingForPaddle = false;
     let showingUnlockMessage = false;
 
-    // 滑鼠移動
+    // 滑鼠移動控制條條
     document.addEventListener("mousemove", e => {
       const rect = canvas.getBoundingClientRect();
       paddle.x = e.clientX - rect.left - paddle.width / 2;
     });
 
-// 觸控拖曳
+    // === 觸控拖曳控制條條（手機平板專用）===
     let isTouching = false;
-      canvas.addEventListener('touchstart', function(e) {
+    canvas.addEventListener('touchstart', function(e) {
       isTouching = true;
       const rect = canvas.getBoundingClientRect();
       const touch = e.touches[0];
@@ -69,7 +69,6 @@
       isTouching = false;
     });
 
-
     function drawBall() {
       ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
     }
@@ -82,7 +81,7 @@
     function drawStar() {
       if (!waitingForPaddle) {
         ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // 如要看碰撞範圍可解註下行
+        // 若想檢查碰撞範圍可解除下方註解
         // ctx.strokeStyle = "rgba(255,0,0,0.7)";
         // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
       }
@@ -190,3 +189,4 @@
   <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>
+
