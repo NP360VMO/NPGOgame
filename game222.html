@@ -43,10 +43,32 @@
     let waitingForPaddle = false;
     let showingUnlockMessage = false;
 
+    // 滑鼠移動
     document.addEventListener("mousemove", e => {
       const rect = canvas.getBoundingClientRect();
       paddle.x = e.clientX - rect.left - paddle.width / 2;
     });
+
+// 觸控拖曳
+    let isTouching = false;
+      canvas.addEventListener('touchstart', function(e) {
+      isTouching = true;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      paddle.x = touch.clientX - rect.left - paddle.width / 2;
+      e.preventDefault();
+    });
+    canvas.addEventListener('touchmove', function(e) {
+      if (!isTouching) return;
+      const rect = canvas.getBoundingClientRect();
+      const touch = e.touches[0];
+      paddle.x = touch.clientX - rect.left - paddle.width / 2;
+      e.preventDefault();
+    });
+    canvas.addEventListener('touchend', function() {
+      isTouching = false;
+    });
+
 
     function drawBall() {
       ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
