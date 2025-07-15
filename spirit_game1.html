@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 黃哞哞</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #fffbe6; }
+    img { width: 200px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>黃哞哞 🐮</h1>
+  <img src="images/game-spirit1.png" alt="黃哞哞">
+  <p><strong>簡介：</strong>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
+
+  <button onclick="collect()">收集精靈</button>
+  <p id="message"></p>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game1',
+      name: '黃哞哞',
+      image: 'images/game-spirit1.png',
+      page: 'spirit_game1.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有黃哞哞了喔！';
+      }
+    }
+  </script>
+
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+</body>
+</html>

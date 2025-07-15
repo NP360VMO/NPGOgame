@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>昂坪精靈 - 纜雲仔（標準形態）</title>
+    <style>
+        body {font-family: Arial, sans-serif; text-align: center; background-color: #fffbe6;}
+        img {width: 200px;}
+        button {padding:10px 20px; font-size:16px; margin-top:15px;}
+    </style>
+</head>
+<body>
+    <h1>纜雲仔（標準形態） 🚠</h1>
+    <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
+    <p><strong>簡介：</strong>纜雲仔（標準形態）是最早守護昂坪的精靈之一。每天，它都載著來自世界各地的旅客穿越山巒海峽，<br> 從東涌直達昂坪。在２５分鐘的空中旅程中，它總會用風趣的方式講述昂坪的風光與歷史，是所有精靈中最健談的一位！。</p>
+	<p><strong>🗺️ 真實世界對應資料：</strong> 昂坪360纜車車廂以鑽石型設計，四面環窗，讓乘客可360度細心欣賞大嶼山自然景致。</p>
+    <button onclick="collect()">收集精靈</button>
+    <p id="message"></p>
+
+    <script>
+        const spirit = {
+            id: 'spirit1',
+            name: '纜雲仔（標準形態）',
+            image: 'images/cablecar-spirit.png',
+			page: 'spirit1.html'
+        };
+
+        function collect() {
+            let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+            if (!spirits.some(s => s.id === spirit.id)) {
+                spirits.push(spirit);
+                localStorage.setItem('spirits', JSON.stringify(spirits));
+                document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+            } else {
+                document.getElementById('message').innerText = '你已經收集過纜雲仔（標準形態）囉！';
+            }
+        }
+    </script>
+
+    <br><br>
+    <a href="index.html">🔙 返回主頁</a>
+</body>
+</html>

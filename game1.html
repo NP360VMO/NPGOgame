@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>挑戰遊戲：點擊反應</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #fff9e6; }
+    #target {
+      width: 100px; height: 100px;
+      background-color: orange;
+      border-radius: 50%;
+      position: absolute;
+      display: none;
+      cursor: pointer;
+    }
+    #gameArea {
+      position: relative;
+      width: 100%; height: 400px;
+      border: 2px dashed #aaa;
+      margin: 20px auto;
+    }
+    button { padding: 10px 20px; font-size: 16px; }
+    #status { margin-top: 15px; font-size: 18px; }
+    #timer { font-size: 18px; color: red; margin-top: 10px; }
+  </style>
+</head>
+<body>
+  <h1>🎯 點擊挑戰：找出黃哞哞</h1>
+  <p>請在 1.5 秒內點擊出現的黃哞哞圖案，20 秒內連續成功 10 次即可解鎖精靈！</p>
+  <button onclick="startGame()">開始遊戲</button>
+
+  <div id="gameArea">
+    <img src="images/game-spirit1.png" id="target" alt="黃哞哞">
+  </div>
+
+  <div id="status">尚未開始</div>
+  <div id="timer">剩餘時間：20 秒</div>
+
+  <script>
+    let success = 0;
+    let timeoutId;
+    let totalTime = 20;
+    let intervalId;
+    let showDelay = 1500; // 
+
+    const target = document.getElementById('target');
+    const status = document.getElementById('status');
+    const timer = document.getElementById('timer');
+    const gameArea = document.getElementById('gameArea');
+
+    function startGame() {
+      success = 0;
+      totalTime = 20;
+      showDelay = 1500; // Reset to 1500ms
+      status.innerText = '遊戲開始！準備好點擊黃哞哞';
+      updateTimer();
+      intervalId = setInterval(updateTimer, 1000);
+      showTarget();
+    }
+
+    function updateTimer() {
+      totalTime--;
+      timer.innerText = `剩餘時間：${totalTime} 秒`;
+      if (totalTime <= 0) {
+        endGame("⏱️ 時間到！請再試一次");
+      }
+    }
+
+    function endGame(message) {
+      clearInterval(intervalId);
+      clearTimeout(timeoutId);
+      target.style.display = 'none';
+      status.innerText = message;
+    }
+
+    function showTarget() {
+      const x = Math.random() * (gameArea.clientWidth - 100);
+      const y = Math.random() * (gameArea.clientHeight - 100);
+      target.style.left = x + 'px';
+      target.style.top = y + 'px';
+      target.style.display = 'block';
+
+      timeoutId = setTimeout(() => {
+        target.style.display = 'none';
+        status.innerText = '太慢了！請再試一次';
+        success = 0;
+      }, showDelay);
+    }
+
+    function handleInteraction() {
+      clearTimeout(timeoutId);
+      target.style.display = 'none';
+      success++;
+      showDelay = Math.max(400, showDelay - 50); // Reduced from 100ms to 50ms
+      if (success >= 10) {
+        clearInterval(intervalId);
+        unlockSpirit();
+      } else {
+        status.innerText = `成功 ${success} 次，再接再厲！`;
+        setTimeout(showTarget, 500);
+      }
+    }
+
+    target.onclick = handleInteraction;
+    target.ontouchstart = (e) => {
+      e.preventDefault();
+      handleInteraction();
+    };
+
+    function unlockSpirit() {
+      const spirit = {
+        id: 'spirit_game1',
+        name: '黃哞哞',
+        image: 'images/game-spirit1.png',
+        page: 'spirit_game1.html'
+      };
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));         
+        status.innerText = '🎉 成功解鎖挑戰精靈：黃哞哞！';
+      } else {
+        status.innerText = '你已經解鎖過黃哞哞了喔！';
+      }
+      target.style.display = 'none';
+    }
+  </script>
+
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+</body>
+</html>
