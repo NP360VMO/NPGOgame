@@ -49,7 +49,7 @@
       paddle.x = e.clientX - rect.left - paddle.width / 2;
     });
 
-    // === 觸控拖曳控制條條（手機平板專用）===
+    // 觸控拖曳控制條條（手機平板專用）
     let isTouching = false;
     canvas.addEventListener('touchstart', function(e) {
       isTouching = true;
@@ -81,7 +81,7 @@
     function drawStar() {
       if (!waitingForPaddle) {
         ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // 若想檢查碰撞範圍可解除下方註解
+        // 如要看碰撞範圍可解除下方註解
         // ctx.strokeStyle = "rgba(255,0,0,0.7)";
         // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
       }
@@ -181,7 +181,9 @@
       setTimeout(() => {
         showingUnlockMessage = false;
         stopGame();
-      }, 1500); // 顯示1.5秒再結束遊戲
+        // 加這行自動跳轉
+        window.location.href = 'spirit_game2.html';
+      }, 1500); // 顯示1.5秒再跳轉
     }
   </script>
 
@@ -189,4 +191,3 @@
   <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>
-
