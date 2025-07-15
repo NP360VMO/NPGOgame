@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>匹配挑戰：飲茶仔請飲茶</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #fff9e6;
+    }
+    #grid {
+      display: grid;
+      grid-template-columns: repeat(8, 50px);
+      grid-gap: 2px;
+      width: 416px;
+      margin: 20px auto;
+    }
+    .cell {
+      width: 50px;
+      height: 50px;
+      line-height: 50px;
+      font-size: 24px;
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      text-align: center;
+      cursor: pointer;
+      user-select: none;
+      touch-action: manipulation;
+    }
+    #score, #time {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 匹配挑戰：飲茶仔請飲茶</h1>
+  <p>匹配三個或更多相同的圖案，獲得200分即可解鎖飲茶仔！</p>
+  <div id="score">Score: 0</div>
+  <div id="time">Time: 30s</div>
+  <div id="grid"></div>
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+
+  <script>
+    const GRID_SIZE = 8;
+    const ANIMAL_TYPES = ['🥟', '🥮', '🥠', '🍡', '🍤'];
+    const gridElement = document.getElementById('grid');
+    const scoreElement = document.getElementById('score');
+    const timeElement = document.getElementById('time');
+    let grid = [];
+    let score = 0;
+    let timeLeft = 30;
+    let selectedCell = null;
+
+    function initializeGrid() {
+      grid = Array.from({ length: GRID_SIZE }, () =>
+        Array.from({ length: GRID_SIZE }, () => ANIMAL_TYPES[Math.floor(Math.random() * ANIMAL_TYPES.length)])
+      );
+      while (hasMatches()) {
+        eliminateMatches();
+        dropAnimals();
+      }
+      renderGrid();
+    }
+
+    function renderGrid() {
+      gridElement.innerHTML = '';
+      for (let i = 0; i < GRID_SIZE; i++) {
+        for (let j = 0; j < GRID_SIZE; j++) {
+          const cell = document.createElement('div');
+          cell.classList.add('cell');
+          cell.dataset.x = i;
+          cell.dataset.y = j;
+          cell.textContent = grid[i][j];
+          cell.addEventListener('click', handleCellClick);
+          cell.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            handleCellClick(e);
+          });
+          gridElement.appendChild(cell);
+        }
+      }
+    }
+
+    function handleCellClick(event) {
+      const x = parseInt(event.target.dataset.x);
+      const y = parseInt(event.target.dataset.y);
+      if (!selectedCell) {
+        selectedCell = { x, y };
+        event.target.style.border = '2px solid red';
+      } else {
+        const prevX = selectedCell.x;
+        const prevY = selectedCell.y;
+        if (isAdjacent(x, y, prevX, prevY) && swapAndCheck(x, y, prevX, prevY)) {
+          eliminateMatches();
+          dropAnimals();
+          while (hasMatches()) {
+            eliminateMatches();
+            dropAnimals();
+          }
+        }
+        document.querySelector(`.cell[data-x="${prevX}"][data-y="${prevY}"]`).style.border = '';
+        selectedCell = null;
+        renderGrid();
+      }
+    }
+
+    function isAdjacent(x1, y1, x2, y2) {
+      return (Math.abs(x1 - x2) === 1 && y1 === y2) || (Math.abs(y1 - y2) === 1 && x1 === x2);
+    }
+
+    function swapAndCheck(x1, y1, x2, y2) {
+      [grid[x1][y1], grid[x2][y2]] = [grid[x2][y2], grid[x1][y1]];
+      if (!hasMatches()) {
+        [grid[x1][y1], grid[x2][y2]] = [grid[x2][y2], grid[x1][y1]];
+        return false;
+      }
+      return true;
+    }
+
+    function hasMatches() {
+      for (let i = 0; i < GRID_SIZE; i++) {
+        for (let j = 0; j < GRID_SIZE - 2; j++) {
+          if (grid[i][j] && grid[i][j] === grid[i][j + 1] && grid[i][j] === grid[i][j + 2]) {
+            return true;
+          }
+        }
+      }
+      for (let j = 0; j < GRID_SIZE; j++) {
+        for (let i = 0; i < GRID_SIZE - 2; i++) {
+          if (grid[i][j] && grid[i][j] === grid[i + 1][j] && grid[i][j] === grid[i + 2][j]) {
+            return true;
+          }
+        }
+      }
+      return false;
+    }
+
+    function eliminateMatches() {
+      for (let i = 0; i < GRID_SIZE; i++) {
+        for (let j = 0; j < GRID_SIZE - 2; j++) {
+          if (grid[i][j] && grid[i][j] === grid[i][j + 1] && grid[i][j] === grid[i][j + 2]) {
+            score += 10;
+            grid[i][j] = grid[i][j + 1] = grid[i][j + 2] = null;
+          }
+        }
+      }
+      for (let j = 0; j < GRID_SIZE; j++) {
+        for (let i = 0; i < GRID_SIZE - 2; i++) {
+          if (grid[i][j] && grid[i][j] === grid[i + 1][j] && grid[i][j] === grid[i + 2][j]) {
+            score += 10;
+            grid[i][j] = grid[i + 1][j] = grid[i + 2][j] = null;
+          }
+        }
+      }
+      scoreElement.textContent = `Score: ${score}`;
+    }
+
+    function dropAnimals() {
+      for (let j = 0; j < GRID_SIZE; j++) {
+        let emptyRow = GRID_SIZE - 1;
+        for (let i = GRID_SIZE - 1; i >= 0; i--) {
+          if (grid[i][j]) {
+            grid[emptyRow][j] = grid[i][j];
+            if (i !== emptyRow) grid[i][j] = null;
+            emptyRow--;
+          }
+        }
+        for (let i = 0; i <= emptyRow; i++) {
+          grid[i][j] = ANIMAL_TYPES[Math.floor(Math.random() * ANIMAL_TYPES.length)];
+        }
+      }
+    }
+
+    function unlockSpirit() {
+      const spirit = {
+        id: 'spirit_game3',
+        name: '飲茶仔',
+        image: 'images/game-spirit3.png',
+        page: 'spirit_game3.html',
+        unlockDate: new Date().toISOString(),
+        score: score
+      };
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        alert('🎉 成功解鎖挑戰精靈：飲茶仔！');
+        setTimeout(() => {
+          window.location.href = 'spirit_game3.html';
+        }, 1000);
+      } else {
+        alert('你已經解鎖過飲茶仔了喔！');
+      }
+    }
+
+    function gameLoop() {
+      if (score >= 200) {
+        unlockSpirit();
+        return;
+      }
+      if (timeLeft <= 0) {
+        alert(`Game Over! Final Score: ${score}`);
+        return;
+      }
+      timeLeft--;
+      timeElement.textContent = `Time: ${timeLeft}s`;
+      setTimeout(gameLoop, 1000);
+    }
+
+    initializeGrid();
+    gameLoop();
+  </script>
+</body>
+</html>

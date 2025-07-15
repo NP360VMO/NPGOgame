@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 小黃彈彈</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0fff8; }
+    img { width: 200px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>小黃彈彈 🐶</h1>
+  <img src="images/game-spirit2.png" alt="小黃彈彈">
+  <p><strong>簡介：</strong>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
+
+  <button onclick="collect()">收集精靈</button>
+  <p id="message"></p>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game2',
+      name: '小黃彈彈',
+      image: 'images/game-spirit2.png',
+      page: 'spirit_game2.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有小黃彈彈了喔！';
+      }
+    }
+  </script>
+
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+</body>
+</html>
