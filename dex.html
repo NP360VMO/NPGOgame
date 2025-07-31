@@ -54,18 +54,14 @@
 
   <script>
     // 所有精靈的資料（即使未收集也列出）
-	const allSpirits = [
-		{ id: 'spirit1', name: '纜雲仔（標準形態）', image: 'images/cablecar-spirit.png', page: 'spirit1.html', type: '探索系' },
-		{ id: 'spirit2', name: '纜雲仔（水晶形態）', image: 'images/crystal-spirit.png', page: 'spirit2.html', type: '探索系' },
-		{ id: 'spirit3', name: '纜雲仔（全景形態）', image: 'images/panorama-spirit.png', page: 'spirit3.html', type: '探索系' },
-		{ id: 'spirit_game1', name: '黃哞哞', image: 'images/game-spirit1.png', page: 'spirit_game1.html', type: '🎮 挑戰系' },
-		{ id: 'spirit_game2', name: '小黃彈彈', image: 'images/game-spirit2.png', page: 'spirit_game2.html', type: '🎮 挑戰系' },
-		{ id: 'spirit_game3', name: '飲茶仔', image: 'images/game-spirit3.png', page: 'spirit_game3.html', type: '🎮 挑戰系' },
-		//{ id: 'spirit4', name: 'Color Cha Cha', image: 'images/Shop 1.png', page: 'spirit4.html', type: '探索系 ' },
-		//{ id: 'spirit5', name: 'Mountain Café', image: 'images/Shop 2.png', page: 'spirit5.html', type: '探索系 ' },
-		//{ id: 'spirit6', name: 'Chrisly Café 華星冰室', image: 'images/Shop 3.png', page: 'spirit6.html', type: '探索系 ' },
-		//{ id: 'spirit7', name: 'Honeymoon Dessert 滿記甜品', image: 'images/Shop 5.png', page: 'spirit7.html', type: '探索系 ' },
-      // 可繼續新增更多精靈
+    const allSpirits = [
+      { id: 'spirit1', name: '纜雲仔（標準形態）', image: 'images/cablecar-spirit.png', page: 'spirit1.html', type: '探索系', prompt: '探索昂坪纜車站以解鎖纜雲仔（標準形態）！' },
+      { id: 'spirit2', name: '纜雲仔（水晶形態）', image: 'images/crystal-spirit.png', page: 'spirit2.html', type: '探索系', prompt: '搭乘水晶纜車以解鎖纜雲仔（水晶形態）！' },
+      { id: 'spirit3', name: '纜雲仔（全景形態）', image: 'images/panorama-spirit.png', page: 'spirit3.html', type: '探索系', prompt: '體驗全景纜車以解鎖纜雲仔（全景形態）！' },
+      { id: 'spirit_game1', name: '黃哞哞', image: 'images/game-spirit1.png', page: 'spirit_game1.html', type: '🎮 挑戰系', prompt: '完成黃哞哞挑戰遊戲以解鎖此精靈！' },
+      { id: 'spirit_game2', name: '小黃彈彈', image: 'images/game-spirit2.png', page: 'spirit_game2.html', type: '🎮 挑戰系', prompt: '挑戰小黃彈彈遊戲以解鎖此精靈！' },
+      { id: 'spirit_game3', name: '飲茶仔', image: 'images/game-spirit3.png', page: 'spirit_game3.html', type: '🎮 挑戰系', prompt: '參加飲茶仔挑戰以解鎖此精靈！' },
+      { id: 'spirit_game4', name: '珍奶雞蛋仔', image: 'images/game-spirit4.png', page: 'spirit_game4.html', type: '🎮 挑戰系', prompt: '完成珍奶雞蛋仔任務以解鎖此精靈！' },
     ];
 
     const collected = JSON.parse(localStorage.getItem('spirits') || '[]').map(s => s.id);
@@ -73,26 +69,36 @@
     const progress = document.getElementById('progress');
     progress.innerText = `已收集 ${collected.length} / ${allSpirits.length} 隻精靈`;
 
+    // Check if all spirits are collected
+    if (collected.length === allSpirits.length) {
+      alert('恭喜收集完成！');
+    }
+
     allSpirits.forEach(spirit => {
       const div = document.createElement('div');
       div.className = 'entry';
 
-
-	  if (collected.includes(spirit.id)) {
-		div.innerHTML = `
-			<a href="${spirit.page}">
-				<img src="${spirit.image}" alt="${spirit.name}">
-				<div>${spirit.name}</div>
-				<div style="font-size: 12px; color: #888;">${spirit.type}</div>
-			</a>
-		`;
-	  } else {
-		div.innerHTML = `
-			<img src="${spirit.image}" alt="???" class="unknown">
-			<div>???</div>
-			<div style="font-size: 12px; color: #aaa;">${spirit.type}</div>
-		`;
-	 }
+      if (collected.includes(spirit.id)) {
+        div.innerHTML = `
+          <a href="${spirit.page}">
+            <img src="${spirit.image}" alt="${spirit.name}">
+            <div>${spirit.name}</div>
+            <div style="font-size: 12px; color: #888;">${spirit.type}</div>
+          </a>
+        `;
+      } else {
+        div.innerHTML = `
+          <img src="${spirit.image}" alt="???" class="unknown">
+          <div>???</div>
+          <div style="font-size: 12px; color: #aaa;">${spirit.type}</div>
+        `;
+        // Add click event listener for uncollected spirits
+        const img = div.querySelector('img');
+        img.style.cursor = 'pointer'; // Change cursor to indicate clickability
+        img.addEventListener('click', () => {
+          alert(spirit.prompt);
+        });
+      }
 
       container.appendChild(div);
     });
