@@ -1,0 +1,45 @@
+
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 珍奶雞蛋仔</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0fff8; }
+    img { width: 200px; }
+    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
+  </style>
+</head>
+<body>
+  <h1>珍奶雞蛋仔 </h1>
+  <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
+  <p><strong>簡介：</strong>珍奶雞蛋仔是一隻熱愛香港小食文化的為食仔。牠會帶你用貪吃蛇的方式認識香港小食文化！</p>
+
+  <button onclick="collect()">收集精靈</button>
+  <p id="message"></p>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game4',
+      name: '珍奶雞蛋仔',
+      image: 'images/game-spirit4.png',
+      page: 'spirit_game4.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有珍奶雞蛋仔了喔！';
+      }
+    }
+  </script>
+
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+</body>
+</html>
