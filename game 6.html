@@ -1,0 +1,441 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>貪吃挑戰：珍奶雞蛋仔肚餓了</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      background-color: #fff9e6;
+      margin: 0;
+      padding: 0;
+      touch-action: manipulation;
+    }
+    #gameContainer {
+      max-width: 100%;
+      margin: 10px auto;
+      position: relative;
+    }
+    #gameCanvas {
+      background-color: #f0f0f0;
+      border: 1px solid #ccc;
+      display: block;
+      margin: 0 auto;
+      max-width: 100%;
+    }
+    #score, #time {
+      font-size: 18px;
+      margin: 10px 0;
+    }
+    button {
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 5px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border: none;
+      border-radius: 10px;
+    }
+    button:disabled {
+      background-color: rgba(0, 0, 0, 0.1);
+      cursor: not-allowed;
+    }
+    
+    /* 虛擬方向鍵樣式 */
+    #virtualControls {
+      display: flex;
+      justify-content: center;
+      margin-top: 20px;
+      flex-direction: column;
+      align-items: center;
+    }
+    .control-row {
+      display: flex;
+      justify-content: center;
+    }
+    .control-btn {
+      width: 60px;
+      height: 60px;
+      background-color: rgba(0, 0, 0, 0.2);
+      border-radius: 50%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 5px;
+      font-size: 24px;
+      user-select: none;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .control-btn:active {
+      background-color: rgba(0, 0, 0, 0.4);
+    }
+    .control-btn:disabled {
+      background-color: rgba(0, 0, 0, 0.1);
+      cursor: not-allowed;
+    }
+    
+    /* 響應式調整 */
+    @media (max-width: 600px) {
+      #gameCanvas {
+        width: 100%;
+        height: auto;
+      }
+      .control-btn {
+        width: 50px;
+        height: 50px;
+        font-size: 20px;
+      }
+    }
+  </style>
+</head>
+<body>
+  <h1>🎮 貪吃挑戰：珍奶雞蛋仔肚餓了</h1>
+  <p>控制珍奶雞蛋仔吃食物，獲得10分即可解鎖挑戰精靈！</p>
+  <div id="score">Score: 0</div>
+  <div id="time">Time: 60s</div>
+  <div id="gameContainer">
+    <canvas id="gameCanvas"></canvas>
+  </div>
+  
+  <!-- 開始遊戲按鍵 -->
+  <button id="startBtn">開始遊戲</button>
+  
+  <!-- 虛擬方向鍵 -->
+  <div id="virtualControls">
+    <div class="control-row">
+      <div class="control-btn" id="upBtn" disabled>↑</div>
+    </div>
+    <div class="control-row">
+      <div class="control-btn" id="leftBtn" disabled>←</div>
+      <div class="control-btn" id="downBtn" disabled>↓</div>
+      <div class="control-btn" id="rightBtn" disabled>→</div>
+    </div>
+  </div>
+  
+  <br><br>
+  <a href="index.html">🔙 返回主頁</a>
+
+  <script>
+    // 遊戲常量
+    const GRID_SIZE = 20;
+    let CELL_SIZE = 30;
+    
+    // 遊戲元素
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const scoreElement = document.getElementById('score');
+    const timeElement = document.getElementById('time');
+    const startBtn = document.getElementById('startBtn');
+    
+    // 遊戲圖片資源
+    const snakeHeadImage = new Image();
+    snakeHeadImage.src = 'images/snake_head.png';
+    const snakeBodyImage = new Image();
+    snakeBodyImage.src = 'images/snake_body.png';
+    const foodImage = new Image();
+    foodImage.src = 'images/boba.png';
+    
+    // 遊戲狀態
+    let snake = [{ x: 10, y: 10 }];
+    let food = { x: 15, y: 15 };
+    let direction = { x: 0, y: 0 };
+    let score = 0;
+    let timeLeft = 60;
+    let gameOver = false;
+    let gameStarted = false;
+    let lastUpdateTime = 0;
+    let lastSecondTime = 0;
+    let isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+
+    // 調整畫布大小
+    function resizeCanvas() {
+      const maxWidth = Math.min(window.innerWidth - 40, 600);
+      const maxHeight = Math.min(window.innerHeight - 300, 600);
+      const size = Math.min(maxWidth, maxHeight);
+      CELL_SIZE = Math.floor(size / GRID_SIZE);
+      
+      canvas.width = GRID_SIZE * CELL_SIZE;
+      canvas.height = GRID_SIZE * CELL_SIZE;
+      
+      document.getElementById('virtualControls').style.display = isMobile ? 'flex' : 'none';
+      renderGame();
+    }
+
+    // 初始化遊戲
+    function initializeGame() {
+      resizeCanvas();
+      window.addEventListener('resize', resizeCanvas);
+      
+      resetGameState();
+      
+      // 事件監聽
+      document.addEventListener('keydown', handleKeyPress);
+      
+      // 開始按鍵事件
+      startBtn.addEventListener('click', startGame);
+      startBtn.addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        startGame();
+      });
+      
+      // 觸摸控制
+      document.getElementById('upBtn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameStarted && !gameOver) changeDirection(0, -1);
+      });
+      document.getElementById('downBtn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameStarted && !gameOver) changeDirection(0, 1);
+      });
+      document.getElementById('leftBtn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameStarted && !gameOver) changeDirection(-1, 0);
+      });
+      document.getElementById('rightBtn').addEventListener('touchstart', (e) => {
+        e.preventDefault();
+        if (gameStarted && !gameOver) changeDirection(1, 0);
+      });
+      
+      // 點擊控制
+      document.getElementById('upBtn').addEventListener('click', () => {
+        if (gameStarted && !gameOver) changeDirection(0, -1);
+      });
+      document.getElementById('downBtn').addEventListener('click', () => {
+        if (gameStarted && !gameOver) changeDirection(0, 1);
+      });
+      document.getElementById('leftBtn').addEventListener('click', () => {
+        if (gameStarted && !gameOver) changeDirection(-1, 0);
+      });
+      document.getElementById('rightBtn').addEventListener('click', () => {
+        if (gameStarted && !gameOver) changeDirection(1, 0);
+      });
+    }
+
+    // 重置遊戲狀態
+    function resetGameState() {
+      snake = [{ x: 10, y: 10 }];
+      food = generateFoodPosition();
+      direction = { x: 0, y: 0 };
+      score = 0;
+      timeLeft = 60;
+      gameOver = false;
+      gameStarted = false;
+      scoreElement.textContent = `Score: ${score}`;
+      timeElement.textContent = `Time: ${timeLeft}s`;
+      startBtn.disabled = false;
+      document.getElementById('upBtn').disabled = true;
+      document.getElementById('downBtn').disabled = true;
+      document.getElementById('leftBtn').disabled = true;
+      document.getElementById('rightBtn').disabled = true;
+      renderGame();
+    }
+
+    // 開始遊戲
+    function startGame() {
+      if (!gameStarted && !gameOver) {
+        gameStarted = true;
+        startBtn.disabled = true;
+        document.getElementById('upBtn').disabled = false;
+        document.getElementById('downBtn').disabled = false;
+        document.getElementById('leftBtn').disabled = false;
+        document.getElementById('rightBtn').disabled = false;
+        lastUpdateTime = 0;
+        lastSecondTime = 0;
+      }
+    }
+
+    // 改變方向
+    function changeDirection(x, y) {
+      // 防止反向移動
+      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return;
+      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) {
+        direction = { x, y };
+      }
+    }
+
+    // 生成食物位置
+    function generateFoodPosition() {
+      let newFood;
+      do {
+        newFood = {
+          x: Math.floor(Math.random() * GRID_SIZE),
+          y: Math.floor(Math.random() * GRID_SIZE)
+        };
+      } while (snake.some(segment => segment.x === newFood.x && segment.y === newFood.y));
+      return newFood;
+    }
+
+    // 處理鍵盤輸入
+    function handleKeyPress(event) {
+      if (!gameStarted && !gameOver) {
+        startGame();
+      }
+      if (gameStarted && !gameOver) {
+        switch (event.key) {
+          case 'ArrowUp': changeDirection(0, -1); break;
+          case 'ArrowDown': changeDirection(0, 1); break;
+          case 'ArrowLeft': changeDirection(-1, 0); break;
+          case 'ArrowRight': changeDirection(1, 0); break;
+        }
+      }
+    }
+
+    // 更新遊戲狀態
+    function updateGame() {
+      if (gameOver || !gameStarted || (direction.x === 0 && direction.y === 0)) return;
+
+      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
+
+      // 碰撞檢測
+      if (head.x < 0 || head.x >= GRID_SIZE || head.y < 0 || head.y >= GRID_SIZE ||
+          snake.some(segment => segment.x === head.x && segment.y === head.y)) {
+        gameOver = true;
+        alert(`遊戲結束! 最終分數: ${score}`);
+        resetGameState();
+        return;
+      }
+
+      snake.unshift(head);
+
+      // 吃食物邏輯
+      if (head.x === food.x && head.y === food.y) {
+        score += 1;
+        scoreElement.textContent = `Score: ${score}`;
+        food = generateFoodPosition();
+        if (score >= 10) {
+          unlockSpirit();
+          gameOver = true;
+          return;
+        }
+      } else {
+        snake.pop();
+      }
+
+      renderGame();
+    }
+
+    // 渲染遊戲
+    function renderGame() {
+      ctx.fillStyle = '#f0f0f0';
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 繪製蛇
+      snake.forEach((segment, index) => {
+        const img = index === 0 ? snakeHeadImage : snakeBodyImage;
+        ctx.drawImage(img, segment.x * CELL_SIZE, segment.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+      });
+
+      // 繪製食物
+      ctx.drawImage(foodImage, food.x * CELL_SIZE, food.y * CELL_SIZE, CELL_SIZE, CELL_SIZE);
+    }
+
+    // 解鎖精靈
+    function unlockSpirit() {
+      const spirit = {
+        id: 'spirit_game4',
+        name: '珍奶雞蛋仔',
+        image: 'images/game-spirit4.png',
+        page: 'spirit_game4.html',
+        unlockDate: new Date().toISOString(),
+        score: score
+      };
+      
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        alert('🎉 成功解鎖挑戰精靈：珍奶雞蛋仔！');
+        setTimeout(() => {
+          window.location.href = 'spirit_game4.html';
+        }, 1000);
+      } else {
+        alert('你已經解鎖過珍奶雞蛋仔了喔！');
+        resetGameState();
+      }
+    }
+
+    // 遊戲主循環
+    function gameLoop(timestamp) {
+      if (gameOver) return;
+
+      if (!lastUpdateTime) lastUpdateTime = timestamp;
+      if (!lastSecondTime) lastSecondTime = timestamp;
+
+      // 更新遊戲狀態
+      if (timestamp - lastUpdateTime >= 200) {
+        updateGame();
+        lastUpdateTime = timestamp;
+      }
+
+      // 更新時間
+      if (gameStarted && timestamp - lastSecondTime >= 1000) {
+        timeLeft--;
+        timeElement.textContent = `Time: ${timeLeft}s`;
+        lastSecondTime = timestamp;
+        if (timeLeft <= 0 && !gameOver) {
+          gameOver = true;
+          alert(`遊戲結束! 最終分數: ${score}`);
+          resetGameState();
+          return;
+        }
+      }
+
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 圖片加載完成後啟動遊戲
+    Promise.all([
+      new Promise(resolve => { snakeHeadImage.onload = resolve; }),
+      new Promise(resolve => { snakeBodyImage.onload = resolve; }),
+      new Promise(resolve => { foodImage.onload = resolve; })
+    ]).then(() => {
+      initializeGame();
+      requestAnimationFrame(gameLoop);
+    }).catch(error => {
+      console.error('圖片加載失敗:', error);
+      alert('遊戲圖片加載失敗，請刷新頁面重試');
+    });
+  </script>
+</body>
+</html>
