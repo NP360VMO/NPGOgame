@@ -4,26 +4,58 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>精靈介紹 - 纜雲仔（水晶形態）</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0faff; }
-    img { width: 200px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
-  </style>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>纜雲仔（水晶形態） ✨</h1>
-  <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
-  <p><strong>🗺️簡介：</strong><p>纜雲仔（水晶形態）是水晶車廂化身的透明精靈，擁有通透的眼睛和冒險的心。象徵開放心靈與勇於踏出第一步的精神。</p>
-<p>熱愛站在高點，透過透明地板欣賞腳下蜿蜒的山徑與海岸線，喜歡帶領旅人以通透地欣賞昂坪的山海。 </p>
-<p>這位精靈從東涌到昂坪，沿途飛越5.7公里的山海風光，25分鐘的旅程猶如一場視覺魔法秀，讓人腳下風景一覽無遺！ </p>
-<p>有別於標準形態的穩重，纜雲仔（水晶形態）以其通透車底和360度開闊視野，增添一絲刺激與驚奇。 </p>
-<p>作為最愛分享故事的精靈，它會用風趣的語調，娓娓道來昂坪的傳奇——從天壇大佛的莊嚴肅穆，到寶蓮禪寺的靈性靜謐，再到昂坪市集的熱鬧歡騰。 </p>
-<p>無論是俯瞰香港國際機場的繁忙起降，還是遠眺南中國海的波光粼粼，纜雲仔（水晶形態）總能讓旅人拍出「腳踏透明玻璃」的驚艷美照，留下難忘回憶！ </p>
+<body class="theme-sky layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 纜雲仔（水晶形態）</div>
+        <div class="badge">透明冒險 · 通透視野</div>
+      </div>
 
-<p><strong>🗺️ 精靈小知識：</strong> <p>昂坪360水晶纜車採用強化透明玻璃車底，車廂四周為標準不透明設計，專為喜愛適度刺激的旅客打造。車廂可容納最多10人。</p>
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）" />
+        </div>
 
-  <button onclick="collect()">收集精靈</button>
-  <p id="message"></p>
+      
+        <div class="intro">
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>纜雲仔（水晶形態）是水晶車廂化身的透明精靈，擁有通透的眼睛和冒險的心，象徵開放心靈與勇於踏出第一步的精神。</p>
+<p>牠熱愛站在高點，透過透明地板欣賞腳下蜿蜒的山徑與海岸線，喜歡帶領旅人以通透地欣賞昂坪的山海。</p>
+<p>從東涌到昂坪飛越5.7公里的山海風光，25分鐘的旅程猶如一場視覺魔法秀，讓人腳下風景一覽無遺！</p>
+<p>有別於標準形態的穩重，纜雲仔（水晶形態）以其通透車底和360度開闊視野，增添一絲刺激與驚奇。</p>
+<p>作為最愛分享故事的精靈，它會用風趣的語調，娓娓道來昂坪的傳奇——從天壇大佛的莊嚴肅穆，到寶蓮禪寺的靈性靜謐，再到昂坪市集的熱鬧歡騰。</p>
+<p>無論是俯瞰香港國際機場的繁忙起降，還是遠眺南中國海的波光粼粼，纜雲仔（水晶形態）總能讓旅人拍出「腳踏透明玻璃」的驚艷美照，留下難忘回憶！</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>昂坪360水晶纜車採用強化透明玻璃車底，車廂四周為標準不透明設計，專為喜愛適度刺激的旅客打造。車廂可容納最多10人。</p>
+
+        </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
 
   <script>
     const spirit = {
@@ -38,14 +70,11 @@
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
-        document.getElementById('message').innerText = '🎉 你已成功收集纜雲仔（水晶形態）！';
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
       } else {
         document.getElementById('message').innerText = '你已經擁有纜雲仔（水晶形態）了喔！';
       }
     }
   </script>
-
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>

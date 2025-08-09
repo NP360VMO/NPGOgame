@@ -1,27 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>精靈介紹 - 小黃彈彈</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0fff8; }
-    img { width: 200px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
-  </style>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>小黃彈彈 🐶</h1>
-  <img src="images/game-spirit2.png" alt="小黃彈彈">
-  <p><strong>🗺️簡介：</strong><p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
-擁有柔軟的金黃色毛髮，閃爍著如同晨光般的溫暖光澤。眼睛大而圓潤，宛如琥珀，散發著純真與好奇的光芒；尾巴蓬鬆如棉花糖，總是歡快地搖擺。</p>
-被視為「忠誠與快樂之靈」，象徵無私的陪伴與簡單的幸福。擁有讓人感到安心的小魔法。</p>
-</strong>🗺️ 精靈小知識：</strong>
-<P>中國最古老的犬種之一，起源可追溯至數千年前的灰狼馴化。中國南方（包括香港所在的珠三角地區）是全球家犬的起源地之一，這些本土狗擁有豐富的遺傳多樣性。</P>
-<P>在香港，黃狗俗稱「小黃」，常見於鄉村或郊區，如大嶼山的村落，擔任看家護院的角色。牠們偶爾出沒於昂坪的巷弄間，可以嘗試尋找他的身影>.<</p>
-  <button onclick="collect()">收集精靈</button>
-  <p id="message"></p>
+<body class="theme-grass layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 小黃彈彈</div>
+        <div class="badge">忠誠 · 快樂 · 活力</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit2.png" alt="小黃彈彈" />
+        </div>
+        <div class="intro">
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
+<p>擁有柔軟的金黃色毛髮，閃爍如晨光；眼睛大而圓潤，宛如琥珀；尾巴蓬鬆如棉花糖，總是歡快地搖擺。</p>
+<p>被視為「忠誠與快樂之靈」，象徵無私的陪伴與簡單幸福，擁有讓人感到安心的小魔法。</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>中國最古老的犬種之一起源可追溯至數千年前的馴化歷史。中國南方（包括香港所在的珠三角地區）是全球家犬的重要起源地之一，本土犬具備豐富遺傳多樣性。</p>
+<p>在香港，黃狗俗稱「小黃」，常見於鄉村或郊區（如大嶼山的村落），擔任看家護院角色，偶爾也會在昂坪巷弄間現身。</p>
+
+        </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
 
   <script>
     const spirit = {
@@ -42,8 +72,5 @@
       }
     }
   </script>
-
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>

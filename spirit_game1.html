@@ -1,34 +1,72 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>精靈介紹 - 黃哞哞</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #fffbe6; }
-    img { width: 200px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
-  </style>
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>黃哞哞 🐮</h1>
-  <img src="images/game-spirit1.png" alt="黃哞哞">
-  <p><strong>🗺️簡介：</strong><p>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
-體型健壯，擁有金黃色的短毛皮，閃耀著如稻穀成熟時的溫暖光澤，頭上長有小巧的彎角。<p>
-被視為「勤奮與守護之靈」，象徵辛勤勞作與對土地的忠誠。他們擁有溫和的魔法，能讓作物生長更茂盛，或為疲憊的農人注入活力。<p>
-<strong>🗺️ 精靈小知識：</strong>
-<P>南方黃牛是中國黃牛三大品系之一，主要分佈於中國南方，包括廣東、福建、海南、江西、貴州、雲南等省，涵蓋香港所在的大嶼山周邊地區。</P>
-<P>大嶼山的鄉村（如梅窩、南丫島）常見野化黃牛，牠們悠然漫步於田野，與旅人偶遇，增添自然情趣。</P>
-  <button onclick="collect()">收集精靈</button>
-  <p id="message"></p>
+<body class="theme-warm layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 黃哞哞</div>
+        <div class="badge">勤奮 · 守護 · 穩健</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit1.png" alt="黃哞哞" />
+        </div>
+        <div class="intro">
+          <p><strong>🗺️ 簡介：</strong></p>
+          <p>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
+          <p>體型健壯，擁有金黃色短毛，閃耀如稻穀成熟時的溫暖光澤，頭上長有小巧彎角。被視為「勤奮與守護之靈」，象徵辛勤與對土地的忠誠；其溫和魔法能令作物更茂盛，並為疲憊旅人注入活力。</p>
+        </div>
+      </div>
+
+      <div class="section knowledge">
+        <h3>🗺️ 精靈小知識</h3>
+        <p>南方黃牛為中國黃牛三大品系之一，主要分佈於中國南方（廣東、福建、海南、江西、貴州、雲南等），涵蓋大嶼山周邊地區。</p>
+        <p>大嶼山鄉郊（如梅窩、南丫島）常見野化黃牛，牠們悠然漫步於田野，與旅人偶遇，增添自然情趣。</p>
+      </div>
+
+      <div class="grid actions-info">
+        <div class="section">
+          <h3>✅ 正確應對方法</h3>
+          <ul>
+            <li>保持冷靜與安靜，避免大聲呼喊或衝動行為，以免驚嚇牛隻。</li>
+            <li>與牛隻保持距離，切勿觸摸、追逐或拍打，尤其是小牛；母牛或會為保護幼牛而發動攻擊。</li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>🚫 不應該做的行為</h3>
+          <ul>
+            <li>切勿餵飼任何食物，包括蔬果、肉類或加工食品等。</li>
+            <li>避免使用閃光燈拍攝，尤其在昏暗環境，免致驚嚇。</li>
+            <li>勿在牛隻附近高聲喧嘩、製造噪音，或以物件騷擾牛隻。</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 收集精靈</button>
+        <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
 
   <script>
     const spirit = {
       id: 'spirit_game1',
       name: '黃哞哞',
       image: 'images/game-spirit1.png',
-      page: 'spirit_game1.html'
+      page: 'spirit_game_1.html'
     };
 
     function collect() {
@@ -42,8 +80,5 @@
       }
     }
   </script>
-
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>

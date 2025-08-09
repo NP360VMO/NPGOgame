@@ -1,29 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>精靈介紹 - 飲茶仔</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0fff8; }
-    img { width: 200px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
-  </style>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>飲茶仔 </h1>
-  <img src="images/game-spirit3.png" alt="飲茶仔">
-  <p><strong>🗺️簡介：</strong><p>飲茶仔是一隻熱愛飲茶文化的外賣仔。牠會帶你用串串樂的方式認識飲茶文化！</p>
-擁有如蒸籠般溫暖的氣質和晶瑩剔透的皮膚，彷彿糯米製成的蝦餃外皮。</p>
-居住在熱鬧的茶樓或傳統市場附近，喜歡在清晨或午餐時段，悄悄為點心增添美味魔力，或在茶壺間嬉戲，讓茶湯更香醇。</p>
-他們是「團圓與分享之靈」，守護著點心背後的家庭與社交意義。他們能感知食用者的心情，為每一籠點心注入溫暖與幸福。</p>
-<strong>🗺️ 精靈小知識：</strong>
-<p>飲茶起源於中國南方的廣東地區，追溯至唐代或更早的絲綢之路時期。當時，茶肆為旅人提供茶飲與小份食物，促進消化與社交，逐漸演變為現代的飲茶文化。</p>
-<p>廣東點心以精緻、多樣聞名，涵蓋蒸、炸、煎、烤等多種烹調方式，菜式超過千種，包括蝦餃、燒賣、叉燒包等。</P>
-<P>香港與廣州是飲茶文化的中心，點心種類遠超其他地區。</p>
-  <button onclick="collect()">收集精靈</button>
-  <p id="message"></p>
+<body class="theme-dimsum layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 飲茶仔</div>
+        <div class="badge">團圓 · 分享 · 幸福</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit3.png" alt="飲茶仔" />
+        </div>
+        <div class="intro">
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>飲茶仔是一隻熱愛飲茶文化的外賣仔，會帶你用串串樂的方式認識飲茶文化！</p>
+<p>牠擁有如蒸籠般溫暖的氣質與晶瑩剔透的皮膚，彷彿糯米製成的蝦餃外皮；常棲身於熱鬧茶樓或市場，為點心與茶湯注入溫暖魔力。</p>
+<p>作為「團圓與分享之靈」，牠守護點心背後的家庭與社交意義，能感知食用者的心情，為每一籠點心注入幸福。</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>飲茶起源於中國南方廣東地區，歷史可追溯至唐代或更早。茶肆為旅人提供茶飲與小食，逐步演變為今日的飲茶文化。</p>
+<p>廣東點心以精緻與多樣見稱，涵蓋蒸、炸、煎、烤等烹調方式，菜式逾千，包括蝦餃、燒賣、叉燒包等。香港與廣州是飲茶文化的中心。</p>
+
+         </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
 
   <script>
     const spirit = {
@@ -44,8 +72,5 @@
       }
     }
   </script>
-
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>

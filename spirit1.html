@@ -1,48 +1,68 @@
 <!DOCTYPE html>
 <html lang="zh">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>昂坪精靈 - 纜雲仔（標準形態）</title>
-    <style>
-        body {font-family: Arial, sans-serif; text-align: center; background-color: #fffbe6;}
-        img {width: 200px;}
-        button {padding:10px 20px; font-size:16px; margin-top:15px;}
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 纜雲仔（標準形態）</title>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-    <h1>纜雲仔（標準形態） 🚠</h1>
-    <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
-    <p><strong>🗺️簡介：</strong><p>纜雲仔（標準形態）是昂坪最早的守護精靈之一，充滿活力與熱情！它以一輛靈動的纜車形態，每天載著來自五湖四海的旅客，穿越連綿山巒與閃耀海峽，從東涌飛馳至昂坪。</P>
-<p>這段25分鐘的空中旅程，不僅是一場視覺盛宴，更是一次充滿歡笑的歷史探秘！</p>
-纜雲仔是精靈中最健談的一位，總愛用風趣的語調，向旅客訴說昂坪的迷人風光與悠久歷史。從天壇大佛的莊嚴到寶蓮禪寺的靜謐，再到昂坪市集的熱鬧，它的故事總能讓旅人會心一笑，彷彿與大嶼山的靈魂來了一場親密對話。</p>
-<p>無論是俯瞰香港國際機場的飛機起落，還是遠眺山海交融的壯麗，纜雲仔都能讓每位旅客感受到昂坪的獨特魅力！</p>
-	<p><strong>🗺️ 精靈小知識：</strong>
- <P>昂坪360標準纜車以鑽石型設計，四面環窗，讓乘客可360度細心欣賞大嶼山自然景致。</p>
-    <button onclick="collect()">收集精靈</button>
-    <p id="message"></p>
+<body class="theme-sky layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 纜雲仔（標準形態）</div>
+        <div class="badge">天空旅者 · 穩重 · 友善</div>
+      </div>
 
-    <script>
-        const spirit = {
-            id: 'spirit1',
-            name: '纜雲仔（標準形態）',
-            image: 'images/cablecar-spirit.png',
-			page: 'spirit1.html'
-        };
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）" />
+        </div>
+        <div class="intro">
+          <p><strong>🗺️ 簡介：</strong></p>
+          <p>纜雲仔（標準形態）是昂坪最早的守護精靈之一，充滿活力與熱情！它以一輛靈動的纜車形態，每天載著來自五湖四海的旅客，穿越連綿山巒與閃耀海峽，從東涌飛馳至昂坪。</p>
+          <p>這段25分鐘的空中旅程，不僅是一場視覺盛宴，更是一次充滿歡笑的歷史探秘！</p>
+          <p>纜雲仔是精靈中最健談的一位，總愛用風趣的語調，向旅客訴說昂坪的迷人風光與悠久歷史。從天壇大佛的莊嚴到寶蓮禪寺的靜謐，再到昂坪市集的熱鬧，它的故事總能讓旅人會心一笑，彷彿與大嶼山的靈魂來了一場親密對話。</p>
+          <p>無論是俯瞰香港國際機場的飛機起落，還是遠眺山海交融的壯麗，纜雲仔都能讓每位旅客感受到昂坪的獨特魅力！</p>
+        </div>
+      </div>
 
-        function collect() {
-            let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
-            if (!spirits.some(s => s.id === spirit.id)) {
-                spirits.push(spirit);
-                localStorage.setItem('spirits', JSON.stringify(spirits));
-                document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
-            } else {
-                document.getElementById('message').innerText = '你已經收集過纜雲仔（標準形態）囉！';
-            }
-        }
-    </script>
+      <div class="section knowledge">
+        <h3>🗺️ 精靈小知識</h3>
+        <p>昂坪360標準纜車以鑽石型設計，四面環窗，讓乘客可360度細心欣賞大嶼山自然景致。</p>
+      </div>
 
-    <br><br>
-    <a href="index.html">🔙 返回主頁</a>
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 收集精靈</button>
+        <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit1',
+      name: '纜雲仔（標準形態）',
+      image: 'images/cablecar-spirit.png',
+      page: 'spirit1.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有纜雲仔（標準形態）了喔！';
+      }
+    }
+  </script>
 </body>
 </html>

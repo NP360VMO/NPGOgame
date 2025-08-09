@@ -1,29 +1,57 @@
-
 <!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>精靈介紹 - 珍奶雞蛋仔</title>
-  <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #f0fff8; }
-    img { width: 200px; }
-    button { padding: 10px 20px; font-size: 16px; margin-top: 15px; }
-  </style>
+  
+  <link rel="stylesheet" href="styles.css">
 </head>
-<body>
-  <h1>珍奶雞蛋仔 </h1>
-  <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
-  <p><strong>🗺️簡介：</strong><p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔。牠會帶你用貪吃蛇的方式認識街頭美食文化！</p>
-牠們擁有將普通食材轉化為美味點心的能力，還能感知食用者的情緒，根據心情調整飲料的甜度或雞蛋仔的酥脆程度。</p>
-牠們性格溫和但頑皮，喜歡惡作劇，例如偷偷把珍珠換成超大波霸或把雞蛋仔烤成心形。</p>
-據傳，珍奶雞蛋仔精靈棲息在繁忙的夜市或手搖飲店附近，喜歡偷偷為人們的飲料增添甜美滋味，或在雞蛋仔烤盤旁跳舞，為食物注入幸福的魔法。</p>
-<strong>🗺️ 精靈小知識：</strong> <p>珍珠奶茶誕生於1980年代的台灣，以泡沫紅茶與Q彈珍珠的組合席捲全球。</P>
-<P>而雞蛋仔起源於1950年代的香港，據傳是戰後小販利用破損雞蛋與麵糊創造的平價小食。其蜂巢模具靈感或來自歐洲鬆餅，但以濃郁蛋香成為香港街頭文化的代表</P>
-<p>這兩者皆是街頭美食文化的代表。</p>
+<body class="theme-boba layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 珍奶雞蛋仔</div>
+        <div class="badge">街頭 · 幸福 · 美味</div>
+      </div>
 
-  <button onclick="collect()">收集精靈</button>
-  <p id="message"></p>
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit4.png" alt="珍奶雞蛋仔" />
+        </div>
+        <div class="intro">
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔，會帶你用貪吃蛇的方式探索街頭美食！</p>
+<p>牠能將平凡食材化作美味點心，亦能感知食用者情緒，調整飲品甜度與雞蛋仔的酥脆度；性格溫和卻帶點頑皮。</p>
+<p>據說牠棲息於熱鬧夜市或手搖飲店附近，總愛在雞蛋仔烤盤旁跳舞，為食物注入幸福魔法。</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>珍珠奶茶誕生於 1980 年代的台灣，結合泡沫紅茶與 Q 彈珍珠，迅速風靡全球。</p>
+<p>雞蛋仔起源於 1950 年代的香港，據傳由戰後小販善用破損雞蛋與麵糊創作而成，成為香港街頭文化代表。</p>
+
+        </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
 
   <script>
     const spirit = {
@@ -44,8 +72,5 @@
       }
     }
   </script>
-
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
 </body>
 </html>
