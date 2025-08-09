@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>昂坪360 GO</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background-image: url('images/background.png');
+      background-size: contain;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      margin: 0;
+      padding: 20px;
+      background-color: #f0f8ff;
+      text-align: center;
+    }
+    h1 {
+      font-size: 2.2em;
+      color: #0d5eaf;
+    }
+    .spirit {
+      display: inline-block;
+      margin: 10px;
+    }
+    .spirit img {
+      width: 120px;
+      border-radius: 10px;
+      transition: transform 0.2s;
+    }
+    .spirit img:hover {
+      transform: scale(1.05);
+    }
+    a {
+      text-decoration: none;
+      color: #333;
+    }
+    #dex-link {
+      font-size: 20px;
+      color: red; /* Changed to red */
+      font-weight: bold; /* Bold text */
+    }
+    #dex-link:hover {
+      color: #cc0000; /* Slightly darker red on hover for visual feedback */
+    }
+    #reset-btn {
+      margin-top: 30px;
+      padding: 10px 20px;
+      font-size: 16px;
+      background-color: #f76c6c;
+      color: white;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    #reset-btn:hover {
+      background-color: #d65555;
+    }
+  </style>
+</head>
+<body>
+  <h1>昂坪360 GO</h1>
+<h2> 在昂坪市集追尋精靈的隱秘身影！翻開精靈圖鑑!</h2>
+<h2> 解鎖更多神秘線索 開啟一場奇幻冒險！</h2>
+<h2 style="color: #FF0000;">已收集的精靈</h2>
+
+  <div id="collected"></div>
+ 
+  <br><br>
+  <a id="dex-link" href="dex.html">📖 查看精靈圖鑑</a>
+</P></Strong><h3>查看精靈圖鑑得到更多精靈線索</h3></P>
+
+<br><br>
+<br><br> 
+<br><br> 
+<br><br>
+<br><br>
+<br><br>
+<button id="reset-btn" onclick="clearCollection()">🔄 重置收集記錄</button>
+
+  <audio id="bgm" loop>
+    <source src="images/bgm.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+  <script>
+    const spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+    const container = document.getElementById('collected');
+
+    if (spirits.length === 0) {
+      container.innerHTML = '<p>你還未收集任何精靈，快到市集探索吧！</p>';
+    } else {
+      spirits.forEach(spirit => {
+        const div = document.createElement('div');
+        div.className = 'spirit';
+        div.innerHTML = `
+          <a href="${spirit.page}">
+            <img src="${spirit.image}" alt="${spirit.name}">
+            <br>${spirit.name}
+          </a>
+        `;
+        container.appendChild(div);
+      });
+    }
+
+    function clearCollection() {
+      if (confirm("確定要重置所有收集記錄？此操作無法還原。")) {
+        localStorage.removeItem('spirits');
+        location.reload();
+      }
+    }
+  </script>
+</body>
+</html>
