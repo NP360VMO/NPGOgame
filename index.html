@@ -4,112 +4,192 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-image: url('images/background.png');
-      background-size: contain;
-      background-position: center;
-      background-repeat: no-repeat;
-      background-attachment: fixed;
-      margin: 0;
-      padding: 20px;
-      background-color: #f0f8ff;
-      text-align: center;
-    }
-    h1 {
-      font-size: 2.2em;
-      color: #0d5eaf;
-    }
-    .spirit {
-      display: inline-block;
-      margin: 10px;
-    }
-    .spirit img {
-      width: 120px;
-      border-radius: 10px;
-      transition: transform 0.2s;
-    }
-    .spirit img:hover {
-      transform: scale(1.05);
-    }
-    a {
-      text-decoration: none;
-      color: #333;
-    }
-    #dex-link {
-      font-size: 20px;
-      color: red; /* Changed to red */
-      font-weight: bold; /* Bold text */
-    }
-    #dex-link:hover {
-      color: #cc0000; /* Slightly darker red on hover for visual feedback */
-    }
-    #reset-btn {
-      margin-top: 30px;
-      padding: 10px 20px;
-      font-size: 16px;
-      background-color: #f76c6c;
-      color: white;
-      border: none;
-      border-radius: 5px;
-      cursor: pointer;
-    }
-    #reset-btn:hover {
-      background-color: #d65555;
+    body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+    .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
+    .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
+    .theme-select { display:inline-flex; align-items:center; gap:6px; border:2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 6px 10px; font-weight: 800; }
+    .theme-select select { border:none; background: transparent; font-weight: 800; color: var(--accent-ink); outline: none; }
+    .home-title { font-size: clamp(24px, 5vw, 42px); font-weight: 900; color: var(--accent-ink); margin: 0 0 6px; text-shadow: 0 2px 6px rgba(255,255,255,.6); }
+    .home-sub { font-size: clamp(14px, 3.2vw, 18px); color: rgba(0,0,0,.75); margin: 0 0 12px; text-shadow: 0 1px 4px rgba(255,255,255,.7); }
+    .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
+    .gallery-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
+    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; }
+    .progress-bar { position:relative; height:10px; width:min(560px, 90%); background:#e9eef5; border-radius:999px; overflow:hidden; }
+    .progress-fill { height:100%; width:0%; background: var(--accent); transition: width .4s ease; }
+    .grid-wrap { max-width: 1024px; margin: 16px auto 28px; padding: 0 12px; }
+    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; }
+    .card-spirit { background: var(--section-bg); border:1px solid var(--section-border); border-radius:14px; padding:12px; text-align:center; transition: transform .12s ease, box-shadow .2s ease; }
+    .card-spirit:hover { transform: translateY(-2px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
+    .card-spirit img { width: 120px; max-width: 70%; height:auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,.12)); }
+    .card-spirit .name { margin-top: 8px; font-weight: 800; color: var(--ink); font-size: clamp(14px, 2.6vw, 16px); }
+    .empty { text-align:center; padding: 18px; color: var(--ink); }
+    .empty p { margin: 6px 0; }
+    .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
+    .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+    @media (max-width: 360px) {
+      .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
+      .card-spirit img { width: 100px; }
     }
   </style>
 </head>
-<body>
-  <h1>昂坪360 GO</h1>
-<h2> 在昂坪市集追尋精靈的隱秘身影！翻開精靈圖鑑!</h2>
-<h2> 解鎖更多神秘線索 開啟一場奇幻冒險！</h2>
-<h2 style="color: #FF0000;">已收集的精靈</h2>
+<body class="theme-sky">
+  <div class="container">
+    <div class="home-hero">
+      <div class="home-topbar">
+        <div class="theme-select">
+          🎨 主題：
+          <select id="theme-picker" aria-label="選擇主題">
+            <option value="theme-sky">天空藍</option>
+            <option value="theme-grass">草地綠</option>
+            <option value="theme-warm">暖黃</option>
+            <option value="theme-dimsum">飲茶橙</option>
+            <option value="theme-boba">奶茶棕</option>
+          </select>
+        </div>
+        <button id="audio-btn" class="audio-ctl">▶️ 背景音樂</button>
+      </div>
 
-  <div id="collected"></div>
- 
-  <br><br>
-  <a id="dex-link" href="dex.html">📖 查看精靈圖鑑</a>
-</P></Strong><h3>查看精靈圖鑑得到更多精靈線索</h3></P>
+      <div class="home-title">昂坪360 GO</div>
+      <div class="home-sub">在昂坪市集追尋精靈的隱秘身影，解鎖更多神秘線索，開啟一場奇幻冒險！</div>
+      <div class="home-actions">
+        <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
+      <div style="height:20px;"></div>
+        
+      </div>
 
-<br><br>
-<br><br> 
-<br><br> 
-<br><br>
-<br><br>
-<br><br>
-<button id="reset-btn" onclick="clearCollection()">🔄 重置收集記錄</button>
+      <div class="gallery-card">
+        <div class="home-sub" style="margin-bottom:6px;"><strong>已收集的精靈</strong></div>
+        <div class="progress">
+          <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+          <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-wrap">
+      <div id="collected" class="grid"></div>
+    </div>
+
+    
+    <div class="home-footer">
+      <a class="btn secondary" href="dex.html#dex">📖 去圖鑑解鎖線索</a>
+    </div>
+
+    <div style="max-width: 1024px; margin: 12px auto 24px; padding: 0 12px; margin-bottom: 30px;">
+      <div style="height:1px; background: var(--section-border); margin: 12px 0 8px;"></div>
+      <div style="display:flex; align-items:center; justify-content: space-between; gap:10px; flex-wrap:wrap;">
+        <small style="color: rgba(0,0,0,.6);">⚠️ 小心操作：重置會清除你所有已收集的精靈紀錄，且無法還原。</small>
+        <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
+      </div>
+    </div>
+
+    </div>
+  </div>
 
   <audio id="bgm" loop>
-    <source src="images/bgm.mp3" type="audio/mpeg">
+    <source src="BGM/BGM4.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
-  <script>
-    const spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
-    const container = document.getElementById('collected');
 
-    if (spirits.length === 0) {
-      container.innerHTML = '<p>你還未收集任何精靈，快到市集探索吧！</p>';
-    } else {
-      spirits.forEach(spirit => {
-        const div = document.createElement('div');
-        div.className = 'spirit';
-        div.innerHTML = `
-          <a href="${spirit.page}">
-            <img src="${spirit.image}" alt="${spirit.name}">
-            <br>${spirit.name}
-          </a>
-        `;
-        container.appendChild(div);
-      });
+  <script>
+    // --- Theme Switching (persisted) ---
+    const themePicker = document.getElementById('theme-picker');
+    const savedTheme = localStorage.getItem('np_theme') || 'theme-sky';
+    document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+    document.body.classList.add(savedTheme);
+    themePicker.value = savedTheme;
+    themePicker.addEventListener('change', () => {
+      const val = themePicker.value;
+      document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+      document.body.classList.add(val);
+      localStorage.setItem('np_theme', val);
+    });
+
+    // --- Audio control ---
+    const audio = document.getElementById('bgm');
+    const audioBtn = document.getElementById('audio-btn');
+    let playing = false;
+    audioBtn.addEventListener('click', () => {
+      if (!playing) {
+        audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ 背景音樂'; }).catch(() => alert('瀏覽器封鎖了自動播放，請再按一次播放。'));
+      } else {
+        audio.pause(); playing = false; audioBtn.textContent = '▶️ 背景音樂';
+      }
+    });
+
+    // --- Collected spirits render ---
+    const container = document.getElementById('collected');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const resetBtn = document.getElementById('reset-btn');
+
+    const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
+
+    function renderCollected(total) {
+      container.innerHTML = '';
+      if (collected.length === 0) {
+        container.innerHTML = `
+          <div class="card-spirit empty" style="grid-column: 1 / -1;">
+            <p>你還未收集任何精靈，快到市集探索吧！</p>
+            <p><a class="btn" href="dex.html#dex">📖 前往精靈圖鑑</a></p>
+          </div>`;
+      } else {
+        collected.forEach(spirit => {
+          const div = document.createElement('div');
+          div.className = 'card-spirit';
+          div.innerHTML = `
+            <a href="${spirit.page}" style="text-decoration:none;">
+              <img src="${spirit.image}" alt="${spirit.name}">
+              <div class="name">${spirit.name}</div>
+            </a>`;
+          container.appendChild(div);
+        });
+      }
+      const denom = total || 0;
+      const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
+      progressFill.style.width = pct + '%';
+      progressText.textContent = `${collected.length} / ${denom}`;
     }
 
-    function clearCollection() {
-      if (confirm("確定要重置所有收集記錄？此操作無法還原。")) {
+    // --- Auto-calc total spirits from dex.html ---
+    async function getTotalFromDex() {
+      try {
+        const res = await fetch('dex.html', { cache: 'no-store' });
+        if (!res.ok) throw new Error('fetch failed');
+        const html = await res.text();
+        const doc = new DOMParser().parseFromString(html, 'text/html');
+        // Priority 1: elements with data-spirit-id
+        let nodes = doc.querySelectorAll('[data-spirit-id]');
+        if (nodes.length > 0) return nodes.length;
+        // Priority 2: cards with .dex-card
+        nodes = doc.querySelectorAll('.dex-card');
+        if (nodes.length > 0) return nodes.length;
+        // Priority 3: count unique spirit detail links
+        const links = Array.from(doc.querySelectorAll('a[href]')).map(a => a.getAttribute('href'));
+        const spirits = new Set(links.filter(h => h && /spirit[\w\-]*\.html$/i.test(h)));
+        if (spirits.size > 0) return spirits.size;
+        throw new Error('no elements found');
+      } catch (e) {
+        // Fallback: known list (update here if you新增)
+        return new Set(['spirit1.html','spirit2.html','spirit3.html','spirit_game_1.html','spirit_game2.html','spirit_game3.html','spirit_game4.html']).size;
+      }
+    }
+
+    async function init() {
+      const total = await getTotalFromDex();
+      renderCollected(total);
+    }
+
+    resetBtn.addEventListener('click', () => {
+      if (confirm('確定要重置所有收集記錄？此操作無法還原。')) {
         localStorage.removeItem('spirits');
         location.reload();
       }
-    }
+    });
+
+    init();
   </script>
 </body>
 </html>
