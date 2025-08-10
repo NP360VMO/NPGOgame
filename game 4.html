@@ -6,69 +6,17 @@
   <title>挑戰遊戲｜飲茶仔 匹配挑戰</title>
   <link rel="stylesheet" href="styles.css">
   <style>
-    :root{
-      --bg:#fff7eb; --ink:#2b2012; --card:#fffdf9; --section-bg:#fff9f0; --section-border:#eadcc8;
-      --accent:#ffb547; --ok:#15a36d; --warn:#e04848; --info:#2b6eea;
-      --cell:50px;         /* ✅ 由 JS 動態調整 */
-      --gap:6px;           /* ✅ 由 JS 動態調整（小螢幕略縮小） */
-      --cell-font:26px;    /* ✅ 由 JS 動態調整，跟隨 cell 尺寸 */
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
-    .container{max-width:960px;margin:0 auto;padding:20px}
-    .card{background:var(--card);border:1px solid var(--section-border);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.06);overflow:hidden}
-    .header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--section-border)}
-    .title{font-size:20px;font-weight:900}
-    .badge{font-weight:700;background:#fff1d8;border:1px solid #ffd9a0;color:#7a4a00;border-radius:999px;padding:6px 10px}
-    .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:18px 20px;border-bottom:1px solid var(--section-border);
-      background:linear-gradient(180deg,#fff2d8,#ffffff)}
-    .img-wrap{display:flex;align-items:center;justify-content:center}
-    .img-wrap img{width:96px;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
-    .intro p{margin:.35rem 0}
-    .status-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .pill{border:2px solid var(--section-border);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
-    .pill.ok{border-color:#bfe6d6;color:var(--ok)}
-    .pill.warn{border-color:#ffd1d1;color:var(--warn)}
-    .pill.info{border-color:#cfe0ff;color:var(--info)}
-    .section{padding:18px 20px}
-
-    .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
-    .stage{display:flex;flex-direction:column;align-items:center;gap:10px}
-    .grid{
-      display:grid;
-      grid-template-columns:repeat(8, var(--cell)); /* ✅ 依變數 */
-      gap:var(--gap);                               /* ✅ 依變數 */
-      user-select:none;
-      touch-action:manipulation;
-      max-width:100%;
-    }
-    .cell{
-      width:var(--cell); height:var(--cell);
-      display:flex; align-items:center; justify-content:center;
-      font-size:var(--cell-font);                   /* ✅ 依變數 */
-      background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
+.stage{display:flex;flex-direction:column;align-items:center;gap:10px}.grid{display:grid;grid-template-columns:repeat(8, 50px);gap:6px;user-select:none}.cell{
+      width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+      font-size:26px;background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
       cursor:pointer;transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
       box-shadow:0 2px 8px rgba(0,0,0,.05)
-    }
-    .cell:hover{transform:translateY(-1px)}
-    .cell.selected{border:2px solid #ffb547;box-shadow:0 4px 14px rgba(255,181,71,.25)}
-    .cell.clearing{animation:pop .2s ease both}
-    @keyframes pop{from{transform:scale(.85);opacity:.4}to{transform:scale(1.1);opacity:1}}
+    }.cell:hover{transform:translateY(-1px)}.cell.selected{border:2px solid #ffb547;box-shadow:0 4px 14px rgba(255,181,71,.25)}.cell.clearing{animation:pop .2s ease both, fade .18s ease forwards}
+    @keyframes fade{to{opacity:.25; transform:scale(.8);}}@keyframes pop{from{transform:scale(.85);opacity:.4}to{transform:scale(1.1);opacity:1}}
 
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-    .btn{appearance:none;border:0;cursor:pointer;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
-    .btn.secondary{background:#fff;border:1px solid var(--section-border);color:var(--ink)}
-    .btn:active{transform:translateY(1px)}
-    .hint{margin-top:4px;color:#7a4a00;font-weight:700}
-
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;
-      font-weight:900;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-
-    @media (max-width:560px){
-      .hero{grid-template-columns:84px 1fr}
-      .img-wrap img{width:80px}
-    }
-  </style>
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}.btn:active{transform:translateY(1px)}.hint{margin-top:4px;color:#7a4a00;font-weight:700}@media (max-width:560px){
+      .hero{grid-template-columns:84px 1fr}.grid{gap:5px}.cell{width:44px;height:44px;font-size:24px}
+</style>
 </head>
 <body class="theme-dimsum">
   <div class="container">
@@ -120,58 +68,8 @@
     const btnStart  = document.getElementById('btn-start');
     const btnRetry  = document.getElementById('btn-retry');
 
-    let grid = [], score = 0, timeLeft = 30, running = false, selected = null;
+    let grid = [], score = 0, timeLeft = 30, timerId = null, running = false, selected = null;
 
-    /* ---------------------------
-       ✅ 自適應：計算 cell 尺寸
-       依容器寬度與可用高度取最小值，保證整個棋盤 + 按鈕區可完整顯示
-    --------------------------- */
-    function fitGridCell() {
-      const root = document.documentElement;
-      const card = document.querySelector('.card');
-      const header = document.querySelector('.header');
-      const hero = document.querySelector('.hero');
-      const gameWrap = document.querySelector('.game-wrap');
-      const actions = document.querySelector('.stage .actions');
-
-      const viewportH = window.innerHeight;
-      const viewportW = window.innerWidth;
-
-      // 預估除棋盤外佔用的高度（header + hero + 上下 padding + 按鈕區等）
-      const fixedTop = (header?.offsetHeight || 0) + (hero?.offsetHeight || 0) + 40; // 40 buffer
-      const fixedBottom = (actions?.offsetHeight || 44) + 40; // 40 buffer
-
-      // 可用高度給棋盤（含 gaps）
-      const availableH = Math.max(200, viewportH - fixedTop - fixedBottom);
-      // 可用寬度為 game-wrap 內層寬度（避免超出左右邊界）
-      const availableW = Math.min(gameWrap?.clientWidth || viewportW - 32, viewportW - 24);
-
-      // gap 會在小螢幕略縮小
-      const gap = viewportW <= 420 ? 4 : 6;
-
-      // 依寬度計算可用 cell 大小（扣除 gaps）
-      const maxCellByW = Math.floor((availableW - (GRID_SIZE - 1) * gap) / GRID_SIZE);
-      // 依高度計算可用 cell 大小
-      const maxCellByH = Math.floor((availableH - (GRID_SIZE - 1) * gap) / GRID_SIZE);
-
-      // 原本設計上限 50px，下限 34px；再取寬高限制的較小值
-      const target = Math.max(34, Math.min(50, maxCellByW, maxCellByH));
-
-      root.style.setProperty('--cell', target + 'px');
-      root.style.setProperty('--gap', gap + 'px');
-      // 字體大小大約為 cell 的 52%
-      root.style.setProperty('--cell-font', Math.max(18, Math.round(target * 0.52)) + 'px');
-    }
-
-    // 監聽尺寸
-    window.addEventListener('resize', fitGridCell);
-    window.addEventListener('orientationchange', () => setTimeout(fitGridCell, 120));
-    // 初次套用
-    requestAnimationFrame(fitGridCell);
-
-    /* ---------------------------
-       遊戲主邏輯
-    --------------------------- */
     function makeCell(x,y,val){
       const d = document.createElement('div');
       d.className = 'cell';
@@ -199,11 +97,10 @@
       grid = Array.from({length:GRID_SIZE}, ()=> Array.from({length:GRID_SIZE}, ()=> TYPES[Math.floor(Math.random()*TYPES.length)]));
       // 開局消連
       while (hasMatches()){
-        eliminate(false);
+        const _tmp=eliminate(false); if(_tmp && _tmp.marks){ for(let i=0;i<GRID_SIZE;i++){ for(let j=0;j<GRID_SIZE;j++){ if(_tmp.marks[i][j]) grid[i][j]=null; } } }
         drop();
       }
       render();
-      fitGridCell(); // 每次重建後再適配一次
     }
 
     function isAdj(a,b){ return (Math.abs(a.x-b.x)===1 && a.y===b.y) || (Math.abs(a.y-b.y)===1 && a.x===b.x); }
@@ -244,34 +141,54 @@
       return false;
     }
 
+    
     function eliminate(addScore = true){
-      let cleared = 0;
-      // 橫
+      // phase 1: find matches
+      const marks = Array.from({length:GRID_SIZE}, ()=> Array(GRID_SIZE).fill(false));
+      let any = false;
+      // row
       for(let i=0;i<GRID_SIZE;i++){
         for(let j=0;j<GRID_SIZE-2;j++){
-          const v=grid[i][j];
+          const v = grid[i][j];
           if(v && v===grid[i][j+1] && v===grid[i][j+2]){
             let len=3; while(j+len<GRID_SIZE && grid[i][j+len]===v) len++;
-            for(let k=0;k<len;k++){ grid[i][j+k]=null; cleared++; }
-            if(addScore){ score += 10 + (len>3 ? (len-3)*5 : 0); }
-            j += len-1;
+            for(let k=0;k<len;k++) marks[i][j+k]=true;
+            j += len-1; any = true;
           }
         }
       }
-      // 直
+      // col
       for(let j=0;j<GRID_SIZE;j++){
         for(let i=0;i<GRID_SIZE-2;i++){
           const v=grid[i][j];
           if(v && v===grid[i+1][j] && v===grid[i+2][j]){
             let len=3; while(i+len<GRID_SIZE && grid[i+len][j]===v) len++;
-            for(let k=0;k<len;k++){ grid[i+k][j]=null; cleared++; }
-            if(addScore){ score += 10 + (len>3 ? (len-3)*5 : 0); }
-            i += len-1;
+            for(let k=0;k<len;k++) marks[i+k][j]=true;
+            i += len-1; any = true;
           }
         }
       }
-      return cleared;
+      if(!any) return 0;
+      // add score & mark DOM
+      let cleared = 0;
+      for(let i=0;i<GRID_SIZE;i++){
+        for(let j=0;j<GRID_SIZE;j++){
+          if(marks[i][j]){
+            cleared++;
+            if(addScore) score += 10; // 簡化：一次 +10（可再依長度加成）
+          }
+        }
+      }
+      // render with .clearing
+      render();
+      // add .clearing classes
+      document.querySelectorAll('.cell').forEach(d=>{
+        const x=+d.dataset.x, y=+d.dataset.y;
+        if(marks[x][y]) d.classList.add('clearing');
+      });
+      return {cleared, marks};
     }
+
 
     function drop(){
       for(let j=0;j<GRID_SIZE;j++){
@@ -289,36 +206,43 @@
       }
     }
 
-    function chainResolve(){
+    function delay(ms){ return new Promise(res=>setTimeout(res, ms)); }
+    async function chainResolve(){
+      // 連消：有得消就持續
       do{
-        eliminate(true);
-        drop();
+        const res = eliminate(true);
+        if(res && res.marks){
+          await delay(160);
+          // phase 2: null & drop
+          for(let i=0;i<GRID_SIZE;i++){
+            for(let j=0;j<GRID_SIZE;j++){
+              if(res.marks[i][j]) grid[i][j]=null;
+            }
+          }
+          drop();
+          render();
+          await delay(80);
+        }
       } while (hasMatches());
-      render();
       if(score>=200){ unlock(); }
     }
 
-    let tickHandle = null;
     function tick(){
       timeLeft--;
       pillTime.textContent = `Time：${timeLeft}s`;
       if(timeLeft<=0){ stop('⏱️ 時間到！請再試一次'); return; }
-      tickHandle = setTimeout(tick,1000);
+      setTimeout(tick,1000);
     }
 
     function start(){
-      // 先清除可能的殘餘計時
-      if(tickHandle){ clearTimeout(tickHandle); tickHandle = null; }
-
       running = true; score = 0; timeLeft = 30; selected = null;
       pillStatus.textContent='遊戲開始！'; btnStart.style.display='none'; btnRetry.style.display='none';
       initGrid();
-      tickHandle = setTimeout(tick,1000);
+      setTimeout(tick,1000);
     }
 
     function stop(msg){
       running = false; pillStatus.textContent = msg; btnRetry.style.display='inline-flex';
-      if(tickHandle){ clearTimeout(tickHandle); tickHandle = null; }
     }
 
     function toast(msg){
@@ -339,12 +263,13 @@
         pillStatus.textContent='你已經解鎖過飲茶仔喇！';
       }
       btnRetry.style.display='inline-flex';
+
+      // 延遲 2 秒自動跳轉（可自行改時間）
       setTimeout(()=>{ window.location.href = spirit.page; }, 2000);
     }
 
     btnStart.addEventListener('click', start);
     btnRetry.addEventListener('click', start);
-
     // 預先生成棋盤（未開始可互動會被忽略）
     initGrid();
     pillStatus.textContent = '點「開始遊戲」就可以玩啦';

@@ -128,6 +128,7 @@
     const gameArea = document.getElementById('gameArea');
     const btnStart = document.getElementById('btn-start');
     const btnRetry = document.getElementById('btn-retry');
+    let lastTs = 0;
 
     function setTimeBar(){
       const pct = Math.max(0,totalTime/20)*100;
@@ -136,11 +137,23 @@
       timeBar.style.background = `linear-gradient(90deg,hsl(${hue},60%,55%),#ffd166)`;
     }
 
-    function updateTimer(){
-      totalTime--;
-      pillTimer.textContent = `剩餘時間：${totalTime} 秒`;
+    function updateTimerDisplay(){ 
+      pillTimer.textContent = `剩餘時間：${Math.ceil(Math.max(0,totalTime))} 秒`; 
       setTimeBar();
-      if (totalTime <= 0) endGame('⏱️ 時間到！請再試一次');
+    }
+    
+    function timerLoop(ts){
+      if(!running) return;
+      if(!lastTs) lastTs = ts;
+      const dt = (ts - lastTs) / 1000;
+      lastTs = ts;
+      totalTime -= dt;
+      updateTimerDisplay();
+      if(totalTime <= 0){
+        endGame('⏱️ 時間到！請再試一次');
+        return;
+      }
+      requestAnimationFrame(timerLoop);
     }
 
     function endGame(message){
@@ -198,13 +211,13 @@
     function startGame(){
       success = 0; totalTime = 20; showDelay = 1500; running = true;
       pillStatus.textContent = '遊戲開始！準備好點擊黃哞哞';
-      pillTimer.textContent = `剩餘時間：${totalTime} 秒`;
+      updateTimerDisplay();
       pillSuccess.textContent = `成功：0 / 10`;
       btnStart.style.display = 'none';
       btnRetry.style.display = 'none';
       clearInterval(intervalId); clearTimeout(timeoutId);
       setTimeBar();
-      intervalId = setInterval(updateTimer, 1000);
+      lastTs = 0; requestAnimationFrame(timerLoop);
       showTarget();
     }
 

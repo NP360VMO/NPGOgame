@@ -192,9 +192,7 @@ ul li { margin: 6px 0; line-height: 1.7; font-size: clamp(14px, 2.4vw, 16px); }
   --section-border: #ecdcc8;
   
   /* ============================================================
-   
-}
-挑戰遊戲統一風格
+   挑戰遊戲統一風格
    ============================================================ */
 
 /* 遊戲容器 */
@@ -375,37 +373,4 @@ ul li { margin: 6px 0; line-height: 1.7; font-size: clamp(14px, 2.4vw, 16px); }
     padding: 10px 16px;
   }
 }
-}
-
-
-/* ============================================================
-   挑戰遊戲統一風格（共用）
-   - 適用於所有挑戰系遊戲頁
-   - 若個別遊戲需要特殊樣式，請在頁面內額外覆寫
-   ============================================================ */
-
-/* 狀態列與膠囊標籤 */
-.status-bar { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
-.pill { border: 2px solid var(--section-border); background:#fff; border-radius:999px; padding:6px 12px; font-weight:800; }
-.pill.ok { border-color:#bfe6d6; color: var(--ok); }
-.pill.warn { border-color:#ffd1d1; color: var(--warn); }
-.pill.info { border-color:#cfe0ff; color: var(--info); }
-
-/* 遊戲容器 */
-.game-wrap { background: var(--section-bg); border: 1px dashed var(--section-border); border-radius: 16px; padding: 12px; }
-
-/* 進度條（時間等） */
-.progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; }
-.bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #8ad398, #ffd166); }
-
-/* 遊戲區域（可視需要再覆寫尺寸） */
-.play-area { position: relative; border-radius: 12px; min-height: 360px; max-width: 720px; margin: 0 auto; background: #fff; }
-
-/* Toast */
-.toast { position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px; background: var(--accent); color: #fff;
-         padding: 10px 14px; border-radius: 12px; font-weight: 900; display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0,0,0,.18); }
-
-@media (max-width:560px){
-  .hero { grid-template-columns:84px 1fr; }
-  .img-wrap img { width: clamp(80px, 22vw, 120px); }
 }
