@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
+  
+  <script src="spirits.js"></script>
+<style>
     body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
     .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
     .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
@@ -154,35 +156,10 @@
     }
 
     // --- Auto-calc total spirits from dex.html ---
-    async function getTotalFromDex() {
-      try {
-        const res = await fetch('dex.html', { cache: 'no-store' });
-        if (!res.ok) throw new Error('fetch failed');
-        const html = await res.text();
-        const doc = new DOMParser().parseFromString(html, 'text/html');
-        // Priority 1: elements with data-spirit-id
-        let nodes = doc.querySelectorAll('[data-spirit-id]');
-        if (nodes.length > 0) return nodes.length;
-        // Priority 2: cards with .dex-card
-        nodes = doc.querySelectorAll('.dex-card');
-        if (nodes.length > 0) return nodes.length;
-        // Priority 3: count unique spirit detail links
-        const links = Array.from(doc.querySelectorAll('a[href]')).map(a => a.getAttribute('href'));
-        const spirits = new Set(links.filter(h => h && /spirit[\w\-]*\.html$/i.test(h)));
-        if (spirits.size > 0) return spirits.size;
-        throw new Error('no elements found');
-      } catch (e) {
-        // Fallback: known list (update here if you新增)
-        return new Set(['spirit1.html','spirit2.html','spirit3.html','spirit_game1.html','spirit_game2.html','spirit_game3.html','spirit_game4.html']).size;
-      }
-    }
+    function getTotalFromDex(){ return window.SPIRITS ? window.SPIRITS.length : 0; }
 
-    async function init() {
-      const total = await getTotalFromDex();
-      renderCollected(total);
-    }
-
-    resetBtn.addEventListener('click', () => {
+    function init(){ const total = getTotalFromDex(); renderCollected(total); }
+resetBtn.addEventListener('click', () => {
       if (confirm('確定要重置所有收集記錄？此操作無法還原。')) {
         localStorage.removeItem('spirits');
         location.reload();
