@@ -9,6 +9,9 @@
     :root{
       --bg:#fff7eb; --ink:#2b2012; --card:#fffdf9; --section-bg:#fff9f0; --section-border:#eadcc8;
       --accent:#ffb547; --ok:#15a36d; --warn:#e04848; --info:#2b6eea;
+      --cell:50px;         /* ✅ 由 JS 動態調整 */
+      --gap:6px;           /* ✅ 由 JS 動態調整（小螢幕略縮小） */
+      --cell-font:26px;    /* ✅ 由 JS 動態調整，跟隨 cell 尺寸 */
     }
     *{box-sizing:border-box}
     body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
@@ -31,10 +34,19 @@
 
     .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
     .stage{display:flex;flex-direction:column;align-items:center;gap:10px}
-    .grid{display:grid;grid-template-columns:repeat(8, 50px);gap:6px;user-select:none}
+    .grid{
+      display:grid;
+      grid-template-columns:repeat(8, var(--cell)); /* ✅ 依變數 */
+      gap:var(--gap);                               /* ✅ 依變數 */
+      user-select:none;
+      touch-action:manipulation;
+      max-width:100%;
+    }
     .cell{
-      width:50px;height:50px;display:flex;align-items:center;justify-content:center;
-      font-size:26px;background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
+      width:var(--cell); height:var(--cell);
+      display:flex; align-items:center; justify-content:center;
+      font-size:var(--cell-font);                   /* ✅ 依變數 */
+      background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
       cursor:pointer;transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
       box-shadow:0 2px 8px rgba(0,0,0,.05)
     }
@@ -55,8 +67,6 @@
     @media (max-width:560px){
       .hero{grid-template-columns:84px 1fr}
       .img-wrap img{width:80px}
-      .grid{gap:5px}
-      .cell{width:44px;height:44px;font-size:24px}
     }
   </style>
 </head>
@@ -110,8 +120,58 @@
     const btnStart  = document.getElementById('btn-start');
     const btnRetry  = document.getElementById('btn-retry');
 
-    let grid = [], score = 0, timeLeft = 30, timerId = null, running = false, selected = null;
+    let grid = [], score = 0, timeLeft = 30, running = false, selected = null;
 
+    /* ---------------------------
+       ✅ 自適應：計算 cell 尺寸
+       依容器寬度與可用高度取最小值，保證整個棋盤 + 按鈕區可完整顯示
+    --------------------------- */
+    function fitGridCell() {
+      const root = document.documentElement;
+      const card = document.querySelector('.card');
+      const header = document.querySelector('.header');
+      const hero = document.querySelector('.hero');
+      const gameWrap = document.querySelector('.game-wrap');
+      const actions = document.querySelector('.stage .actions');
+
+      const viewportH = window.innerHeight;
+      const viewportW = window.innerWidth;
+
+      // 預估除棋盤外佔用的高度（header + hero + 上下 padding + 按鈕區等）
+      const fixedTop = (header?.offsetHeight || 0) + (hero?.offsetHeight || 0) + 40; // 40 buffer
+      const fixedBottom = (actions?.offsetHeight || 44) + 40; // 40 buffer
+
+      // 可用高度給棋盤（含 gaps）
+      const availableH = Math.max(200, viewportH - fixedTop - fixedBottom);
+      // 可用寬度為 game-wrap 內層寬度（避免超出左右邊界）
+      const availableW = Math.min(gameWrap?.clientWidth || viewportW - 32, viewportW - 24);
+
+      // gap 會在小螢幕略縮小
+      const gap = viewportW <= 420 ? 4 : 6;
+
+      // 依寬度計算可用 cell 大小（扣除 gaps）
+      const maxCellByW = Math.floor((availableW - (GRID_SIZE - 1) * gap) / GRID_SIZE);
+      // 依高度計算可用 cell 大小
+      const maxCellByH = Math.floor((availableH - (GRID_SIZE - 1) * gap) / GRID_SIZE);
+
+      // 原本設計上限 50px，下限 34px；再取寬高限制的較小值
+      const target = Math.max(34, Math.min(50, maxCellByW, maxCellByH));
+
+      root.style.setProperty('--cell', target + 'px');
+      root.style.setProperty('--gap', gap + 'px');
+      // 字體大小大約為 cell 的 52%
+      root.style.setProperty('--cell-font', Math.max(18, Math.round(target * 0.52)) + 'px');
+    }
+
+    // 監聽尺寸
+    window.addEventListener('resize', fitGridCell);
+    window.addEventListener('orientationchange', () => setTimeout(fitGridCell, 120));
+    // 初次套用
+    requestAnimationFrame(fitGridCell);
+
+    /* ---------------------------
+       遊戲主邏輯
+    --------------------------- */
     function makeCell(x,y,val){
       const d = document.createElement('div');
       d.className = 'cell';
@@ -143,6 +203,7 @@
         drop();
       }
       render();
+      fitGridCell(); // 每次重建後再適配一次
     }
 
     function isAdj(a,b){ return (Math.abs(a.x-b.x)===1 && a.y===b.y) || (Math.abs(a.y-b.y)===1 && a.x===b.x); }
@@ -184,7 +245,6 @@
     }
 
     function eliminate(addScore = true){
-      // 回傳被清除的座標數目，>3 給加成
       let cleared = 0;
       // 橫
       for(let i=0;i<GRID_SIZE;i++){
@@ -230,7 +290,6 @@
     }
 
     function chainResolve(){
-      // 連消：有得消就持續
       do{
         eliminate(true);
         drop();
@@ -239,22 +298,27 @@
       if(score>=200){ unlock(); }
     }
 
+    let tickHandle = null;
     function tick(){
       timeLeft--;
       pillTime.textContent = `Time：${timeLeft}s`;
       if(timeLeft<=0){ stop('⏱️ 時間到！請再試一次'); return; }
-      setTimeout(tick,1000);
+      tickHandle = setTimeout(tick,1000);
     }
 
     function start(){
+      // 先清除可能的殘餘計時
+      if(tickHandle){ clearTimeout(tickHandle); tickHandle = null; }
+
       running = true; score = 0; timeLeft = 30; selected = null;
       pillStatus.textContent='遊戲開始！'; btnStart.style.display='none'; btnRetry.style.display='none';
       initGrid();
-      setTimeout(tick,1000);
+      tickHandle = setTimeout(tick,1000);
     }
 
     function stop(msg){
       running = false; pillStatus.textContent = msg; btnRetry.style.display='inline-flex';
+      if(tickHandle){ clearTimeout(tickHandle); tickHandle = null; }
     }
 
     function toast(msg){
@@ -275,13 +339,12 @@
         pillStatus.textContent='你已經解鎖過飲茶仔喇！';
       }
       btnRetry.style.display='inline-flex';
-
-      // 延遲 2 秒自動跳轉（可自行改時間）
       setTimeout(()=>{ window.location.href = spirit.page; }, 2000);
     }
 
     btnStart.addEventListener('click', start);
     btnRetry.addEventListener('click', start);
+
     // 預先生成棋盤（未開始可互動會被忽略）
     initGrid();
     pillStatus.textContent = '點「開始遊戲」就可以玩啦';
