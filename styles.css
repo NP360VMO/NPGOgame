@@ -190,4 +190,187 @@ ul li { margin: 6px 0; line-height: 1.7; font-size: clamp(14px, 2.4vw, 16px); }
   --badge-border: #e4d2bf;
   --section-bg: #fbf6f0;
   --section-border: #ecdcc8;
+  
+  /* ============================================================
+   挑戰遊戲統一風格
+   ============================================================ */
+
+/* 遊戲容器 */
+.game-container {
+  background: var(--card);
+  border: 1px solid var(--section-border);
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+  margin: 20px auto;
+  max-width: 800px;
+}
+
+/* 遊戲標題 */
+.game-title {
+  font-size: clamp(24px, 4vw, 32px);
+  font-weight: 900;
+  color: var(--accent-ink);
+  text-align: center;
+  margin-bottom: 10px;
+  position: relative;
+}
+
+.game-title::after {
+  content: "";
+  position: absolute;
+  bottom: -8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 80px;
+  height: 4px;
+  background: var(--accent);
+  border-radius: 2px;
+}
+
+/* 遊戲說明 */
+.game-description {
+  font-size: clamp(15px, 3vw, 18px);
+  color: var(--ink);
+  text-align: center;
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+
+/* 遊戲狀態欄 */
+.game-status {
+  display: flex;
+  justify-content: center;
+  gap: 15px;
+  margin: 15px 0;
+  flex-wrap: wrap;
+}
+
+.game-status-item {
+  background: var(--section-bg);
+  border: 1px solid var(--section-border);
+  border-radius: 20px;
+  padding: 8px 16px;
+  font-weight: 700;
+  font-size: clamp(14px, 3vw, 16px);
+}
+
+/* 遊戲按鈕 */
+.game-btn {
+  padding: 12px 24px;
+  font-size: clamp(15px, 3vw, 18px);
+  font-weight: 800;
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.game-btn-primary {
+  background: var(--accent);
+  color: white;
+  border: none;
+  box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
+}
+
+.game-btn-primary:hover {
+  background: var(--accent-dark);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(var(--accent-rgb), 0.4);
+}
+
+.game-btn-secondary {
+  background: transparent;
+  color: var(--accent-ink);
+  border: 2px solid var(--accent);
+}
+
+.game-btn-secondary:hover {
+  background: rgba(var(--accent-rgb), 0.1);
+}
+
+/* 遊戲畫布/區域 */
+.game-canvas {
+  background: var(--section-bg);
+  border: 1px solid var(--section-border);
+  border-radius: 12px;
+  margin: 0 auto;
+  display: block;
+  max-width: 100%;
+}
+
+/* 遊戲控制區 */
+.game-controls {
+  display: flex;
+  justify-content: center;
+  gap: 12px;
+  margin-top: 20px;
+  flex-wrap: wrap;
+}
+
+/* 虛擬控制按鈕 */
+.virtual-controls {
+  display: flex;
+  justify-content: center;
+  margin-top: 20px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.control-row {
+  display: flex;
+  justify-content: center;
+}
+
+.control-btn {
+  width: 60px;
+  height: 60px;
+  background-color: rgba(var(--accent-rgb), 0.2);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 5px;
+  font-size: 24px;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  transition: background 0.2s;
+}
+
+.control-btn:active {
+  background-color: rgba(var(--accent-rgb), 0.4);
+}
+
+/* 響應式調整 */
+@media (max-width: 600px) {
+  .game-container {
+    padding: 15px;
+  }
+  
+  .control-btn {
+    width: 50px;
+    height: 50px;
+    font-size: 20px;
+  }
+}
+
+@media (max-width: 400px) {
+  .game-status {
+    gap: 8px;
+  }
+  
+  .game-status-item {
+    padding: 6px 12px;
+  }
+  
+  .game-controls {
+    gap: 8px;
+  }
+  
+  .game-btn {
+    padding: 10px 16px;
+  }
+}
 }

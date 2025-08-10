@@ -3,131 +3,247 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>挑戰遊戲：點擊反應</title>
+  <title>挑戰遊戲｜黃哞哞 快閃反應</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #fff9e6; }
-    #target {
-      width: 100px; height: 100px;
-      background-color: orange;
-      border-radius: 50%;
-      position: absolute;
-      display: none;
-      cursor: pointer;
+    :root{
+      --bg: #f7f3ea;
+      --ink: #2f2a25;
+      --card: #fffdf9;
+      --accent: #ffb547;
+      --accent-ink:#6b400a;
+      --section-bg:#fff9f0;
+      --section-border:#e7d9c5;
+      --ok:#15a36d;
+      --warn:#e04848;
+      --info:#2b6eea;
     }
-    #gameArea {
-      position: relative;
-      width: 100%; height: 400px;
-      border: 2px dashed #aaa;
-      margin: 20px auto;
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);}
+    .container{max-width:960px;margin:0 auto;padding:20px}
+    .card{background:var(--card);border:1px solid var(--section-border);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.06);overflow:hidden}
+    .header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--section-border)}
+    .title{font-size:20px;font-weight:900;letter-spacing:.5px}
+    .badge{font-weight:700;background:#fff1d8;border:1px solid #ffd9a0;color:#7a4a00;border-radius:999px;padding:6px 10px}
+    .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:18px 20px;border-bottom:1px solid var(--section-border);background:
+      linear-gradient(to bottom,rgba(255,248,236,.8),rgba(255,255,255,.6)),url('images/background.png');background-size:cover;background-position:center}
+    .img-wrap{display:flex;align-items:center;justify-content:center}
+    .img-wrap img{width:96px;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
+    .intro p{margin:.35rem 0}
+    .status-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .pill{border:2px solid var(--section-border);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
+    .pill.ok{border-color: #bfe6d6;color:var(--ok)}
+    .pill.warn{border-color: #ffd1d1;color:var(--warn)}
+    .pill.info{border-color: #cfe0ff;color:var(--info)}
+
+    .section{padding:18px 20px}
+    .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
+    .play-area{position:relative;border-radius:12px;min-height:360px;max-width:720px;margin:0 auto;background:#fff;}
+    #gameArea{position:relative;width:100%;height:420px;overflow:hidden;border-radius:12px}
+
+    /* 頂部進度條 */
+    .progress{position:absolute;left:0;top:0;width:100%;height:8px;background:#f1f1f1}
+    .bar{height:100%;width:100%;transform-origin:left center;background:linear-gradient(90deg,#8ad398,#ffd166);}
+
+    /* 目標動畫 */
+    #target{width:100px;height:100px;position:absolute;display:none;cursor:pointer;user-select:none;-webkit-user-drag:none;touch-action:manipulation;
+      filter:drop-shadow(0 10px 22px rgba(0,0,0,.16))}
+    .pop{animation:pop .18s ease-out}
+    @keyframes pop{from{transform:scale(.7);opacity:.4}to{transform:scale(1);opacity:1}}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .btn{appearance:none;border:0;cursor:pointer;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+    .btn.secondary{background:#fff;border:1px solid var(--section-border);color:var(--ink)}
+    .btn:active{transform:translateY(1px)}
+
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;
+      font-weight:900;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+    @media (max-width:560px){
+      .hero{grid-template-columns:84px 1fr}
+      .img-wrap img{width:80px}
+      #gameArea{height:360px}
+      #target{width:84px;height:84px}
     }
-    button { padding: 10px 20px; font-size: 16px; }
-    #status { margin-top: 15px; font-size: 18px; }
-    #timer { font-size: 18px; color: red; margin-top: 10px; }
   </style>
 </head>
-<body>
-  <h1>🎯 點擊挑戰：找出黃哞哞</h1>
-  <p>請在 1.5 秒內點擊出現的黃哞哞圖案，20 秒內連續成功 10 次即可解鎖精靈！</p>
-  <button onclick="startGame()">開始遊戲</button>
+<body class="theme-warm layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">挑戰遊戲 - 黃哞哞</div>
+        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+      </div>
 
-  <div id="gameArea">
-    <img src="images/game-spirit1.png" id="target" alt="黃哞哞">
+      <div class="hero">
+        <div class="img-wrap"><img src="images/game-spirit1.png" alt="黃哞哞"></div>
+        <div class="intro">
+          <p><strong>玩法：</strong>於 <strong>1.5 秒</strong> 內點擊畫面中出現嘅 <strong>黃哞哞</strong>；在 <strong>20 秒</strong> 內連續成功 <strong>10 次</strong> 即可解鎖。</p>
+          <p>成功次數愈多，出現時間會愈短；挑戰你嘅反應！</p>
+          <div class="status-bar">
+            <span class="pill info" id="pill-status">尚未開始</span>
+            <span class="pill" id="pill-success">成功：0 / 10</span>
+            <span class="pill warn" id="pill-timer">剩餘時間：20 秒</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="game-wrap">
+          <div class="play-area">
+            <div class="progress"><div class="bar" id="timeBar"></div></div>
+            <div id="gameArea">
+              <img src="images/game-spirit1.png" id="target" alt="黃哞哞">
+            </div>
+          </div>
+          <div class="actions">
+            <button class="btn" id="btn-start">▶️ 開始遊戲</button>
+            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
+            <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
+          </div>
+        </div>
+        <div class="actions"><a class="btn secondary" href="index.html">🔙 返回主頁</a></div>
+      </div>
+    </div>
   </div>
 
-  <div id="status">尚未開始</div>
-  <div id="timer">剩餘時間：20 秒</div>
+  <div class="toast" id="toast">🎉 已解鎖：黃哞哞！</div>
 
   <script>
-    let success = 0;
-    let timeoutId;
-    let totalTime = 20;
-    let intervalId;
-    let showDelay = 1500; // 
+    // 主題同步（如首頁選過主題）
+    (function syncTheme(){
+      const saved = localStorage.getItem('np_theme');
+      if (!saved) return;
+      document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+      document.body.classList.add(saved);
+    })();
+
+    let success = 0, timeoutId, totalTime = 20, intervalId, showDelay = 1500, running = false;
 
     const target = document.getElementById('target');
-    const status = document.getElementById('status');
-    const timer = document.getElementById('timer');
+    const pillStatus = document.getElementById('pill-status');
+    const pillTimer  = document.getElementById('pill-timer');
+    const pillSuccess = document.getElementById('pill-success');
+    const timeBar = document.getElementById('timeBar');
     const gameArea = document.getElementById('gameArea');
+    const btnStart = document.getElementById('btn-start');
+    const btnRetry = document.getElementById('btn-retry');
 
-    function startGame() {
-      success = 0;
-      totalTime = 20;
-      showDelay = 1500; // Reset to 1500ms
-      status.innerText = '遊戲開始！準備好點擊黃哞哞';
-      updateTimer();
-      intervalId = setInterval(updateTimer, 1000);
-      showTarget();
+    function setTimeBar(){
+      const pct = Math.max(0,totalTime/20)*100;
+      timeBar.style.width = pct + '%';
+      const hue = Math.max(0, Math.min(120, pct*1.2)); // 0~120（綠→黃→紅）
+      timeBar.style.background = `linear-gradient(90deg,hsl(${hue},60%,55%),#ffd166)`;
     }
 
-    function updateTimer() {
+    function updateTimer(){
       totalTime--;
-      timer.innerText = `剩餘時間：${totalTime} 秒`;
-      if (totalTime <= 0) {
-        endGame("⏱️ 時間到！請再試一次");
-      }
+      pillTimer.textContent = `剩餘時間：${totalTime} 秒`;
+      setTimeBar();
+      if (totalTime <= 0) endGame('⏱️ 時間到！請再試一次');
     }
 
-    function endGame(message) {
+    function endGame(message){
       clearInterval(intervalId);
       clearTimeout(timeoutId);
       target.style.display = 'none';
-      status.innerText = message;
+      running = false;
+      pillStatus.textContent = message;
+      btnRetry.style.display = 'inline-flex';   // 時間到時可立即重開
+      btnStart.style.display = 'none';
     }
 
-    function showTarget() {
-      const x = Math.random() * (gameArea.clientWidth - 100);
-      const y = Math.random() * (gameArea.clientHeight - 100);
+    function showTarget(){
+      const areaRect = gameArea.getBoundingClientRect();
+      const size = target.getBoundingClientRect();
+      const margin = 29; // 邊界緩衝距離
+      const x = margin + Math.random() * Math.max(0, areaRect.width  - size.width  - margin*2);
+      const y = margin + Math.random() * Math.max(0, areaRect.height - size.height - margin*2);
       target.style.left = x + 'px';
-      target.style.top = y + 'px';
+      target.style.top  = y + 'px';
       target.style.display = 'block';
+      target.classList.remove('pop');
+      void target.offsetWidth; // 重新觸發動畫
+      target.classList.add('pop');
 
       timeoutId = setTimeout(() => {
+        // 太慢：立即提供「重新開始」
         target.style.display = 'none';
-        status.innerText = '太慢了！請再試一次';
+        pillStatus.textContent = '太慢了！請再試一次';
         success = 0;
+        pillSuccess.textContent = `成功：${success} / 10`;
+        btnRetry.style.display = 'inline-flex'; // 立刻可重開
       }, showDelay);
     }
 
-    function handleInteraction() {
+    function handleInteraction(){
+      if (!running) return;
       clearTimeout(timeoutId);
       target.style.display = 'none';
       success++;
-      showDelay = Math.max(400, showDelay - 50); // Reduced from 100ms to 50ms
+      pillSuccess.textContent = `成功：${success} / 10`;
+      showDelay = Math.max(400, showDelay - 50);
       if (success >= 10) {
         clearInterval(intervalId);
         unlockSpirit();
       } else {
-        status.innerText = `成功 ${success} 次，再接再厲！`;
-        setTimeout(showTarget, 500);
+        pillStatus.textContent = `成功 ${success} 次，再接再厲！`;
+        setTimeout(showTarget, 420);
       }
     }
 
     target.onclick = handleInteraction;
-    target.ontouchstart = (e) => {
-      e.preventDefault();
-      handleInteraction();
-    };
+    target.ontouchstart = (e)=>{ e.preventDefault(); handleInteraction(); };
 
-    function unlockSpirit() {
-      const spirit = {
-        id: 'spirit_game1',
-        name: '黃哞哞',
-        image: 'images/game-spirit1.png',
-        page: 'spirit_game1.html'
-      };
+    function startGame(){
+      success = 0; totalTime = 20; showDelay = 1500; running = true;
+      pillStatus.textContent = '遊戲開始！準備好點擊黃哞哞';
+      pillTimer.textContent = `剩餘時間：${totalTime} 秒`;
+      pillSuccess.textContent = `成功：0 / 10`;
+      btnStart.style.display = 'none';
+      btnRetry.style.display = 'none';
+      clearInterval(intervalId); clearTimeout(timeoutId);
+      setTimeBar();
+      intervalId = setInterval(updateTimer, 1000);
+      showTarget();
+    }
+
+    function showToast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.display='block';
+      setTimeout(()=> t.style.display='none', 1600);
+    }
+
+    function unlockSpirit(){
+      const spirit = { id:'spirit_game1', name:'黃哞哞', image:'images/game-spirit1.png', page:'spirit_game1.html',
+        unlockDate:new Date().toISOString(), score:success };
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit);
-        localStorage.setItem('spirits', JSON.stringify(spirits));         
-        status.innerText = '🎉 成功解鎖挑戰精靈：黃哞哞！';
+        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
+        showToast('🎉 已解鎖：黃哞哞！'); pillStatus.textContent = '🎉 成功解鎖挑戰精靈：黃哞哞！';
       } else {
-        status.innerText = '你已經解鎖過黃哞哞了喔！';
+        pillStatus.textContent = '你已經解鎖過黃哞哞了喔！';
       }
-      target.style.display = 'none';
-    }
-  </script>
 
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
+      target.style.display = 'none'; running = false; clearInterval(intervalId);
+
+      // 2 秒後自動轉去精靈頁
+      setTimeout(() => {
+        window.location.href = 'spirit_game1.html';
+      }, 2000);
+    }
+
+    // 按鈕
+    btnStart.addEventListener('click', startGame);
+    btnRetry.addEventListener('click', startGame);
+
+    // 可選：按空白鍵快速重開（遊戲未進行時）
+    document.addEventListener('keydown', (e)=>{
+      if(e.code==='Space' && !running){
+        e.preventDefault();
+        startGame();
+      }
+    });
+  </script>
 </body>
 </html>

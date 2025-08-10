@@ -3,168 +3,218 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>挑戰遊戲：彈跳球</title>
+  <title>挑戰遊戲｜小黃彈彈 彈跳球</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; background-color: #e6faff; }
-    canvas { background: #ffffff; border: 2px solid #aaa; display: block; margin: 20px auto; }
-    button { padding: 10px 20px; font-size: 16px; }
-    #status { margin-top: 15px; font-size: 18px; }
+    /* 後備主題變數 */
+    :root{
+      --bg:#f0f7ff; --ink:#172432; --card:#ffffff; --section-bg:#f8fbff; --section-border:#dfe9f7;
+      --accent:#3aa1ff; --accent-ink:#0e3861; --ok:#15a36d; --warn:#e04848; --info:#2b6eea;
+    }
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+    .container{max-width:960px;margin:0 auto;padding:20px}
+    .card{background:var(--card);border:1px solid var(--section-border);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.06);overflow:hidden}
+    .header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--section-border)}
+    .title{font-size:20px;font-weight:900}
+    .badge{font-weight:700;background:#e7f2ff;border:1px solid #cfe4ff;color:#0e3861;border-radius:999px;padding:6px 10px}
+    .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:18px 20px;border-bottom:1px solid var(--section-border);
+      background:linear-gradient(180deg,#eef7ff,#ffffff)}
+    .img-wrap{display:flex;align-items:center;justify-content:center}
+    .img-wrap img{width:96px;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
+    .intro p{margin:.35rem 0}
+    .status-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .pill{border:2px solid var(--section-border);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
+    .pill.ok{border-color:#bfe6d6;color:var(--ok)}
+    .pill.warn{border-color:#ffd1d1;color:var(--warn)}
+    .pill.info{border-color:#cfe0ff;color:var(--info)}
+
+    .section{padding:18px 20px}
+    .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
+    .stage{position:relative;max-width:720px;margin:0 auto;border-radius:16px;background:linear-gradient(180deg,#cdefff,#f8ffff)}
+    .canvas-wrap{position:relative;padding:10px}
+    canvas{background:#ffffff;border:2px solid #cfe4ff;border-radius:12px;display:block;margin:0 auto;box-shadow:0 10px 22px rgba(0,0,0,.06)}
+    .hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px}
+    .hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+    .hint .bubble{background:rgba(255,255,255,.9);border:1px solid var(--section-border);border-radius:14px;padding:8px 12px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.08)}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .btn{appearance:none;border:0;cursor:pointer;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+    .btn.secondary{background:#fff;border:1px solid var(--section-border);color:var(--ink)}
+    .btn:active{transform:translateY(1px)}
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;
+      font-weight:900;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+    @media (max-width:560px){
+      .hero{grid-template-columns:84px 1fr}
+      .img-wrap img{width:80px}
+    }
   </style>
 </head>
-<body>
-  <h1>🏀 彈跳球遊戲：小黃彈彈的挑戰</h1>
-  <p>控制小狗彈跳並接住蝴蝶，得分達 5 分即可解鎖精靈！</p>
-  <button onclick="startGame()">開始遊戲</button>
-  <canvas id="gameCanvas" width="300" height="400"></canvas>
-  <div id="status">尚未開始</div>
+<body class="theme-sky">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">挑戰遊戲 - 小黃彈彈（彈跳球）</div>
+        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap"><img src="images/game-spirit2.png" alt="小黃彈彈"></div>
+        <div class="intro">
+          <p><strong>玩法：</strong>控制擋板令小狗彈起追蝴蝶；得分達 <strong>5 分</strong> 即可解鎖。</p>
+          <p>滑鼠左右移動（或觸控拖動）即可控制擋板。</p>
+          <div class="status-bar">
+            <span class="pill info" id="pill-status">尚未開始</span>
+            <span class="pill ok" id="pill-score">得分：0 / 5</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="game-wrap">
+          <div class="stage">
+            <div class="hud">
+              <span class="pill">🎯 命中蝴蝶可得 1 分</span>
+              <span class="pill">🛡 擋板反彈不中會跌落</span>
+            </div>
+            <div class="canvas-wrap">
+              <canvas id="gameCanvas" width="300" height="400"></canvas>
+              <div class="hint" id="hint"><div class="bubble">← → 滑鼠移動控制（手機：拖動）</div></div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="btn-start">▶️ 開始遊戲</button>
+            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
+          </div>
+        </div>
+
+        <div class="actions">
+          <a class="btn secondary" href="index.html">🔙 返回主頁</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">🎉 已解鎖：小黃彈彈！</div>
 
   <script>
+    // 圖片載入
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
-    const status = document.getElementById("status");
+    const statusEl = document.getElementById("pill-status");
+    const scoreEl  = document.getElementById("pill-score");
+    const btnStart = document.getElementById("btn-start");
+    const btnRetry = document.getElementById("btn-retry");
+    const hint     = document.getElementById("hint");
 
-    // 圖片載入
-    const ballImg = new Image();
-    ballImg.src = '彈彈球.png';
-    const starImg = new Image();
-    starImg.src = '星星.png';
+    const ballImg = new Image();  ballImg.src = '彈彈球.png';
+    const starImg = new Image();  starImg.src = '星星.png';
 
-    // 球與條條設定
-    let ball = { x: 150, y: 200, radius: 30, dx: 2.2, dy: -3.2 };
-    let paddle = { x: 110, width: 80, height: 10 };
+    let ball, paddle, star, starHitbox, score, gameLoop, waitingForPaddle, showingUnlockMessage, playing;
 
-    // 蝴蝶圖片顯示大，碰撞判定小
-    let star = { x: 100, y: 50, size: 120 }; // 蝴蝶圖顯示大
-    let starHitbox = { width: 32, height: 32 }; // 蝴蝶碰撞判斷小
+    function initVars(){
+      ball = { x: 150, y: 200, radius: 30, dx: 2.2, dy: -3.2 };
+      paddle = { x: 110, width: 80, height: 10 };
+      star = { x: 100, y: 50, size: 120 };
+      starHitbox = { width: 32, height: 32 };
+      score = 0; waitingForPaddle = false; showingUnlockMessage = false; playing = false;
+      scoreEl.textContent = "得分：0 / 5";
+      statusEl.textContent = "尚未開始";
+      hint.style.display = 'flex';
+    }
 
-    let score = 0;
-    let gameLoop;
-    let playing = false;
-    let waitingForPaddle = false;
-    let showingUnlockMessage = false;
+    initVars();
 
-    document.addEventListener("mousemove", e => {
+    // 控制：滑鼠 + 觸控
+    function setPaddleByClientX(clientX){
       const rect = canvas.getBoundingClientRect();
-      paddle.x = e.clientX - rect.left - paddle.width / 2;
-    });
-
-    function drawBall() {
-      ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius * 2, ball.radius * 2);
+      paddle.x = clientX - rect.left - paddle.width / 2;
     }
+    document.addEventListener("mousemove", e => { if(playing) setPaddleByClientX(e.clientX); });
+    canvas.addEventListener("touchmove", e => { if(!playing) return; e.preventDefault(); setPaddleByClientX(e.touches[0].clientX); }, {passive:false});
 
-    function drawPaddle() {
-      ctx.fillStyle = "#0077cc";
-      ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height);
-    }
-
-    function drawStar() {
+    function drawBall(){ ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius*2, ball.radius*2); }
+    function drawPaddle(){ ctx.fillStyle = "#0e74d0"; ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height); }
+    function drawStar(){
       if (!waitingForPaddle) {
         ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // 如要看碰撞範圍可解註下行
-        // ctx.strokeStyle = "rgba(255,0,0,0.7)";
+        // 調試 Hitbox 時可開啟：
+        // ctx.strokeStyle = "rgba(255,0,0,0.6)";
         // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
       }
     }
 
-    function moveBall() {
-      ball.x += ball.dx;
-      ball.y += ball.dy;
-
-      if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
-      if (ball.y < ball.radius) ball.dy *= -1;
-
-      // Paddle collision
-      if (
-        ball.y + ball.radius > canvas.height - paddle.height - 10 &&
-        ball.x > paddle.x &&
-        ball.x < paddle.x + paddle.width
-      ) {
-        ball.dy *= -1;
-        if (waitingForPaddle) {
-          resetStar();
-          waitingForPaddle = false;
-        }
-      }
-
-      // Star collision（以hitbox為準）
-      if (
-        !waitingForPaddle &&
-        ball.x + ball.radius > star.x + (star.size - starHitbox.width)/2 &&
-        ball.x - ball.radius < star.x + (star.size - starHitbox.width)/2 + starHitbox.width &&
-        ball.y + ball.radius > star.y + (star.size - starHitbox.height)/2 &&
-        ball.y - ball.radius < star.y + (star.size - starHitbox.height)/2 + starHitbox.height
-      ) {
-        score++;
-        waitingForPaddle = true;
-        if (score >= 5) {
-          unlockSpirit();
-          return;
-        }
-      }
-
-      if (ball.y > canvas.height) {
-        stopGame();
-        status.innerText = "💥 遊戲結束，請再試一次！";
-      }
-    }
-
-    function resetStar() {
+    function resetStar(){
       const maxX = canvas.width - star.size;
       const maxY = (canvas.height / 2) - star.size;
       star.x = Math.random() * maxX;
       star.y = Math.random() * maxY;
     }
 
-    function draw() {
+    function moveBall(){
+      ball.x += ball.dx; ball.y += ball.dy;
+      if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
+      if (ball.y < ball.radius) ball.dy *= -1;
+
+      // 擋板碰撞
+      if (ball.y + ball.radius > canvas.height - paddle.height - 10 &&
+          ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
+        ball.dy *= -1;
+        if (waitingForPaddle) { resetStar(); waitingForPaddle = false; }
+      }
+
+      // 星星碰撞（以 Hitbox 為準）
+      if (!waitingForPaddle &&
+          ball.x + ball.radius > star.x + (star.size - starHitbox.width)/2 &&
+          ball.x - ball.radius < star.x + (star.size - starHitbox.width)/2 + starHitbox.width &&
+          ball.y + ball.radius > star.y + (star.size - starHitbox.height)/2 &&
+          ball.y - ball.radius < star.y + (star.size - starHitbox.height)/2 + starHitbox.height) {
+        score++; waitingForPaddle = true;
+        scoreEl.textContent = `得分：${score} / 5`;
+        statusEl.textContent = '命中！彈回去再追下一隻～';
+        if (score >= 5) { unlockSpirit(); return; }
+      }
+
+      if (ball.y > canvas.height) { stopGame(); statusEl.textContent = "💥 遊戲結束，請再試一次！"; btnRetry.style.display='inline-flex'; }
+    }
+
+    function draw(){
       ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBall();
-      drawPaddle();
-      drawStar();
-      moveBall();
-      if (!showingUnlockMessage)
-        status.innerText = "得分：" + score;
+      drawBall(); drawPaddle(); drawStar(); moveBall();
     }
 
-    function startGame() {
-      ball = { x: 150, y: 200, radius: 30, dx: 2.2, dy: -3.2 };
-      score = 0;
-      waitingForPaddle = false;
-      showingUnlockMessage = false;
-      resetStar();
-      status.innerText = "遊戲開始！得分：" + score;
-      playing = true;
-      gameLoop = setInterval(draw, 20);
+    function startGame(){
+      initVars(); resetStar();
+      statusEl.textContent = "遊戲開始！"; hint.style.display='none';
+      playing = true; btnStart.style.display='none'; btnRetry.style.display='none';
+      clearInterval(gameLoop); gameLoop = setInterval(draw, 20);
     }
 
-    function stopGame() {
-      clearInterval(gameLoop);
-      playing = false;
+    function stopGame(){ clearInterval(gameLoop); playing = false; }
+
+    function toast(msg){
+      const t = document.getElementById('toast');
+      t.textContent = msg; t.style.display='block';
+      setTimeout(()=> t.style.display='none', 1600);
     }
 
-    function unlockSpirit() {
-      const spirit = {
-        id: 'spirit_game2',
-        name: '小黃彈彈',
-        image: 'images/game-spirit2.png',
-        page: 'spirit_game2.html'
-      };
+    // ✅ 解鎖後 2 秒自動跳轉到精靈頁
+    function unlockSpirit(){
+      const spirit = { id:'spirit_game2', name:'小黃彈彈', image:'images/game-spirit2.png', page:'spirit_game2.html' };
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit);
-        localStorage.setItem('spirits', JSON.stringify(spirits));
-        status.innerText = '🎉 恭喜解鎖精靈：小黃彈彈！';
-      } else {
-        status.innerText = '你已經擁有這位精靈囉！';
-      }
-      showingUnlockMessage = true;
-      setTimeout(() => {
-        showingUnlockMessage = false;
-        stopGame();
-      }, 1500); // 顯示1.5秒再結束遊戲
-    }
-  </script>
+        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
+        toast('🎉 已解鎖：小黃彈彈！'); statusEl.textContent='🎉 成功解鎖挑戰精靈：小黃彈彈！';
+      } else { statusEl.textContent='你已經擁有呢位精靈喇！'; }
 
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
+      stopGame(); // 停止畫面更新
+      setTimeout(()=>{ window.location.href = spirit.page; }, 2000); // 自動跳轉
+    }
+
+    document.getElementById("btn-start").addEventListener("click", startGame);
+    document.getElementById("btn-retry").addEventListener("click", startGame);
+  </script>
 </body>
 </html>

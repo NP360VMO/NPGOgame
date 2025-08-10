@@ -3,221 +3,288 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>匹配挑戰：飲茶仔請飲茶</title>
+  <title>挑戰遊戲｜飲茶仔 匹配挑戰</title>
+  <link rel="stylesheet" href="styles.css">
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      text-align: center;
-      background-color: #fff9e6;
+    :root{
+      --bg:#fff7eb; --ink:#2b2012; --card:#fffdf9; --section-bg:#fff9f0; --section-border:#eadcc8;
+      --accent:#ffb547; --ok:#15a36d; --warn:#e04848; --info:#2b6eea;
     }
-    #grid {
-      display: grid;
-      grid-template-columns: repeat(8, 50px);
-      grid-gap: 2px;
-      width: 416px;
-      margin: 20px auto;
+    *{box-sizing:border-box}
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink)}
+    .container{max-width:960px;margin:0 auto;padding:20px}
+    .card{background:var(--card);border:1px solid var(--section-border);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.06);overflow:hidden}
+    .header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--section-border)}
+    .title{font-size:20px;font-weight:900}
+    .badge{font-weight:700;background:#fff1d8;border:1px solid #ffd9a0;color:#7a4a00;border-radius:999px;padding:6px 10px}
+    .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:18px 20px;border-bottom:1px solid var(--section-border);
+      background:linear-gradient(180deg,#fff2d8,#ffffff)}
+    .img-wrap{display:flex;align-items:center;justify-content:center}
+    .img-wrap img{width:96px;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
+    .intro p{margin:.35rem 0}
+    .status-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
+    .pill{border:2px solid var(--section-border);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
+    .pill.ok{border-color:#bfe6d6;color:var(--ok)}
+    .pill.warn{border-color:#ffd1d1;color:var(--warn)}
+    .pill.info{border-color:#cfe0ff;color:var(--info)}
+    .section{padding:18px 20px}
+
+    .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
+    .stage{display:flex;flex-direction:column;align-items:center;gap:10px}
+    .grid{display:grid;grid-template-columns:repeat(8, 50px);gap:6px;user-select:none}
+    .cell{
+      width:50px;height:50px;display:flex;align-items:center;justify-content:center;
+      font-size:26px;background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
+      cursor:pointer;transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
+      box-shadow:0 2px 8px rgba(0,0,0,.05)
     }
-    .cell {
-      width: 50px;
-      height: 50px;
-      line-height: 50px;
-      font-size: 24px;
-      background-color: #f0f0f0;
-      border: 1px solid #ccc;
-      text-align: center;
-      cursor: pointer;
-      user-select: none;
-      touch-action: manipulation;
-    }
-    #score, #time {
-      font-size: 18px;
-      margin: 10px 0;
-    }
-    button {
-      padding: 10px 20px;
-      font-size: 16px;
-      cursor: pointer;
+    .cell:hover{transform:translateY(-1px)}
+    .cell.selected{border:2px solid #ffb547;box-shadow:0 4px 14px rgba(255,181,71,.25)}
+    .cell.clearing{animation:pop .2s ease both}
+    @keyframes pop{from{transform:scale(.85);opacity:.4}to{transform:scale(1.1);opacity:1}}
+
+    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
+    .btn{appearance:none;border:0;cursor:pointer;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
+    .btn.secondary{background:#fff;border:1px solid var(--section-border);color:var(--ink)}
+    .btn:active{transform:translateY(1px)}
+    .hint{margin-top:4px;color:#7a4a00;font-weight:700}
+
+    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;
+      font-weight:900;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.18)}
+
+    @media (max-width:560px){
+      .hero{grid-template-columns:84px 1fr}
+      .img-wrap img{width:80px}
+      .grid{gap:5px}
+      .cell{width:44px;height:44px;font-size:24px}
     }
   </style>
 </head>
-<body>
-  <h1>🎮 匹配挑戰：飲茶仔請飲茶</h1>
-  <p>匹配三個或更多相同的圖案，獲得200分即可解鎖飲茶仔！</p>
-  <div id="score">Score: 0</div>
-  <div id="time">Time: 30s</div>
-  <div id="grid"></div>
-  <br><br>
-  <a href="index.html">🔙 返回主頁</a>
+<body class="theme-dimsum">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">挑戰遊戲 - 飲茶仔（匹配）</div>
+        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap"><img src="images/game-spirit3.png" alt="飲茶仔"></div>
+        <div class="intro">
+          <p><strong>玩法：</strong>交換相鄰格子，形成 <strong>3 連以上</strong> 即消除；在限時內累積 <strong>200 分</strong> 解鎖飲茶仔。</p>
+          <div class="status-bar">
+            <span class="pill info" id="pill-status">尚未開始</span>
+            <span class="pill ok" id="pill-score">Score：0 / 200</span>
+            <span class="pill warn" id="pill-time">Time：30s</span>
+          </div>
+          <div class="hint">💡 提示：一次消除超過 3 個會有加分！</div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="game-wrap">
+          <div class="stage">
+            <div id="grid" class="grid" aria-label="match-3 grid"></div>
+            <div class="actions">
+              <button class="btn" id="btn-start">▶️ 開始遊戲</button>
+              <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+          <a class="btn secondary" href="index.html">🔙 返回主頁</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">🎉 已解鎖：飲茶仔！</div>
 
   <script>
     const GRID_SIZE = 8;
-    const ANIMAL_TYPES = ['🥟', '🥮', '🥠', '🍡', '🍤'];
-    const gridElement = document.getElementById('grid');
-    const scoreElement = document.getElementById('score');
-    const timeElement = document.getElementById('time');
-    let grid = [];
-    let score = 0;
-    let timeLeft = 30;
-    let selectedCell = null;
+    const TYPES = ['🥟','🥮','🥠','🍡','🍤'];
+    const gridEl = document.getElementById('grid');
+    const pillScore = document.getElementById('pill-score');
+    const pillTime  = document.getElementById('pill-time');
+    const pillStatus= document.getElementById('pill-status');
+    const btnStart  = document.getElementById('btn-start');
+    const btnRetry  = document.getElementById('btn-retry');
 
-    function initializeGrid() {
-      grid = Array.from({ length: GRID_SIZE }, () =>
-        Array.from({ length: GRID_SIZE }, () => ANIMAL_TYPES[Math.floor(Math.random() * ANIMAL_TYPES.length)])
-      );
-      while (hasMatches()) {
-        eliminateMatches();
-        dropAnimals();
-      }
-      renderGrid();
+    let grid = [], score = 0, timeLeft = 30, timerId = null, running = false, selected = null;
+
+    function makeCell(x,y,val){
+      const d = document.createElement('div');
+      d.className = 'cell';
+      d.dataset.x = x; d.dataset.y = y;
+      d.textContent = val;
+      d.addEventListener('click', onCellClick, {passive:true});
+      d.addEventListener('touchstart', (e)=>{ e.preventDefault(); onCellClick({target:d}); }, {passive:false});
+      return d;
     }
 
-    function renderGrid() {
-      gridElement.innerHTML = '';
-      for (let i = 0; i < GRID_SIZE; i++) {
-        for (let j = 0; j < GRID_SIZE; j++) {
-          const cell = document.createElement('div');
-          cell.classList.add('cell');
-          cell.dataset.x = i;
-          cell.dataset.y = j;
-          cell.textContent = grid[i][j];
-          cell.addEventListener('click', handleCellClick);
-          cell.addEventListener('touchstart', (e) => {
-            e.preventDefault();
-            handleCellClick(e);
-          });
-          gridElement.appendChild(cell);
+    function render(){
+      gridEl.innerHTML = '';
+      for(let i=0;i<GRID_SIZE;i++){
+        for(let j=0;j<GRID_SIZE;j++){
+          const d = makeCell(i,j,grid[i][j]);
+          if(selected && selected.x===i && selected.y===j) d.classList.add('selected');
+          gridEl.appendChild(d);
         }
       }
+      pillScore.textContent = `Score：${score} / 200`;
+      pillTime.textContent  = `Time：${timeLeft}s`;
     }
 
-    function handleCellClick(event) {
-      const x = parseInt(event.target.dataset.x);
-      const y = parseInt(event.target.dataset.y);
-      if (!selectedCell) {
-        selectedCell = { x, y };
-        event.target.style.border = '2px solid red';
+    function initGrid(){
+      grid = Array.from({length:GRID_SIZE}, ()=> Array.from({length:GRID_SIZE}, ()=> TYPES[Math.floor(Math.random()*TYPES.length)]));
+      // 開局消連
+      while (hasMatches()){
+        eliminate(false);
+        drop();
+      }
+      render();
+    }
+
+    function isAdj(a,b){ return (Math.abs(a.x-b.x)===1 && a.y===b.y) || (Math.abs(a.y-b.y)===1 && a.x===b.x); }
+
+    function onCellClick(e){
+      if(!running) return;
+      const x = +e.target.dataset.x, y = +e.target.dataset.y;
+      if(!selected){
+        selected = {x,y}; render();
       } else {
-        const prevX = selectedCell.x;
-        const prevY = selectedCell.y;
-        if (isAdjacent(x, y, prevX, prevY) && swapAndCheck(x, y, prevX, prevY)) {
-          eliminateMatches();
-          dropAnimals();
-          while (hasMatches()) {
-            eliminateMatches();
-            dropAnimals();
-          }
-        }
-        document.querySelector(`.cell[data-x="${prevX}"][data-y="${prevY}"]`).style.border = '';
-        selectedCell = null;
-        renderGrid();
+        const prev = selected; selected = null;
+        if (isAdj({x,y}, prev) && swapAndCheck({x,y}, prev)){
+          chainResolve();
+        } else render();
       }
     }
 
-    function isAdjacent(x1, y1, x2, y2) {
-      return (Math.abs(x1 - x2) === 1 && y1 === y2) || (Math.abs(y1 - y2) === 1 && x1 === x2);
-    }
-
-    function swapAndCheck(x1, y1, x2, y2) {
-      [grid[x1][y1], grid[x2][y2]] = [grid[x2][y2], grid[x1][y1]];
-      if (!hasMatches()) {
-        [grid[x1][y1], grid[x2][y2]] = [grid[x2][y2], grid[x1][y1]];
+    function swapAndCheck(a,b){
+      [grid[a.x][a.y], grid[b.x][b.y]] = [grid[b.x][b.y], grid[a.x][a.y]];
+      if(!hasMatches()){
+        [grid[a.x][a.y], grid[b.x][b.y]] = [grid[b.x][b.y], grid[a.x][a.y]];
         return false;
       }
       return true;
     }
 
-    function hasMatches() {
-      for (let i = 0; i < GRID_SIZE; i++) {
-        for (let j = 0; j < GRID_SIZE - 2; j++) {
-          if (grid[i][j] && grid[i][j] === grid[i][j + 1] && grid[i][j] === grid[i][j + 2]) {
-            return true;
-          }
+    function hasMatches(){
+      for(let i=0;i<GRID_SIZE;i++){
+        for(let j=0;j<GRID_SIZE-2;j++){
+          if(grid[i][j] && grid[i][j]===grid[i][j+1] && grid[i][j]===grid[i][j+2]) return true;
         }
       }
-      for (let j = 0; j < GRID_SIZE; j++) {
-        for (let i = 0; i < GRID_SIZE - 2; i++) {
-          if (grid[i][j] && grid[i][j] === grid[i + 1][j] && grid[i][j] === grid[i + 2][j]) {
-            return true;
-          }
+      for(let j=0;j<GRID_SIZE;j++){
+        for(let i=0;i<GRID_SIZE-2;i++){
+          if(grid[i][j] && grid[i][j]===grid[i+1][j] && grid[i][j]===grid[i+2][j]) return true;
         }
       }
       return false;
     }
 
-    function eliminateMatches() {
-      for (let i = 0; i < GRID_SIZE; i++) {
-        for (let j = 0; j < GRID_SIZE - 2; j++) {
-          if (grid[i][j] && grid[i][j] === grid[i][j + 1] && grid[i][j] === grid[i][j + 2]) {
-            score += 10;
-            grid[i][j] = grid[i][j + 1] = grid[i][j + 2] = null;
+    function eliminate(addScore = true){
+      // 回傳被清除的座標數目，>3 給加成
+      let cleared = 0;
+      // 橫
+      for(let i=0;i<GRID_SIZE;i++){
+        for(let j=0;j<GRID_SIZE-2;j++){
+          const v=grid[i][j];
+          if(v && v===grid[i][j+1] && v===grid[i][j+2]){
+            let len=3; while(j+len<GRID_SIZE && grid[i][j+len]===v) len++;
+            for(let k=0;k<len;k++){ grid[i][j+k]=null; cleared++; }
+            if(addScore){ score += 10 + (len>3 ? (len-3)*5 : 0); }
+            j += len-1;
           }
         }
       }
-      for (let j = 0; j < GRID_SIZE; j++) {
-        for (let i = 0; i < GRID_SIZE - 2; i++) {
-          if (grid[i][j] && grid[i][j] === grid[i + 1][j] && grid[i][j] === grid[i + 2][j]) {
-            score += 10;
-            grid[i][j] = grid[i + 1][j] = grid[i + 2][j] = null;
+      // 直
+      for(let j=0;j<GRID_SIZE;j++){
+        for(let i=0;i<GRID_SIZE-2;i++){
+          const v=grid[i][j];
+          if(v && v===grid[i+1][j] && v===grid[i+2][j]){
+            let len=3; while(i+len<GRID_SIZE && grid[i+len][j]===v) len++;
+            for(let k=0;k<len;k++){ grid[i+k][j]=null; cleared++; }
+            if(addScore){ score += 10 + (len>3 ? (len-3)*5 : 0); }
+            i += len-1;
           }
         }
       }
-      scoreElement.textContent = `Score: ${score}`;
+      return cleared;
     }
 
-    function dropAnimals() {
-      for (let j = 0; j < GRID_SIZE; j++) {
-        let emptyRow = GRID_SIZE - 1;
-        for (let i = GRID_SIZE - 1; i >= 0; i--) {
-          if (grid[i][j]) {
-            grid[emptyRow][j] = grid[i][j];
-            if (i !== emptyRow) grid[i][j] = null;
-            emptyRow--;
+    function drop(){
+      for(let j=0;j<GRID_SIZE;j++){
+        let empty = GRID_SIZE-1;
+        for(let i=GRID_SIZE-1;i>=0;i--){
+          if(grid[i][j]){
+            grid[empty][j]=grid[i][j];
+            if(i!==empty) grid[i][j]=null;
+            empty--;
           }
         }
-        for (let i = 0; i <= emptyRow; i++) {
-          grid[i][j] = ANIMAL_TYPES[Math.floor(Math.random() * ANIMAL_TYPES.length)];
+        for(let i=0;i<=empty;i++){
+          grid[i][j] = TYPES[Math.floor(Math.random()*TYPES.length)];
         }
       }
     }
 
-    function unlockSpirit() {
-      const spirit = {
-        id: 'spirit_game3',
-        name: '飲茶仔',
-        image: 'images/game-spirit3.png',
-        page: 'spirit_game3.html',
-        unlockDate: new Date().toISOString(),
-        score: score
-      };
-      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
-      if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit);
-        localStorage.setItem('spirits', JSON.stringify(spirits));
-        alert('🎉 成功解鎖挑戰精靈：飲茶仔！');
-        setTimeout(() => {
-          window.location.href = 'spirit_game3.html';
-        }, 1000);
-      } else {
-        alert('你已經解鎖過飲茶仔了喔！');
-      }
+    function chainResolve(){
+      // 連消：有得消就持續
+      do{
+        eliminate(true);
+        drop();
+      } while (hasMatches());
+      render();
+      if(score>=200){ unlock(); }
     }
 
-    function gameLoop() {
-      if (score >= 200) {
-        unlockSpirit();
-        return;
-      }
-      if (timeLeft <= 0) {
-        alert(`Game Over! Final Score: ${score}`);
-        return;
-      }
+    function tick(){
       timeLeft--;
-      timeElement.textContent = `Time: ${timeLeft}s`;
-      setTimeout(gameLoop, 1000);
+      pillTime.textContent = `Time：${timeLeft}s`;
+      if(timeLeft<=0){ stop('⏱️ 時間到！請再試一次'); return; }
+      setTimeout(tick,1000);
     }
 
-    initializeGrid();
-    gameLoop();
+    function start(){
+      running = true; score = 0; timeLeft = 30; selected = null;
+      pillStatus.textContent='遊戲開始！'; btnStart.style.display='none'; btnRetry.style.display='none';
+      initGrid();
+      setTimeout(tick,1000);
+    }
+
+    function stop(msg){
+      running = false; pillStatus.textContent = msg; btnRetry.style.display='inline-flex';
+    }
+
+    function toast(msg){
+      const t = document.getElementById('toast'); t.textContent = msg; t.style.display='block';
+      setTimeout(()=> t.style.display='none', 1600);
+    }
+
+    // ✅ 解鎖後 2 秒自動跳轉到精靈頁
+    function unlock(){
+      running = false;
+      const spirit = { id:'spirit_game3', name:'飲茶仔', image:'images/game-spirit3.png', page:'spirit_game3.html',
+        unlockDate:new Date().toISOString(), score:score };
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if(!spirits.some(s=>s.id===spirit.id)){
+        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
+        toast('🎉 已解鎖：飲茶仔！'); pillStatus.textContent='🎉 成功解鎖挑戰精靈：飲茶仔！';
+      } else {
+        pillStatus.textContent='你已經解鎖過飲茶仔喇！';
+      }
+      btnRetry.style.display='inline-flex';
+
+      // 延遲 2 秒自動跳轉（可自行改時間）
+      setTimeout(()=>{ window.location.href = spirit.page; }, 2000);
+    }
+
+    btnStart.addEventListener('click', start);
+    btnRetry.addEventListener('click', start);
+    // 預先生成棋盤（未開始可互動會被忽略）
+    initGrid();
+    pillStatus.textContent = '點「開始遊戲」就可以玩啦';
   </script>
 </body>
 </html>
