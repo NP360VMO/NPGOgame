@@ -5,10 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO</title>
   <link rel="stylesheet" href="styles.css">
-  
   <script src="spirits.js"></script>
-<style>
-    body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
+
+  <style>
+    /* 背景與首頁樣式補強（沿用你現有結構） */
+    body {
+      background-image: url('images/background.png');
+      background-size: cover; background-position: center;
+      background-repeat: no-repeat; background-attachment: fixed;
+    }
     .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
     .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
     .theme-select { display:inline-flex; align-items:center; gap:6px; border:2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 6px 10px; font-weight: 800; }
@@ -17,9 +22,11 @@
     .home-sub { font-size: clamp(14px, 3.2vw, 18px); color: rgba(0,0,0,.75); margin: 0 0 12px; text-shadow: 0 1px 4px rgba(255,255,255,.7); }
     .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
     .gallery-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
-    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; }
+
+    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; flex-wrap:wrap; }
     .progress-bar { position:relative; height:10px; width:min(560px, 90%); background:#e9eef5; border-radius:999px; overflow:hidden; }
     .progress-fill { height:100%; width:0%; background: var(--accent); transition: width .4s ease; }
+
     .grid-wrap { max-width: 1024px; margin: 16px auto 28px; padding: 0 12px; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; }
     .card-spirit { background: var(--section-bg); border:1px solid var(--section-border); border-radius:14px; padding:12px; text-align:center; transition: transform .12s ease, box-shadow .2s ease; }
@@ -28,14 +35,30 @@
     .card-spirit .name { margin-top: 8px; font-weight: 800; color: var(--ink); font-size: clamp(14px, 2.6vw, 16px); }
     .empty { text-align:center; padding: 18px; color: var(--ink); }
     .empty p { margin: 6px 0; }
+
     .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
     .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+
+    /* ✅ 新增：進度條下方的兌換提示 */
+    .reward-hint{
+      margin-top:10px;
+      text-align:center;
+      font-weight:800;
+      color:var(--accent-ink);
+      background:#fffbe6;
+      border:1px dashed var(--section-border);
+      border-radius:12px;
+      padding:10px 12px;
+      line-height:1.5;
+    }
+
     @media (max-width: 360px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .card-spirit img { width: 100px; }
     }
   </style>
 </head>
+
 <body class="theme-sky">
   <div class="container">
     <div class="home-hero">
@@ -55,18 +78,20 @@
 
       <div class="home-title">昂坪360 GO</div>
       <div class="home-sub">在昂坪市集追尋精靈的隱秘身影，解鎖更多神秘線索，開啟一場奇幻冒險！</div>
+
       <div class="home-actions">
         <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
-      <div style="height:20px;"></div>
-        
       </div>
 
+      <!-- 已收集區塊 + 進度條 + ✅兌換提示 -->
       <div class="gallery-card">
         <div class="home-sub" style="margin-bottom:6px;"><strong>已收集的精靈</strong></div>
         <div class="progress">
           <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
           <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
         </div>
+        <!-- ✅ 新增：進度條下方提示容器（預設隱藏） -->
+        <div id="reward-hint" class="reward-hint" style="display:none;"></div>
       </div>
     </div>
 
@@ -74,7 +99,6 @@
       <div id="collected" class="grid"></div>
     </div>
 
-    
     <div class="home-footer">
       <a class="btn secondary" href="dex.html#dex">📖 去圖鑑解鎖線索</a>
     </div>
@@ -86,17 +110,16 @@
         <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
       </div>
     </div>
-
-    </div>
   </div>
 
+  <!-- BGM -->
   <audio id="bgm" loop>
     <source src="BGM/BGM4.mp3" type="audio/mpeg">
     Your browser does not support the audio element.
   </audio>
 
   <script>
-    // --- Theme Switching (persisted) ---
+    // --- 主題同步 ---
     const themePicker = document.getElementById('theme-picker');
     const savedTheme = localStorage.getItem('np_theme') || 'theme-sky';
     document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
@@ -109,64 +132,110 @@
       localStorage.setItem('np_theme', val);
     });
 
-    // --- Audio control ---
+    // --- 音樂控制 ---
     const audio = document.getElementById('bgm');
     const audioBtn = document.getElementById('audio-btn');
     let playing = false;
     audioBtn.addEventListener('click', () => {
       if (!playing) {
-        audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ 背景音樂'; }).catch(() => alert('瀏覽器封鎖了自動播放，請再按一次播放。'));
+        audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ 背景音樂'; })
+          .catch(() => alert('瀏覽器封鎖了自動播放，請再按一次播放。'));
       } else {
         audio.pause(); playing = false; audioBtn.textContent = '▶️ 背景音樂';
       }
     });
 
-    // --- Collected spirits render ---
+    // --- 資料來源 ---
+    const ALL = (window.SPIRITS || []); // 由 spirits.js 提供
+    let collected = [];                 // 由 localStorage 讀取
+
     const container = document.getElementById('collected');
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
     const resetBtn = document.getElementById('reset-btn');
 
-    const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
-
-    function renderCollected(total) {
-      container.innerHTML = '';
-      if (collected.length === 0) {
-        container.innerHTML = `
-          <div class="card-spirit empty" style="grid-column: 1 / -1;">
-            <p>你還未收集任何精靈，快到市集探索吧！</p>
-            <p><a class="btn" href="dex.html#dex">📖 前往精靈圖鑑</a></p>
-          </div>`;
-      } else {
-        collected.forEach(spirit => {
-          const div = document.createElement('div');
-          div.className = 'card-spirit';
-          div.innerHTML = `
-            <a href="${spirit.page}" style="text-decoration:none;">
-              <img src="${spirit.image}" alt="${spirit.name}">
-              <div class="name">${spirit.name}</div>
-            </a>`;
-          container.appendChild(div);
-        });
+    // 讀取已收集
+    function loadCollected(){
+      try {
+        const raw = JSON.parse(localStorage.getItem('spirits') || '[]');
+        // 只保留仍存在於 SPIRITS 清單的 id，並去重
+        const ids = new Set(raw.map(s => s.id));
+        collected = ALL.filter(s => ids.has(s.id));
+      } catch(e){
+        collected = [];
       }
-      const denom = total || 0;
-      const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
-      progressFill.style.width = pct + '%';
-      progressText.textContent = `${collected.length} / ${denom}`;
     }
 
-    // --- Auto-calc total spirits from dex.html ---
-    function getTotalFromDex(){ return window.SPIRITS ? window.SPIRITS.length : 0; }
-
-    function init(){ const total = getTotalFromDex(); renderCollected(total); }
-resetBtn.addEventListener('click', () => {
-      if (confirm('確定要重置所有收集記錄？此操作無法還原。')) {
-        localStorage.removeItem('spirits');
-        location.reload();
+    // Render 卡片
+    function renderCollected(){
+      container.innerHTML = '';
+      if (!collected.length){
+        const empty = document.createElement('div');
+        empty.className = 'empty';
+        empty.innerHTML = '<p>還沒有收集到精靈喔～</p><p>前往圖鑑探索線索吧！</p>';
+        container.appendChild(empty);
+        return;
       }
+
+      for (const s of collected){
+        const a = document.createElement('a');
+        a.href = s.page;
+        a.className = 'card-spirit';
+        a.innerHTML = `
+          <img src="${s.image}" alt="${s.name}">
+          <div class="name">${s.name}</div>
+          <div class="dex-type">${s.type || ''}</div>
+        `;
+        container.appendChild(a);
+      }
+    }
+
+    // 進度條 + ✅兌換提示
+    function renderProgress(){
+      const denom = ALL.length || 0;
+      const num = collected.length || 0;
+
+      progressText.textContent = `${num} / ${denom}`;
+      const pct = denom ? Math.min(100, Math.round(num / denom * 100)) : 0;
+      progressFill.style.width = pct + '%';
+
+      updateRewardHint(denom, num);
+    }
+
+    // ✅ 顯示提示：滿 6 隻或全收集
+    function updateRewardHint(total, num){
+      const el = document.getElementById('reward-hint');
+      if (!el) return;
+
+      if (!total || total < 1) { el.style.display = 'none'; return; }
+
+      if (num === total) {
+        el.textContent = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
+        el.style.display = 'block';
+      } else if (num === 6) {
+        el.textContent = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
+        el.style.display = 'block';
+      } else {
+        el.style.display = 'none';
+        el.textContent = '';
+      }
+    }
+
+    // 重置
+    resetBtn.addEventListener('click', () => {
+      if (!confirm('確定要重置所有收集記錄嗎？此動作無法還原。')) return;
+      localStorage.removeItem('spirits');
+      loadCollected();
+      renderCollected();
+      renderProgress();
     });
 
-    init();
+    // 初始化
+    (function init(){
+      loadCollected();
+      renderCollected();
+      renderProgress();
+    })();
   </script>
 </body>
 </html>
