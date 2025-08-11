@@ -8,7 +8,7 @@
   <script src="spirits.js"></script>
 
   <style>
-    /* 背景與首頁樣式補強 */
+    /* 背景與首頁樣式補強（沿用你現有結構） */
     body {
       background-image: url('images/background.png');
       background-size: cover; background-position: center;
@@ -23,33 +23,9 @@
     .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
     .gallery-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
 
-    /* 進度條 */
-    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; }
+    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; flex-wrap:wrap; }
     .progress-bar { position:relative; height:10px; width:min(560px, 90%); background:#e9eef5; border-radius:999px; overflow:hidden; }
     .progress-fill { height:100%; width:0%; background: var(--accent); transition: width .4s ease; }
-
-    /* ✅ 進度數字獨立一行（避免跟提示擠一起） */
-    .progress-count {
-      font-weight: 800;
-      color: var(--accent-ink);
-      margin-top: 6px;        /* 與進度條距離 */
-      margin-bottom: 8px;     /* 與提示距離 */
-      font-size: 1rem;
-      text-align: center;
-    }
-
-    /* ✅ 兌換提示 */
-    .reward-hint{
-      text-align:center;
-      font-weight:800;
-      color:var(--accent-ink);
-      background:#fffbe6;
-      border:1px dashed var(--section-border);
-      border-radius:12px;
-      padding:10px 12px;
-      line-height:1.5;
-      display:none;           /* 預設不顯示，由 JS 控制 */
-    }
 
     .grid-wrap { max-width: 1024px; margin: 16px auto 28px; padding: 0 12px; }
     .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; }
@@ -62,6 +38,19 @@
 
     .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
     .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+
+    /* ✅ 新增：進度條下方的兌換提示 */
+    .reward-hint{
+      margin-top:10px;
+      text-align:center;
+      font-weight:800;
+      color:var(--accent-ink);
+      background:#fffbe6;
+      border:1px dashed var(--section-border);
+      border-radius:12px;
+      padding:10px 12px;
+      line-height:1.5;
+    }
 
     @media (max-width: 360px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -94,14 +83,15 @@
         <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
       </div>
 
-      <!-- 已收集區塊 + 進度條 + ✅數字 + ✅兌換提示 -->
+      <!-- 已收集區塊 + 進度條 + ✅兌換提示 -->
       <div class="gallery-card">
         <div class="home-sub" style="margin-bottom:6px;"><strong>已收集的精靈</strong></div>
         <div class="progress">
           <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
+          <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
         </div>
-        <div id="progress-count" class="progress-count">0 / 0</div>
-        <div id="reward-hint" class="reward-hint"></div>
+        <!-- ✅ 新增：進度條下方提示容器（預設隱藏） -->
+        <div id="reward-hint" class="reward-hint" style="display:none;"></div>
       </div>
     </div>
 
@@ -113,8 +103,8 @@
       <a class="btn secondary" href="dex.html#dex">📖 去圖鑑解鎖線索</a>
     </div>
 
-    <div style="max-width: 1024px; margin: 24px auto 24px; padding: 0 12px;">
-      <div style="height:1px; background: var(--section-border); opacity:.35; margin: 24px 0 8px;"></div>
+    <div style="max-width: 1024px; margin: 12px auto 24px; padding: 0 12px; margin-bottom: 30px;">
+      <div style="height:1px; background: var(--section-border); margin: 12px 0 8px;"></div>
       <div style="display:flex; align-items:center; justify-content: space-between; gap:10px; flex-wrap:wrap;">
         <small style="color: rgba(0,0,0,.6);">⚠️ 小心操作：重置會清除你所有已收集的精靈紀錄，且無法還原。</small>
         <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
@@ -155,21 +145,21 @@
       }
     });
 
-    // --- 來源資料與 DOM ---
+    // --- 資料來源 ---
     const ALL = (window.SPIRITS || []); // 由 spirits.js 提供
     let collected = [];                 // 由 localStorage 讀取
 
-    const container     = document.getElementById('collected');
-    const progressFill  = document.getElementById('progress-fill');
-    const progressCount = document.getElementById('progress-count');
-    const resetBtn      = document.getElementById('reset-btn');
-    const hintEl        = document.getElementById('reward-hint');
+    const container = document.getElementById('collected');
+    const progressFill = document.getElementById('progress-fill');
+    const progressText = document.getElementById('progress-text');
+    const resetBtn = document.getElementById('reset-btn');
 
-    // 讀取已收集（以 id 對照 SPIRITS，避免舊資料殘留）
+    // 讀取已收集
     function loadCollected(){
       try {
         const raw = JSON.parse(localStorage.getItem('spirits') || '[]');
-        const ids = new Set(raw.map(s => typeof s === 'string' ? s : s.id));
+        // 只保留仍存在於 SPIRITS 清單的 id，並去重
+        const ids = new Set(raw.map(s => s.id));
         collected = ALL.filter(s => ids.has(s.id));
       } catch(e){
         collected = [];
@@ -177,7 +167,7 @@
     }
 
     // Render 卡片
-    function renderCollectedCards(){
+    function renderCollected(){
       container.innerHTML = '';
       if (!collected.length){
         const empty = document.createElement('div');
@@ -186,6 +176,7 @@
         container.appendChild(empty);
         return;
       }
+
       for (const s of collected){
         const a = document.createElement('a');
         a.href = s.page;
@@ -199,25 +190,34 @@
       }
     }
 
-    // 進度條 + 數字 + 提示
+    // 進度條 + ✅兌換提示
     function renderProgress(){
-      const total = ALL.length || 0;
-      const num   = collected.length || 0;
+      const denom = ALL.length || 0;
+      const num = collected.length || 0;
 
-      const pct = total ? Math.min(100, Math.round(num / total * 100)) : 0;
+      progressText.textContent = `${num} / ${denom}`;
+      const pct = denom ? Math.min(100, Math.round(num / denom * 100)) : 0;
       progressFill.style.width = pct + '%';
-      progressCount.textContent = `${num} / ${total}`;
 
-      // 提示顯示規則
-      if (num === total && total > 0) {
-        hintEl.textContent = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
-        hintEl.style.display = 'block';
+      updateRewardHint(denom, num);
+    }
+
+    // ✅ 顯示提示：滿 6 隻或全收集
+    function updateRewardHint(total, num){
+      const el = document.getElementById('reward-hint');
+      if (!el) return;
+
+      if (!total || total < 1) { el.style.display = 'none'; return; }
+
+      if (num === total) {
+        el.textContent = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
+        el.style.display = 'block';
       } else if (num === 6) {
-        hintEl.textContent = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
-        hintEl.style.display = 'block';
+        el.textContent = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
+        el.style.display = 'block';
       } else {
-        hintEl.style.display = 'none';
-        hintEl.textContent = '';
+        el.style.display = 'none';
+        el.textContent = '';
       }
     }
 
@@ -226,14 +226,14 @@
       if (!confirm('確定要重置所有收集記錄嗎？此動作無法還原。')) return;
       localStorage.removeItem('spirits');
       loadCollected();
-      renderCollectedCards();
+      renderCollected();
       renderProgress();
     });
 
     // 初始化
     (function init(){
       loadCollected();
-      renderCollectedCards();
+      renderCollected();
       renderProgress();
     })();
   </script>
