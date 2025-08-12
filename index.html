@@ -1,12 +1,22 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>  
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO</title>
+
+  <!-- ✅ Google tag (gtag.js) — 換成你的測量 ID -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){ dataLayer.push(arguments); }
+    gtag('js', new Date());
+    gtag('config', 'G-B3740R31MS'); // ← 改成你的測量 ID
+  </script>
+
   <link rel="stylesheet" href="styles.css">
   <script src="spirits.js"></script>
-<style>
+  <style>
     body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
     .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
     .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
@@ -73,9 +83,9 @@
           <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
           <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
         </div>
-        <!-- 新增提示訊息區域 -->
+        <!-- 提示訊息區域 -->
         <div id="collection-hint" style="margin-top: 8px; font-size: 14px; color: var(--accent-ink); font-weight: 600; text-align: center;" aria-live="polite"></div>
-        <!-- 新增兌換區域（只有收集≥6時才會顯示內容） -->
+        <!-- 兌換區域（收集≥6時顯示） -->
         <div id="redeem-area" class="redeem-area" aria-live="polite"></div>
       </div>
     </div>
@@ -130,6 +140,11 @@
         audio.pause(); playing = false; audioBtn.textContent = '▶️ 背景音樂';
       }
     });
+
+    // --- GA 事件工具 ---
+    function gaEvent(name, params){
+      if (window.gtag) { window.gtag('event', name, params || {}); }
+    }
 
     // --- Collected spirits render ---
     const container = document.getElementById('collected');
@@ -233,7 +248,7 @@
           container.appendChild(div);
         });
         
-        // 提示邏輯（維持你原本文案）
+        // 提示文案
         if (collected.length >= 6 && collected.length < total) {
           hintElement.innerHTML = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
         } else if (collected.length === total && total > 0) {
@@ -246,11 +261,27 @@
       progressFill.style.width = pct + '%';
       progressText.textContent = `${collected.length} / ${denom}`;
 
+      // ✅ GA 事件（只上報一次）
+      if (collected.length >= 6 && !localStorage.getItem('ga_evt_6')) {
+        gaEvent('collect_6_spirits', {
+          event_category: 'Game Progress',
+          value: collected.length
+        });
+        localStorage.setItem('ga_evt_6', '1');
+      }
+      if (denom > 0 && collected.length === denom && !localStorage.getItem('ga_evt_all')) {
+        gaEvent('collect_all_spirits', {
+          event_category: 'Game Progress',
+          value: collected.length
+        });
+        localStorage.setItem('ga_evt_all', '1');
+      }
+
       // 更新兌換區域
       updateRedeemUI();
     }
 
-    // --- Auto-calc total spirits from dex.html ---
+    // --- Auto-calc total spirits from dex.html / spirits.js ---
     function getTotalFromDex(){ return window.SPIRITS ? window.SPIRITS.length : 0; }
 
     function init(){ const total = getTotalFromDex(); renderCollected(total); }
@@ -258,7 +289,9 @@
     resetBtn.addEventListener('click', () => {
       if (confirm('確定要重置所有收集記錄與兌換狀態？此操作無法還原。')) {
         localStorage.removeItem('spirits');
-        localStorage.removeItem('np_redeemed'); // 一併清除兌換狀態
+        localStorage.removeItem('np_redeemed');
+        localStorage.removeItem('ga_evt_6');   // 也將 GA 旗標清空
+        localStorage.removeItem('ga_evt_all'); // 也將 GA 旗標清空
         location.reload();
       }
     });
