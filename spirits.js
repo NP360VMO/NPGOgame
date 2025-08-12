@@ -24,7 +24,7 @@
     "image": "images/panorama-spirit.png",
     "page": "spirit3.html",
     "type": "探索系",
-    "prompt": "探索昂坪市集外牆以解鎖纜雲仔（全景形態）！"
+    "prompt": "探索#HONGKONG精品店以解鎖纜雲仔（全景形態）！"
   },
   {
     "id": "spirit_game1",
