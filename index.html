@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO</title>
   <link rel="stylesheet" href="styles.css">
-  
   <script src="spirits.js"></script>
 <style>
     body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
@@ -30,6 +29,13 @@
     .empty p { margin: 6px 0; }
     .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
     .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+
+    /* 兌換區塊樣式 */
+    .redeem-area { margin-top: 8px; text-align: center; }
+    .redeem-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 14px; border-radius:12px; border: 2px solid var(--accent); background: var(--accent); color:#fff; font-weight:800; cursor:pointer; }
+    .redeem-note { margin-top:6px; font-size:12px; color:rgba(0,0,0,.6); }
+    .redeem-status { margin-top:8px; font-weight:800; color: var(--accent-ink); }
+
     @media (max-width: 360px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .card-spirit img { width: 100px; }
@@ -68,7 +74,9 @@
           <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
         </div>
         <!-- 新增提示訊息區域 -->
-        <div id="collection-hint" style="margin-top: 8px; font-size: 14px; color: var(--accent-ink); font-weight: 600; text-align: center;"></div>
+        <div id="collection-hint" style="margin-top: 8px; font-size: 14px; color: var(--accent-ink); font-weight: 600; text-align: center;" aria-live="polite"></div>
+        <!-- 新增兌換區域（只有收集≥6時才會顯示內容） -->
+        <div id="redeem-area" class="redeem-area" aria-live="polite"></div>
       </div>
     </div>
 
@@ -84,7 +92,7 @@
     <div style="max-width: 1024px; margin: 12px auto 24px; padding: 0 12px; margin-bottom: 30px;">
       <div style="height:1px; background: var(--section-border); margin: 12px 0 8px;"></div>
       <div style="display:flex; align-items:center; justify-content: space-between; gap:10px; flex-wrap:wrap;">
-        <small style="color: rgba(0,0,0,.6);">⚠️ 小心操作：重置會清除你所有已收集的精靈紀錄，且無法還原。</small>
+        <small style="color: rgba(0,0,0,.6);">⚠️ 小心操作：重置會清除你所有已收集的精靈紀錄與兌換狀態，且無法還原。</small>
         <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
       </div>
     </div>
@@ -129,8 +137,79 @@
     const progressText = document.getElementById('progress-text');
     const resetBtn = document.getElementById('reset-btn');
     const hintElement = document.getElementById('collection-hint');
+    const redeemArea = document.getElementById('redeem-area');
 
     const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
+
+    // --- 兌換狀態（純前端） ---
+    const REDEEM_KEY = 'np_redeemed'; // { used: boolean, time: ISO }
+    const REDEEM_PASSWORD = 'vmovmo';
+
+    function isRedeemed() {
+      try {
+        const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null');
+        return obj && obj.used === true;
+      } catch { return false; }
+    }
+    function getRedeemTime() {
+      try {
+        const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null');
+        return obj && obj.time ? new Date(obj.time) : null;
+      } catch { return null; }
+    }
+    function setRedeemed() {
+      localStorage.setItem(REDEEM_KEY, JSON.stringify({ used: true, time: new Date().toISOString() }));
+    }
+    function formatTime(dt) {
+      const y = dt.getFullYear();
+      const m = String(dt.getMonth()+1).padStart(2,'0');
+      const d = String(dt.getDate()).padStart(2,'0');
+      const hh = String(dt.getHours()).padStart(2,'0');
+      const mm = String(dt.getMinutes()).padStart(2,'0');
+      return `${y}-${m}-${d} ${hh}:${mm}`;
+    }
+
+    function updateRedeemUI() {
+      const eligible = (collected.length >= 6); // 門檻：6隻或以上
+      const redeemed = isRedeemed();
+      redeemArea.innerHTML = '';
+
+      if (!eligible) return;
+
+      if (redeemed) {
+        const t = getRedeemTime();
+        redeemArea.innerHTML = `
+          <div class="redeem-status">✅ 已兌換${t ? '（'+formatTime(t)+'）' : ''}</div>
+          <div class="redeem-note">如需協助請聯絡現場工作人員。</div>
+        `;
+        return;
+      }
+
+      // 未兌換：顯示兌換按鈕與提示
+      const btn = document.createElement('button');
+      btn.className = 'redeem-btn';
+      btn.textContent = '🎁 兌換獎品';
+      btn.addEventListener('click', () => {
+        const input = prompt('請由工作人員輸入兌換密碼：');
+        if (input === null) return;
+        if (input === REDEEM_PASSWORD) {
+          setRedeemed();
+          redeemArea.innerHTML = `
+            <div class="redeem-status">✅ 已兌換（${formatTime(new Date())}）</div>
+            <div class="redeem-note">感謝參與！</div>
+          `;
+        } else {
+          alert('密碼錯誤，未能完成兌換。');
+        }
+      });
+
+      const note = document.createElement('div');
+      note.className = 'redeem-note';
+      note.textContent = '（收集滿 6 隻或以上方可兌換；由工作人員操作）';
+
+      redeemArea.appendChild(btn);
+      redeemArea.appendChild(note);
+    }
 
     function renderCollected(total) {
       container.innerHTML = '';
@@ -154,7 +233,7 @@
           container.appendChild(div);
         });
         
-        // 新增提示邏輯
+        // 提示邏輯（維持你原本文案）
         if (collected.length >= 6 && collected.length < total) {
           hintElement.innerHTML = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
         } else if (collected.length === total && total > 0) {
@@ -166,6 +245,9 @@
       const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
       progressFill.style.width = pct + '%';
       progressText.textContent = `${collected.length} / ${denom}`;
+
+      // 更新兌換區域
+      updateRedeemUI();
     }
 
     // --- Auto-calc total spirits from dex.html ---
@@ -174,8 +256,9 @@
     function init(){ const total = getTotalFromDex(); renderCollected(total); }
 
     resetBtn.addEventListener('click', () => {
-      if (confirm('確定要重置所有收集記錄？此操作無法還原。')) {
+      if (confirm('確定要重置所有收集記錄與兌換狀態？此操作無法還原。')) {
         localStorage.removeItem('spirits');
+        localStorage.removeItem('np_redeemed'); // 一併清除兌換狀態
         location.reload();
       }
     });
