@@ -1,11 +1,10 @@
-<!DOCTYPE html>
+<!DOCTYPE html> 
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
   <title>貪吃挑戰：珍奶雞蛋仔肚餓了</title>
 
-  <!-- 如果你有共用樣式，可以保留；沒有也不影響這頁 -->
   <link rel="stylesheet" href="styles.css">
 
   <style>
@@ -172,7 +171,11 @@
   <script>
     // 遊戲常量
     const GRID_SIZE = 15;
-    let CELL_SIZE = 40;
+    let CELL_SIZE = 30;
+
+    // ✅ 放大比例（你可以微調）
+    const snakeScale = 1.25; // 蛇頭/蛇身放大 25%
+    const foodScale  = 1.35; // 食物放大 35%
 
     // 元素
     const canvas = document.getElementById('gameCanvas');
@@ -378,14 +381,35 @@
       renderGame();
     }
 
-    // 繪製
+    // 繪製（✅ 放大蛇/食物，並置中）
     function renderGame() {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+      // 蛇
+      const sW = CELL_SIZE * snakeScale;
+      const sH = CELL_SIZE * snakeScale;
+      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2; // 置中偏移
       snake.forEach((seg, i) => {
-        ctx.drawImage(i===0?snakeHeadImage:snakeBodyImage, seg.x*CELL_SIZE, seg.y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+        const img = i===0 ? snakeHeadImage : snakeBodyImage;
+        ctx.drawImage(
+          img,
+          seg.x*CELL_SIZE - sOff,
+          seg.y*CELL_SIZE - sOff,
+          sW, sH
+        );
       });
-      ctx.drawImage(foodImage, food.x*CELL_SIZE, food.y*CELL_SIZE, CELL_SIZE, CELL_SIZE);
+
+      // 食物
+      const fW = CELL_SIZE * foodScale;
+      const fH = CELL_SIZE * foodScale;
+      const fOff = (CELL_SIZE * (foodScale - 1)) / 2;
+      ctx.drawImage(
+        foodImage,
+        food.x*CELL_SIZE - fOff,
+        food.y*CELL_SIZE - fOff,
+        fW, fH
+      );
     }
 
     // 提示
