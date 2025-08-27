@@ -1,0 +1,501 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>昂坪360 GO - 精灵地图</title>
+  <style>
+    :root {
+      --accent: #4a86e8;
+      --accent-ink: #1a365d;
+      --card: rgba(255, 255, 255, 0.95);
+      --section-bg: rgba(255, 255, 255, 0.7);
+      --section-border: rgba(255, 255, 255, 0.9);
+      --ink: #2d3748;
+    }
+
+    .theme-grass {
+      --accent: #68d391;
+      --accent-ink: #22543d;
+    }
+
+    .theme-warm {
+      --accent: #f6ad55;
+      --accent-ink: #744210;
+    }
+
+    .theme-dimsum {
+      --accent: #fc8181;
+      --accent-ink: #742a2a;
+    }
+
+    .theme-boba {
+      --accent: #b48c62;
+      --accent-ink: #553c2b;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-image: url('images/background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+      color: #333;
+      line-height: 1.6;
+      padding: 0;
+      margin: 0;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--accent);
+      color: white;
+      padding: 10px 20px;
+      border-radius: 999px;
+      text-decoration: none;
+      font-weight: 800;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+      transition: all 0.2s ease;
+      border: none;
+      cursor: pointer;
+    }
+
+    .btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+    }
+
+    .btn.secondary {
+      background: transparent;
+      color: var(--accent);
+      border: 2px solid var(--accent);
+    }
+
+    .header {
+      text-align: center;
+      padding: 20px 12px 12px;
+      width: 100%;
+    }
+
+    .topbar {
+      display: flex;
+      justify-content: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 10px;
+    }
+
+    .theme-select {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      border: 2px solid var(--accent);
+      background: #ffffffaa;
+      color: var(--accent-ink);
+      border-radius: 999px;
+      padding: 6px 10px;
+      font-weight: 800;
+    }
+
+    .theme-select select {
+      border: none;
+      background: transparent;
+      font-weight: 800;
+      color: var(--accent-ink);
+      outline: none;
+    }
+
+    .title {
+      font-size: clamp(24px, 5vw, 42px);
+      font-weight: 900;
+      color: var(--accent-ink);
+      margin: 0 0 6px;
+      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.6);
+    }
+
+    .subtitle {
+      font-size: clamp(14px, 3.2vw, 18px);
+      color: rgba(0, 0, 0, 0.75);
+      margin: 0 0 12px;
+      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.7);
+    }
+
+    /* 修改地图容器尺寸 */
+    .map-container {
+      position: relative;
+      width: 100%;
+      max-width: 1278px;
+      height: auto;
+      aspect-ratio: 1278 / 702;
+      margin: 20px auto;
+      background: var(--card);
+      border: 1px solid var(--section-border);
+      border-radius: 16px;
+      padding: 20px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
+      backdrop-filter: blur(2px);
+    }
+
+    /* 修改地图区域为固定尺寸 */
+    .map-area {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: url('images/map.png') no-repeat center center;
+      background-size: contain;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    .spirit-marker {
+      position: absolute;
+      width: 50px;
+      height: 50px;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      transition: all 0.3s ease;
+      z-index: 10;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+      border: 2px solid white;
+    }
+
+    .spirit-marker:hover {
+      transform: translate(-50%, -50%) scale(1.2);
+      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      z-index: 11;
+    }
+
+    .spirit-info {
+      display: none;
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border: 1px solid var(--section-border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 320px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+
+    .spirit-info.active {
+      display: block;
+      animation: fadeIn 0.3s ease;
+    }
+
+    .spirit-marker img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .spirit-info img {
+      width: 100%;
+      height: auto;
+      border-radius: 8px;
+      margin-bottom: 12px;
+    }
+
+    .spirit-info h3 {
+      color: var(--accent-ink);
+      margin-bottom: 8px;
+      font-size: 1.2rem;
+    }
+
+    .spirit-info p {
+      font-size: 14px;
+      color: var(--ink);
+      line-height: 1.5;
+    }
+
+    .close-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--accent-ink);
+      z-index: 1001;
+    }
+
+    .overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.5);
+      z-index: 999;
+    }
+
+    .overlay.active {
+      display: block;
+    }
+
+    .actions {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-top: 20px;
+      margin-bottom: 30px;
+    }
+
+    .footer {
+      text-align: center;
+      margin: 30px 0;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      to { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* 调整响应式设计 */
+    @media (max-width: 768px) {
+      .spirit-marker {
+        width: 40px;
+        height: 40px;
+      }
+      
+      .map-container {
+        padding: 10px;
+      }
+      
+      .spirit-info {
+        width: 85%;
+        max-width: 280px;
+        padding: 15px;
+      }
+      
+      .spirit-info h3 {
+        font-size: 1.1rem;
+      }
+      
+      .spirit-info p {
+        font-size: 13px;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .spirit-marker {
+        width: 32px;
+        height: 32px;
+      }
+      
+      .spirit-info {
+        width: 90%;
+        max-width: 250px;
+        padding: 12px;
+      }
+      
+      .spirit-info h3 {
+        font-size: 1rem;
+      }
+    }
+  </style>
+</head>
+<body class="theme-sky">
+  <div class="overlay" id="info-overlay"></div>
+  
+  <div class="container">
+    <div class="header">
+      <div class="topbar">
+        <div class="theme-select">
+          🎨 主題：
+          <select id="theme-picker" aria-label="選擇主題">
+            <option value="theme-sky">天空藍</option>
+            <option value="theme-grass">草地綠</option>
+            <option value="theme-warm">暖黃</option>
+            <option value="theme-dimsum">飲茶橙</option>
+            <option value="theme-boba">奶茶棕</option>
+          </select>
+        </div>
+        <button id="audio-btn" class="btn">▶️ 背景音樂</button>
+      </div>
+
+      <h1 class="title">昂坪360 GO 精靈地圖</h1>
+      <p class="subtitle">點擊地圖上的標記，發現隱藏在昂坪市集的精靈！</p>
+      
+      <div class="actions">
+        <a class="btn" href="index.html">🏠 返回主頁</a>
+        <a class="btn" href="dex.html#dex">📖 精靈圖鑑</a>
+      </div>
+    </div>
+
+    <div class="map-container">
+      <div class="map-area">
+        <!-- 精灵标记 - 使用图片作为标记 -->
+        <div class="spirit-marker" style="top: 85%; left: 20%;" data-spirit="1">
+          <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
+        </div>
+        <div class="spirit-marker" style="top: 55%; left: 50%;" data-spirit="2">
+          <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
+        </div>
+        <div class="spirit-marker" style="top: 45%; left: 90%;" data-spirit="3">
+          <img src="images/game-spirit1.png" alt="黃吽吽">
+        </div>
+        <div class="spirit-marker" style="top: 55%; left: 60%;" data-spirit="4">
+          <img src="images/game-spirit2.png" alt="小黃彈彈">
+        </div>
+        <div class="spirit-marker" style="top: 67%; left: 20%;" data-spirit="5">
+          <img src="images/game-spirit3.png" alt="飲茶仔">
+        </div>
+        <div class="spirit-marker" style="top: 55%; left: 65%;" data-spirit="6">
+          <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
+        </div>
+        <div class="spirit-marker" style="top: 55%; left: 72%;" data-spirit="7">
+          <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
+        </div>
+      </div>
+    </div>
+
+    <!-- 精灵信息框 - 移到地图容器外部 -->
+    <div class="spirit-info" id="spirit-1">
+      <button class="close-btn">&times;</button>
+      <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
+      <h3>纜雲仔（標準形態）</h3>
+      <p>纜雲仔（標準形態）是昂坪最早的守護精靈之一，充滿活力與熱情！它以一輛靈動的纜車形態，每天載著來自五湖四海的旅客，穿越連綿山巒與閃耀海峽，從東涌飛馳至昂坪。</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-2">
+      <button class="close-btn">&times;</button>
+      <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
+      <h3>纜雲仔（水晶形態）</h3>
+      <p>纜雲仔（水晶形態）是水晶車廂化身的透明精靈，擁有通透的眼睛和冒險的心，象徵開放心靈與勇於踏出第一步的精神。</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-3">
+      <button class="close-btn">&times;</button>
+      <img src="images/game-spirit1.png" alt="黃吽吽">
+      <h3>黃吽吽</h3>
+      <p>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-4">
+      <button class="close-btn">&times;</button>
+      <img src="images/game-spirit2.png" alt="小黃彈彈">
+      <h3>小黃彈彈</h3>
+      <p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-5">
+      <button class="close-btn">&times;</button>
+      <img src="images/game-spirit3.png" alt="飲茶仔">
+      <h3>飲茶仔</h3>
+      <p>飲茶仔是一隻熱愛飲茶文化的外賣仔，會帶你用串串樂的方式認識飲茶文化！</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-6">
+      <button class="close-btn">&times;</button>
+      <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
+      <h3>珍奶雞蛋仔</h3>
+      <p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔，會帶你用貪吃蛇的方式探索街頭美食！</p>
+    </div>
+    
+    <div class="spirit-info" id="spirit-7">
+      <button class="close-btn">&times;</button>
+      <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
+      <h3>纜雲仔（全景形態）</h3>
+      <p>纜雲仔（全景形態）是全景車廂化身的透明夢幻精靈，昂坪天空觀景守護者。擁有最遼闊的視野，牠喜歡更高更穩地觀察，為旅人看清遠方的山海與雲影，是旅途中最冷靜的觀察者。</p>
+    </div>
+
+    <div class="footer">
+      <a class="btn secondary" href="dex.html#dex">📖 探索更多精靈</a>
+    </div>
+  </div>
+
+  <script>
+    // 主题切换功能
+    const themePicker = document.getElementById('theme-picker');
+    const savedTheme = localStorage.getItem('np_theme') || 'theme-sky';
+    document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+    document.body.classList.add(savedTheme);
+    themePicker.value = savedTheme;
+    
+    themePicker.addEventListener('change', () => {
+      const val = themePicker.value;
+      document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+      document.body.classList.add(val);
+      localStorage.setItem('np_theme', val);
+    });
+
+    // 精灵标记点击功能
+    const markers = document.querySelectorAll('.spirit-marker');
+    const infoBoxes = document.querySelectorAll('.spirit-info');
+    const closeButtons = document.querySelectorAll('.close-btn');
+    const overlay = document.getElementById('info-overlay');
+    
+    markers.forEach(marker => {
+      marker.addEventListener('click', function() {
+        const spiritId = this.getAttribute('data-spirit');
+        const infoBox = document.getElementById(`spirit-${spiritId}`);
+        
+        // 显示遮罩层
+        overlay.classList.add('active');
+        
+        // 显示当前信息框
+        infoBox.classList.add('active');
+        
+        // 阻止事件冒泡
+        event.stopPropagation();
+      });
+    });
+    
+    // 关闭按钮功能
+    closeButtons.forEach(button => {
+      button.addEventListener('click', function(e) {
+        e.stopPropagation();
+        // 隐藏所有信息框
+        infoBoxes.forEach(box => {
+          box.classList.remove('active');
+        });
+        // 隐藏遮罩层
+        overlay.classList.remove('active');
+      });
+    });
+    
+    // 点击遮罩层关闭信息框
+    overlay.addEventListener('click', function() {
+      // 隐藏所有信息框
+      infoBoxes.forEach(box => {
+        box.classList.remove('active');
+      });
+      // 隐藏遮罩层
+      overlay.classList.remove('active');
+    });
+  </script>
+</body>
+</html>
