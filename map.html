@@ -4,166 +4,67 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>昂坪360 GO - 精靈地圖</title>
+
+  <!-- 與 index 一致的外部資源 -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="spirits.js"></script>
+
   <style>
-    :root {
-      --accent: #4a86e8;
-      --accent-ink: #1a365d;
-      --card: rgba(255, 255, 255, 0.95);
-      --section-bg: rgba(255, 255, 255, 0.7);
-      --section-border: rgba(255, 255, 255, 0.9);
-      --ink: #2d3748;
-    }
-
-    /* 題材主題（可切換） */
-    .theme-sky { /* 保留空類別，使用 :root 預設色 */
-    }
-    .theme-grass { --accent: #68d391; --accent-ink: #22543d; }
-    .theme-warm  { --accent: #f6ad55; --accent-ink: #744210; }
-    .theme-dimsum{ --accent: #fc8181; --accent-ink: #742a2a; }
-    .theme-boba  { --accent: #b48c62; --accent-ink: #553c2b; }
-
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
+    /* === 與 index 對齊的基礎樣式（摘錄自 index） === */
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
       background-image: url('images/background.png');
       background-size: cover;
       background-position: center;
       background-repeat: no-repeat;
       background-attachment: fixed;
-      color: #333;
-      line-height: 1.6;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
     }
+    .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
+    .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
+    .theme-select { display:inline-flex; align-items:center; gap:6px; border:2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 6px 10px; font-weight: 800; }
+    .theme-select select { border:none; background: transparent; font-weight: 800; color: var(--accent-ink); outline: none; }
+    .home-title { font-size: clamp(24px, 5vw, 42px); font-weight: 900; color: var(--accent-ink); margin: 0 0 6px; text-shadow: 0 2px 6px rgba(255,255,255,.6); }
+    .home-sub { font-size: clamp(14px, 3.2vw, 18px); color: rgba(0,0,0,.75); margin: 0 0 12px; text-shadow: 0 1px 4px rgba(255,255,255,.7); }
+    .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
+    .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
 
-    .container {
-      width: 100%;
-      max-width: 1400px;
-      margin: 0 auto;
-      padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-    }
-
-    .btn {
-      display: inline-block;
-      background: var(--accent);
-      color: white;
-      padding: 10px 20px;
-      border-radius: 999px;
-      text-decoration: none;
-      font-weight: 800;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-      transition: all 0.2s ease;
-      border: none;
-      cursor: pointer;
-    }
-    .btn:hover {
-      transform: translateY(-2px);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
-    }
-    .btn.secondary {
-      background: transparent;
-      color: var(--accent);
-      border: 2px solid var(--accent);
-    }
-
-    .header { text-align: center; padding: 20px 12px 12px; width: 100%; }
-
-    .topbar {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-      flex-wrap: wrap;
-      margin-bottom: 10px;
-    }
-
-    .theme-select {
-      display: inline-flex;
-      align-items: center;
-      gap: 6px;
-      border: 2px solid var(--accent);
-      background: #ffffffaa;
-      color: var(--accent-ink);
-      border-radius: 999px;
-      padding: 6px 10px;
-      font-weight: 800;
-    }
-    .theme-select select {
-      border: none;
-      background: transparent;
-      font-weight: 800;
-      color: var(--accent-ink);
-      outline: none;
-    }
-
-    .title {
-      font-size: clamp(24px, 5vw, 42px);
-      font-weight: 900;
-      color: var(--accent-ink);
-      margin: 0 0 6px;
-      text-shadow: 0 2px 6px rgba(255, 255, 255, 0.6);
-    }
-
-    .subtitle {
-      font-size: clamp(14px, 3.2vw, 18px);
-      color: rgba(0, 0, 0, 0.75);
-      margin: 0 0 12px;
-      text-shadow: 0 1px 4px rgba(255, 255, 255, 0.7);
-    }
-
-    /* 地圖外框容器（保持 16:9 比例） */
+    /* === 地圖卡片與區域（以 index 的卡片風格為基礎） === */
+    .map-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
     .map-container {
       position: relative;
       width: 100%;
       max-width: 1278px;
-      aspect-ratio: 1278 / 702;      /* 讓內層地圖用 contain 充滿 */
-      margin: 20px auto;
-      background: var(--card);
-      border: 1px solid var(--section-border);
-      border-radius: 16px;
-      padding: 20px;
-      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.06);
-      backdrop-filter: blur(2px);
+      aspect-ratio: 1278 / 702;
+      margin: 16px auto 28px;
     }
-
-    /* 地圖區（放底圖與標記） */
     .map-area {
       position: relative;
       width: 100%;
       height: 100%;
       background: url('images/map.png') no-repeat center center;
-      background-size: contain;       /* 不裁切，完整顯示底圖 */
+      background-size: contain;
       border-radius: 12px;
       overflow: hidden;
     }
 
-    /* 精靈標記：使用圖片 */
+    /* 精靈標記 */
     .spirit-marker {
       position: absolute;
-      width: 50px;
-      height: 50px;
+      width: 50px; height: 50px;
       cursor: pointer;
       transform: translate(-50%, -50%);
-      transition: all 0.3s ease;
+      transition: transform .2s ease, box-shadow .2s ease;
       z-index: 10;
       border-radius: 50%;
       overflow: hidden;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
-      border: 2px solid white;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      border: 2px solid #fff;
     }
     .spirit-marker:hover {
-      transform: translate(-50%, -50%) scale(1.2);
-      box-shadow: 0 6px 12px rgba(0, 0, 0, 0.4);
+      transform: translate(-50%, -50%) scale(1.12);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
       z-index: 11;
     }
-    .spirit-marker img {
-      width: 100%; height: 100%; object-fit: cover;
-    }
+    .spirit-marker img { width: 100%; height: 100%; object-fit: cover; }
 
     /* 精靈資訊卡（置中彈窗） */
     .spirit-info {
@@ -188,38 +89,19 @@
     .spirit-info h3 { color: var(--accent-ink); margin-bottom: 8px; font-size: 1.2rem; }
     .spirit-info p  { font-size: 14px; color: var(--ink); line-height: 1.5; }
 
-    /* 關閉鍵 */
-    .close-btn {
-      position: absolute; top: 10px; right: 10px;
-      background: none; border: none; font-size: 20px;
-      cursor: pointer; color: var(--accent-ink); z-index: 1001;
-    }
-
-    /* 半透明遮罩 */
-    .overlay {
-      display: none;
-      position: fixed; inset: 0;
-      background: rgba(0, 0, 0, 0.5);
-      z-index: 999;
-    }
+    /* 關閉鍵與遮罩 */
+    .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--accent-ink); z-index: 1001; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
     .overlay.active { display: block; }
-
-    .actions {
-      display: flex; gap: 10px; justify-content: center; flex-wrap: wrap;
-      margin-top: 20px; margin-bottom: 30px;
-    }
-
-    .footer { text-align: center; margin: 30px 0; }
 
     @keyframes fadeIn {
       from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
       to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
     }
 
-    /* RWD 調整 */
+    /* RWD */
     @media (max-width: 768px) {
       .spirit-marker { width: 40px; height: 40px; }
-      .map-container { padding: 10px; }
       .spirit-info { width: 85%; max-width: 280px; padding: 15px; }
       .spirit-info h3 { font-size: 1.1rem; }
       .spirit-info p  { font-size: 13px; }
@@ -233,20 +115,12 @@
 </head>
 
 <body class="theme-sky">
-  <!-- ✅ 背景音樂元件（本頁可單獨播放；不跨頁延續） -->
-  <audio id="bgm" preload="auto" loop playsinline>
-    <source src="BGM/BGM4.mp3" type="audio/mpeg">
-    Your browser does not support the audio element.
-  </audio>
-
   <!-- 遮罩（顯示精靈資訊時使用） -->
   <div class="overlay" id="info-overlay" aria-hidden="true"></div>
 
   <div class="container">
-    <!-- 頁首 + 主題/音樂控制 -->
-    <div class="header">
-      <div class="topbar">
-        <!-- 主題切換器 -->
+    <div class="home-hero">
+      <div class="home-topbar">
         <div class="theme-select">
           🎨 主題：
           <select id="theme-picker" aria-label="選擇主題">
@@ -257,113 +131,115 @@
             <option value="theme-boba">奶茶棕</option>
           </select>
         </div>
-
-        <!-- ✅ 音樂按鈕（點擊可播放／暫停） -->
-        <button id="audio-btn" class="btn" type="button" aria-label="切換背景音樂">▶️ 背景音樂</button>
+        <button id="audio-btn" class="audio-ctl" type="button" aria-label="切換背景音樂">▶️ 背景音樂</button>
       </div>
 
-      <h1 class="title">昂坪360 GO 精靈地圖</h1>
-      <p class="subtitle">點擊地圖上的標記，發現隱藏在昂坪市集的精靈！</p>
+      <div class="home-title">昂坪360 GO 精靈地圖</div>
+      <div class="home-sub">點擊地圖上的標記，發現隱藏在昂坪市集的精靈！</div>
 
-      <div class="actions">
+      <div class="home-actions">
         <a class="btn" href="index.html">🏠 返回主頁</a>
         <a class="btn" href="dex.html#dex">📖 精靈圖鑑</a>
       </div>
-    </div>
 
-    <!-- 地圖主區 -->
-    <div class="map-container" role="region" aria-label="精靈地圖">
-      <div class="map-area">
-        <!-- 精靈標記（座標以百分比定位；可依需求微調） -->
-        <div class="spirit-marker" style="top: 85%; left: 20%;" data-spirit="1" tabindex="0" aria-label="纜雲仔（標準形態）">
-          <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
-        </div>
-        <div class="spirit-marker" style="top: 55%; left: 50%;" data-spirit="2" tabindex="0" aria-label="纜雲仔（水晶形態）">
-          <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
-        </div>
-        <div class="spirit-marker" style="top: 45%; left: 90%;" data-spirit="3" tabindex="0" aria-label="黃吽吽">
-          <img src="images/game-spirit1.png" alt="黃吽吽">
-        </div>
-        <div class="spirit-marker" style="top: 55%; left: 60%;" data-spirit="4" tabindex="0" aria-label="小黃彈彈">
-          <img src="images/game-spirit2.png" alt="小黃彈彈">
-        </div>
-        <div class="spirit-marker" style="top: 67%; left: 20%;" data-spirit="5" tabindex="0" aria-label="飲茶仔">
-          <img src="images/game-spirit3.png" alt="飲茶仔">
-        </div>
-        <div class="spirit-marker" style="top: 55%; left: 65%;" data-spirit="6" tabindex="0" aria-label="珍奶雞蛋仔">
-          <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
-        </div>
-        <div class="spirit-marker" style="top: 55%; left: 72%;" data-spirit="7" tabindex="0" aria-label="纜雲仔（全景形態）">
-          <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
+      <div class="map-card">
+        <div class="map-container" role="region" aria-label="精靈地圖">
+          <div class="map-area">
+            <!-- 精靈標記（座標以百分比定位；可依需求微調） -->
+            <div class="spirit-marker" style="top: 85%; left: 20%;" data-spirit="1" tabindex="0" aria-label="纜雲仔（標準形態）">
+              <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 50%;" data-spirit="2" tabindex="0" aria-label="纜雲仔（水晶形態）">
+              <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
+            </div>
+            <div class="spirit-marker" style="top: 45%; left: 90%;" data-spirit="3" tabindex="0" aria-label="黃吽吽">
+              <img src="images/game-spirit1.png" alt="黃吽吽">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 60%;" data-spirit="4" tabindex="0" aria-label="小黃彈彈">
+              <img src="images/game-spirit2.png" alt="小黃彈彈">
+            </div>
+            <div class="spirit-marker" style="top: 67%; left: 20%;" data-spirit="5" tabindex="0" aria-label="飲茶仔">
+              <img src="images/game-spirit3.png" alt="飲茶仔">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 65%;" data-spirit="6" tabindex="0" aria-label="珍奶雞蛋仔">
+              <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 72%;" data-spirit="7" tabindex="0" aria-label="纜雲仔（全景形態）">
+              <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
+            </div>
+          </div>
         </div>
       </div>
-    </div>
 
-    <!-- 精靈資訊卡（地圖外，避免 overflow 影響彈窗置中） -->
-    <div class="spirit-info" id="spirit-1" role="dialog" aria-modal="true" aria-label="纜雲仔（標準形態）資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
-      <h3>纜雲仔（標準形態）</h3>
-      <p>纜雲仔（標準形態）是昂坪最早的守護精靈之一，充滿活力與熱情！它以一輛靈動的纜車形態，每天載著來自五湖四海的旅客，穿越連綿山巒與閃耀海峽，從東涌飛馳至昂坪。</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-2" role="dialog" aria-modal="true" aria-label="纜雲仔（水晶形態）資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
-      <h3>纜雲仔（水晶形態）</h3>
-      <p>纜雲仔（水晶形態）是水晶車廂化身的透明精靈，擁有通透的眼睛和冒險的心，象徵開放心靈與勇於踏出第一步的精神。</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-3" role="dialog" aria-modal="true" aria-label="黃吽吽資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/game-spirit1.png" alt="黃吽吽">
-      <h3>黃吽吽</h3>
-      <p>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-4" role="dialog" aria-modal="true" aria-label="小黃彈彈資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/game-spirit2.png" alt="小黃彈彈">
-      <h3>小黃彈彈</h3>
-      <p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-5" role="dialog" aria-modal="true" aria-label="飲茶仔資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/game-spirit3.png" alt="飲茶仔">
-      <h3>飲茶仔</h3>
-      <p>飲茶仔是一隻熱愛飲茶文化的外賣仔，會帶你用串串樂的方式認識飲茶文化！</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-6" role="dialog" aria-modal="true" aria-label="珍奶雞蛋仔資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
-      <h3>珍奶雞蛋仔</h3>
-      <p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔，會帶你用貪吃蛇的方式探索街頭美食！</p>
-    </div>
-
-    <div class="spirit-info" id="spirit-7" role="dialog" aria-modal="true" aria-label="纜雲仔（全景形態）資訊">
-      <button class="close-btn" type="button" aria-label="關閉">&times;</button>
-      <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
-      <h3>纜雲仔（全景形態）</h3>
-      <p>纜雲仔（全景形態）是全景車廂化身的透明夢幻精靈，昂坪天空觀景守護者。擁有最遼闊的視野，牠喜歡更高更穩地觀察，為旅人看清遠方的山海與雲影，是旅途中最冷靜的觀察者。</p>
-    </div>
-
-    <div class="footer">
-      <a class="btn secondary" href="dex.html#dex">📖 探索更多精靈</a>
+      <div class="home-actions" style="margin-top:20px;">
+        <a class="btn secondary" href="dex.html#dex">📖 探索更多精靈</a>
+      </div>
     </div>
   </div>
 
+  <!-- 背景音樂元件（與 index 同 ID） -->
+  <audio id="bgm" preload="auto" loop playsinline>
+    <source src="BGM/BGM4.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- 精靈資訊卡（置於頁尾，避免 overflow 影響） -->
+  <div class="spirit-info" id="spirit-1" role="dialog" aria-modal="true" aria-label="纜雲仔（標準形態）資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/cablecar-spirit.png" alt="纜雲仔（標準形態）">
+    <h3>纜雲仔（標準形態）</h3>
+    <p>纜雲仔（標準形態）是昂坪最早的守護精靈之一，充滿活力與熱情！它以一輛靈動的纜車形態，每天載著來自五湖四海的旅客，穿越連綿山巒與閃耀海峽，從東涌飛馳至昂坪。</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-2" role="dialog" aria-modal="true" aria-label="纜雲仔（水晶形態）資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/crystal-spirit.png" alt="纜雲仔（水晶形態）">
+    <h3>纜雲仔（水晶形態）</h3>
+    <p>纜雲仔（水晶形態）是水晶車廂化身的透明精靈，擁有通透的眼睛和冒險的心，象徵開放心靈與勇於踏出第一步的精神。</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-3" role="dialog" aria-modal="true" aria-label="黃吽吽資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/game-spirit1.png" alt="黃吽吽">
+    <h3>黃吽吽</h3>
+    <p>黃哞哞是昂坪山林的守護者，身手敏捷、奔走迅速。牠喜歡跟人玩「快閃遊戲」，只有最快的人才能與牠結為朋友。</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-4" role="dialog" aria-modal="true" aria-label="小黃彈彈資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/game-spirit2.png" alt="小黃彈彈">
+    <h3>小黃彈彈</h3>
+    <p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-5" role="dialog" aria-modal="true" aria-label="飲茶仔資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/game-spirit3.png" alt="飲茶仔">
+    <h3>飲茶仔</h3>
+    <p>飲茶仔是一隻熱愛飲茶文化的外賣仔，會帶你用串串樂的方式認識飲茶文化！</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-6" role="dialog" aria-modal="true" aria-label="珍奶雞蛋仔資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/game-spirit4.png" alt="珍奶雞蛋仔">
+    <h3>珍奶雞蛋仔</h3>
+    <p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔，會帶你用貪吃蛇的方式探索街頭美食！</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-7" role="dialog" aria-modal="true" aria-label="纜雲仔（全景形態）資訊">
+    <button class="close-btn" type="button" aria-label="關閉">&times;</button>
+    <img src="images/cablecar-spirit.png" alt="纜雲仔（全景形態）">
+    <h3>纜雲仔（全景形態）</h3>
+    <p>纜雲仔（全景形態）是全景車廂化身的透明夢幻精靈，昂坪天空觀景守護者。擁有最遼闊的視野，牠喜歡更高更穩地觀察，為旅人看清遠方的山海與雲影，是旅途中最冷靜的觀察者。</p>
+  </div>
+
   <script>
-    /* =========================
-       主題切換（使用 localStorage）
-       ========================= */
+    /* === 與 index 相同的主題切換（localStorage: np_theme） === */
     const themePicker = document.getElementById('theme-picker');
     const savedTheme = localStorage.getItem('np_theme') || 'theme-sky';
     document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
     document.body.classList.add(savedTheme);
     themePicker.value = savedTheme;
-
     themePicker.addEventListener('change', () => {
       const val = themePicker.value;
       document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
@@ -371,75 +247,32 @@
       localStorage.setItem('np_theme', val);
     });
 
-    /* =========================
-       背景音樂控制
-       - 本頁按鈕點擊即可播放/暫停
-       - 狀態保存在 localStorage（np_bgm）
-       ========================= */
-    const audioEl = document.getElementById('bgm');
+    /* === 與 index 相同的音樂控制 === */
+    const audio = document.getElementById('bgm');
     const audioBtn = document.getElementById('audio-btn');
-
-    // 更新按鈕文案（依照播放狀態）
-    function updateAudioBtn() {
-      if (!audioBtn) return;
-      audioBtn.textContent = (audioEl && !audioEl.paused) ? '⏸️ 暫停音樂' : '▶️ 背景音樂';
-    }
-
-    // 從 localStorage 恢復「開/關」偏好（不強制自動播放，尊重瀏覽器政策）
-    const savedBgm = localStorage.getItem('np_bgm') || 'off';
-    if (savedBgm === 'on') {
-      // 用戶第一次手勢互動後嘗試播放（iOS/Safari 需要手勢）
-      const tryResumeOnce = () => {
-        if (!audioEl) return;
-        audioEl.play().catch(() => { /* 若失敗，使用者再按一次按鈕即可 */ });
-        updateAudioBtn();
-        window.removeEventListener('click', tryResumeOnce);
-        window.removeEventListener('touchend', tryResumeOnce);
-      };
-      window.addEventListener('click', tryResumeOnce, { once: true });
-      window.addEventListener('touchend', tryResumeOnce, { once: true });
-    }
-
+    let playing = false;
     if (audioBtn) {
-      audioBtn.addEventListener('click', async () => {
-        if (!audioEl) return;
-        try {
-          if (audioEl.paused) {
-            await audioEl.play();
-            localStorage.setItem('np_bgm', 'on');  // 記錄為開
-          } else {
-            audioEl.pause();
-            localStorage.setItem('np_bgm', 'off'); // 記錄為關
-          }
-        } catch (err) {
-          console.error('BGM play error:', err);
-          // 可選：提示使用者再點一次或檢查靜音
-          // alert('無法播放音樂，請再點一次或檢查是否靜音／系統音量。');
-        } finally {
-          updateAudioBtn();
+      audioBtn.addEventListener('click', () => {
+        if (!playing) {
+          audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ 背景音樂'; })
+          .catch(() => alert('瀏覽器封鎖了自動播放，請再按一次播放。'));
+        } else {
+          audio.pause(); playing = false; audioBtn.textContent = '▶️ 背景音樂';
         }
       });
     }
-    // 預設音量（可自行調整 0 ~ 1）
-    if (audioEl) audioEl.volume = 0.6;
-    updateAudioBtn();
 
-    /* =========================
-       精靈標記彈窗邏輯
-       ========================= */
+    /* === 地圖彈窗邏輯（沿用原本） === */
     const markers = document.querySelectorAll('.spirit-marker');
     const infoBoxes = document.querySelectorAll('.spirit-info');
     const closeButtons = document.querySelectorAll('.close-btn');
     const overlay = document.getElementById('info-overlay');
 
-    // 工具：關閉所有資訊卡 + 隱藏遮罩
     function closeAllInfos() {
       infoBoxes.forEach(box => box.classList.remove('active'));
       overlay.classList.remove('active');
       overlay.setAttribute('aria-hidden', 'true');
     }
-
-    // 開啟指定精靈資訊
     function openInfo(id) {
       const box = document.getElementById(`spirit-${id}`);
       if (!box) return;
@@ -448,14 +281,12 @@
       box.classList.add('active');
     }
 
-    // 點擊標記：開啟對應資訊卡
     markers.forEach(marker => {
       marker.addEventListener('click', (e) => {
         const spiritId = marker.getAttribute('data-spirit');
         openInfo(spiritId);
-        e.stopPropagation(); // ✅ 使用事件參數 e，而非未定義的 event
+        e.stopPropagation();
       });
-      // 鍵盤可及性：Enter/Space 也可開啟
       marker.addEventListener('keydown', (e) => {
         if (e.key === 'Enter' || e.key === ' ') {
           const spiritId = marker.getAttribute('data-spirit');
@@ -465,18 +296,10 @@
       });
     });
 
-    // 關閉按鈕
     closeButtons.forEach(button => {
-      button.addEventListener('click', (e) => {
-        e.stopPropagation();
-        closeAllInfos();
-      });
+      button.addEventListener('click', (e) => { e.stopPropagation(); closeAllInfos(); });
     });
-
-    // 點遮罩：關閉
     overlay.addEventListener('click', closeAllInfos);
-
-    // 點頁面空白處：關閉（避免誤關，這裡不綁 body 的 click；維持 overlay 點擊關閉即可）
   </script>
 </body>
 </html>
