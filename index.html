@@ -14,37 +14,349 @@
     gtag('config', 'G-B3740R31MS'); // ← 改成你的測量 ID
   </script>
 
-  <link rel="stylesheet" href="styles.css">
-  <script src="spirits.js"></script>
+  <!-- 引入jsQR库 -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
   <style>
-    body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
-    .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
-    .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
-    .theme-select { display:inline-flex; align-items:center; gap:6px; border:2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 6px 10px; font-weight: 800; }
-    .theme-select select { border:none; background: transparent; font-weight: 800; color: var(--accent-ink); outline: none; }
-    .home-title { font-size: clamp(24px, 5vw, 42px); font-weight: 900; color: var(--accent-ink); margin: 0 0 6px; text-shadow: 0 2px 6px rgba(255,255,255,.6); }
-    .home-sub { font-size: clamp(14px, 3.2vw, 18px); color: rgba(0,0,0,.75); margin: 0 0 12px; text-shadow: 0 1px 4px rgba(255,255,255,.7); }
-    .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
-    .gallery-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
-    .progress { display:flex; align-items:center; gap:10px; justify-content:center; margin: 10px auto 0; }
-    .progress-bar { position:relative; height:10px; width:min(560px, 90%); background:#e9eef5; border-radius:999px; overflow:hidden; }
-    .progress-fill { height:100%; width:0%; background: var(--accent); transition: width .4s ease; }
-    .grid-wrap { max-width: 1024px; margin: 16px auto 28px; padding: 0 12px; }
-    .grid { display:grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap:14px; }
-    .card-spirit { background: var(--section-bg); border:1px solid var(--section-border); border-radius:14px; padding:12px; text-align:center; transition: transform .12s ease, box-shadow .2s ease; }
-    .card-spirit:hover { transform: translateY(-2px); box-shadow:0 12px 28px rgba(0,0,0,.12); }
-    .card-spirit img { width: 120px; max-width: 70%; height:auto; filter: drop-shadow(0 8px 18px rgba(0,0,0,.12)); }
-    .card-spirit .name { margin-top: 8px; font-weight: 800; color: var(--ink); font-size: clamp(14px, 2.6vw, 16px); }
-    .empty { text-align:center; padding: 18px; color: var(--ink); }
-    .empty p { margin: 6px 0; }
-    .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
-    .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+    /* 样式保持不变 */
+    :root {
+      --accent: #4e54c8;
+      --accent-ink: #ffffff;
+      --card: rgba(255, 255, 255, 0.92);
+      --section-bg: #f8f9fa;
+      --section-border: #dee2e6;
+      --ink: #212529;
+    }
+    
+    body { 
+      background-image: url('images/background.png'); 
+      background-size: cover; 
+      background-position: center; 
+      background-repeat: no-repeat; 
+      background-attachment: fixed; 
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 20px;
+      color: #333;
+    }
+    
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+    }
+    
+    .home-hero { 
+      text-align: center; 
+      padding: clamp(20px, 6vw, 56px) 12px 12px; 
+    }
+    
+    .home-topbar { 
+      display:flex; 
+      justify-content: center; 
+      gap:10px; 
+      flex-wrap:wrap; 
+      margin-bottom: 10px;
+    }
+    
+    .theme-select { 
+      display:inline-flex; 
+      align-items:center; 
+      gap:6px; 
+      border:2px solid var(--accent); 
+      background: #ffffffaa; 
+      color: var(--accent-ink); 
+      border-radius: 999px; 
+      padding: 6px 10px; 
+      font-weight: 800; 
+    }
+    
+    .theme-select select { 
+      border:none; 
+      background: transparent; 
+      font-weight: 800; 
+      color: var(--accent-ink); 
+      outline: none; 
+    }
+    
+    .home-title { 
+      font-size: clamp(24px, 5vw, 42px); 
+      font-weight: 900; 
+      color: var(--accent-ink); 
+      margin: 0 0 6px; 
+      text-shadow: 0 2px 6px rgba(255,255,255,.6); 
+    }
+    
+    .home-sub { 
+      font-size: clamp(14px, 3.2vw, 18px); 
+      color: rgba(0,0,0,.75); 
+      margin: 0 0 12px; 
+      text-shadow: 0 1px 4px rgba(255,255,255,.7); 
+    }
+    
+    .home-actions { 
+      display:flex; 
+      gap:10px; 
+      justify-content:center; 
+      flex-wrap:wrap; 
+      margin-top: 12px; 
+      margin-bottom: 30px; 
+    }
+    
+    .gallery-card { 
+      background: var(--card); 
+      border:1px solid var(--section-border); 
+      border-radius:16px; 
+      padding:14px; 
+      box-shadow: 0 8px 24px rgba(0,0,0,.06); 
+      backdrop-filter: blur(2px); 
+    }
+    
+    .progress { 
+      display:flex; 
+      align-items:center; 
+      gap:10px; 
+      justify-content:center; 
+      margin: 10px auto 0; 
+    }
+    
+    .progress-bar { 
+      position:relative; 
+      height:10px; 
+      width:min(560px, 90%); 
+      background:#e9eef5; 
+      border-radius:999px; 
+      overflow:hidden; 
+    }
+    
+    .progress-fill { 
+      height:100%; 
+      width:0%; 
+      background: var(--accent); 
+      transition: width .4s ease; 
+    }
+    
+    .grid-wrap { 
+      max-width: 1024px; 
+      margin: 16px auto 28px; 
+      padding: 0 12px; 
+    }
+    
+    .grid { 
+      display:grid; 
+      grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); 
+      gap:14px; 
+    }
+    
+    .card-spirit { 
+      background: var(--section-bg); 
+      border:1px solid var(--section-border); 
+      border-radius:14px; 
+      padding:12px; 
+      text-align:center; 
+      transition: transform .12s ease, box-shadow .2s ease; 
+    }
+    
+    .card-spirit:hover { 
+      transform: translateY(-2px); 
+      box-shadow:0 12px 28px rgba(0,0,0,.12); 
+    }
+    
+    .card-spirit img { 
+      width: 120px; 
+      max-width: 70%; 
+      height:auto; 
+      filter: drop-shadow(0 8px 18px rgba(0,0,0,.12)); 
+    }
+    
+    .card-spirit .name { 
+      margin-top: 8px; 
+      font-weight: 800; 
+      color: var(--ink); 
+      font-size: clamp(14px, 2.6vw, 16px); 
+    }
+    
+    .empty { 
+      text-align:center; 
+      padding: 18px; 
+      color: var(--ink); 
+    }
+    
+    .empty p { 
+      margin: 6px 0; 
+    }
+    
+    .home-footer { 
+      text-align:center; 
+      margin: 18px 0 24px; 
+      margin-bottom: 30px; 
+    }
+    
+    .audio-ctl { 
+      appearance: none; 
+      border: 2px solid var(--accent); 
+      background: #ffffffaa; 
+      color: var(--accent-ink); 
+      border-radius: 999px; 
+      padding: 8px 12px; 
+      font-weight: 800; 
+      cursor: pointer; 
+    }
 
     /* 兌換區塊樣式 */
-    .redeem-area { margin-top: 8px; text-align: center; }
-    .redeem-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 14px; border-radius:12px; border: 2px solid var(--accent); background: var(--accent); color:#fff; font-weight:800; cursor:pointer; }
-    .redeem-note { margin-top:6px; font-size:12px; color:rgba(0,0,0,.6); }
-    .redeem-status { margin-top:8px; font-weight:800; color: var(--accent-ink); }
+    .redeem-area { 
+      margin-top: 8px; 
+      text-align: center; 
+    }
+    
+    .redeem-btn { 
+      display:inline-flex; 
+      align-items:center; 
+      gap:6px; 
+      padding:10px 14px; 
+      border-radius:12px; 
+      border: 2px solid var(--accent); 
+      background: var(--accent); 
+      color:#fff; 
+      font-weight:800; 
+      cursor:pointer; 
+    }
+    
+    .redeem-note { 
+      margin-top:6px; 
+      font-size:12px; 
+      color:rgba(0,0,0,.6); 
+    }
+    
+    .redeem-status { 
+      margin-top:8px; 
+      font-weight:800; 
+      color: var(--accent-ink); 
+    }
+
+    /* QR扫描器样式 */
+    .qr-modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.9); 
+      z-index: 1000; 
+      justify-content: center; 
+      align-items: center; 
+      flex-direction: column;
+    }
+    
+    .qr-scanner-container { 
+      position: relative; 
+      width: 80%; 
+      max-width: 500px; 
+      background: #000; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+    }
+    
+    #qr-video { 
+      width: 100%; 
+      display: block; 
+    }
+    
+    .qr-scanner-overlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      box-sizing: border-box; 
+      border: 2px solid #4CAF50; 
+      pointer-events: none; 
+    }
+    
+    .qr-scanner-overlay::before { 
+      content: ''; 
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      width: 70%; 
+      height: 70%; 
+      transform: translate(-50%, -50%); 
+      border: 1px solid rgba(255,255,255,0.5); 
+      box-sizing: border-box; 
+    }
+    
+    .qr-scanner-controls { 
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 15px; 
+      background: rgba(0,0,0,0.7); 
+      display: flex; 
+      justify-content: center; 
+    }
+    
+    .qr-close-btn { 
+      background: #f44336; 
+      color: white; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-weight: bold; 
+    }
+    
+    .qr-result { 
+      position: absolute; 
+      top: 20px; 
+      left: 0; 
+      width: 100%; 
+      text-align: center; 
+      color: white; 
+      font-weight: bold; 
+      background: rgba(0,0,0,0.5); 
+      padding: 10px; 
+    }
+    
+    .camera-error {
+      display: none;
+      text-align: center;
+      background: #fff4f4;
+      color: #dc3545;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn:hover {
+      background: #3a3f99;
+      transform: translateY(-2px);
+    }
+    
+    .btn-secondary {
+      background: transparent;
+      color: var(--accent);
+    }
+    
+    .btn-secondary:hover {
+      background: rgba(78, 84, 200, 0.1);
+    }
 
     @media (max-width: 360px) {
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
@@ -74,6 +386,8 @@
       <div class="home-actions">
         <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
         <a class="btn" href="map.html">🗺️ 前往地圖</a>
+        <!-- 添加QR扫描按钮 -->
+        <button id="qr-scan-btn" class="btn">📷 掃描QR碼</button>
       <div style="height:20px;"></div>
         
       </div>
@@ -88,6 +402,11 @@
         <div id="collection-hint" style="margin-top: 8px; font-size: 14px; color: var(--accent-ink); font-weight: 600; text-align: center;" aria-live="polite"></div>
         <!-- 兌換區域（收集≥6時顯示） -->
         <div id="redeem-area" class="redeem-area" aria-live="polite"></div>
+      </div>
+      
+      <!-- 摄像头错误提示 -->
+      <div id="camera-error" class="camera-error">
+        無法啟動攝像頭。請確保您已授予相機權限，或使用手機內的QR code掃瞄器進行遊戲。
       </div>
     </div>
 
@@ -109,6 +428,18 @@
       </div>
     </div>
 
+    </div>
+  </div>
+
+  <!-- QR码扫描器模态框 -->
+  <div id="qr-modal" class="qr-modal">
+    <div class="qr-scanner-container">
+      <video id="qr-video"></video>
+      <div class="qr-scanner-overlay"></div>
+      <div class="qr-scanner-controls">
+        <button id="qr-close-btn" class="qr-close-btn">關閉相機</button>
+      </div>
+      <div id="qr-result" class="qr-result"></div>
     </div>
   </div>
 
@@ -155,6 +486,7 @@
     const resetBtn = document.getElementById('reset-btn');
     const hintElement = document.getElementById('collection-hint');
     const redeemArea = document.getElementById('redeem-area');
+    const cameraError = document.getElementById('camera-error');
 
     const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
 
@@ -295,6 +627,201 @@
         localStorage.removeItem('ga_evt_6');   // 也將 GA 旗標清空
         localStorage.removeItem('ga_evt_all'); // 也將 GA 旗標清空
         location.reload();
+      }
+    });
+
+    // --- QR码扫描功能 ---
+    const qrScanBtn = document.getElementById('qr-scan-btn');
+    const qrModal = document.getElementById('qr-modal');
+    const qrVideo = document.getElementById('qr-video');
+    const qrCloseBtn = document.getElementById('qr-close-btn');
+    const qrResult = document.getElementById('qr-result');
+    
+    let scanning = false;
+    let stream = null;
+    let lastScannedUrl = null; // 存储最后扫描到的URL
+    
+    // 打开扫描器
+    qrScanBtn.addEventListener('click', () => {
+      qrModal.style.display = 'flex';
+      qrResult.textContent = '';
+      startScanning();
+    });
+    
+    // 关闭扫描器
+    qrCloseBtn.addEventListener('click', () => {
+      stopScanning();
+      qrModal.style.display = 'none';
+      cameraError.style.display = 'none';
+    });
+    
+    // 开始扫描
+    async function startScanning() {
+      try {
+        cameraError.style.display = 'none';
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: "environment" // 使用后置摄像头
+          } 
+        });
+        qrVideo.srcObject = stream;
+        await qrVideo.play();
+        
+        scanning = true;
+        requestAnimationFrame(tick);
+      } catch (err) {
+        console.error("無法訪問: ", err);
+        cameraError.style.display = 'block';
+        qrModal.style.display = 'none';
+      }
+    }
+    
+    // 停止扫描
+    function stopScanning() {
+      scanning = false;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    }
+    
+    // 扫描循环
+    function tick() {
+      if (!scanning) return;
+      
+      if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        canvas.width = qrVideo.videoWidth;
+        canvas.height = qrVideo.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+          // 找到QR码
+          qrResult.textContent = `找到QR code: ${code.data}`;
+          
+          // 处理扫描到的数据
+          processQRCode(code.data);
+          
+          // 暂停一下再继续扫描
+          scanning = false;
+          setTimeout(() => {
+            scanning = true;
+            qrResult.textContent = '';
+            requestAnimationFrame(tick);
+          }, 2000);
+        } else {
+          requestAnimationFrame(tick);
+        }
+      } else {
+        requestAnimationFrame(tick);
+      }
+    }
+    
+    // 改进的URL验证函数
+    function isValidUrl(string) {
+      try {
+        // 检查是否包含协议头，如果没有则添加https://
+        if (!string.includes('://')) {
+          string = 'https://' + string;
+        }
+        
+        const url = new URL(string);
+        
+        // 确保有有效的域名
+        if (!url.hostname) return false;
+        
+        // 检查常见协议
+        const validProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+        if (!validProtocols.includes(url.protocol)) return false;
+        
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    
+    // 处理扫描到的QR码数据
+    function processQRCode(data) {
+      try {
+        // 检查是否是URL
+        if (isValidUrl(data)) {
+          qrResult.textContent = `找到網頁: ${data}`;
+          lastScannedUrl = data; // 保存URL
+          
+          // 显示确认对话框
+          if (confirm(`掃瞄到網頁地址: ${data}\n\n是否要訪問網頁？`)) {
+            // 使用location.href而不是window.open来避免弹出窗口阻止
+            setTimeout(() => {
+              window.location.href = data;
+            }, 100);
+            
+            // 可选：关闭扫描器
+            stopScanning();
+            qrModal.style.display = 'none';
+          }
+        } else {
+          // 尝试解析为JSON（精灵数据）
+          try {
+            const spiritData = JSON.parse(data);
+            
+            // 检查是否包含必要的精灵字段
+            if (spiritData.id && spiritData.name) {
+              // 检查是否已收集
+              const alreadyCollected = collected.some(s => s.id === spiritData.id);
+              
+              if (!alreadyCollected) {
+                // 添加到收集列表
+                collected.push(spiritData);
+                localStorage.setItem('spirits', JSON.stringify(collected));
+                
+                // 更新UI
+                const total = getTotalFromDex();
+                renderCollected(total);
+                
+                // 显示成功消息
+                qrResult.textContent = `成功收集: ${spiritData.name}`;
+                gaEvent('qr_scan_success', {
+                  event_category: 'QR Scan',
+                  event_label: spiritData.name
+                });
+              } else {
+                qrResult.textContent = `已收集過: ${spiritData.name}`;
+              }
+            } else {
+              // 不是有效的精灵数据
+              qrResult.textContent = `掃瞄到: ${data}`;
+              gaEvent('qr_scan', {
+                event_category: 'QR Scan',
+                event_label: data.substring(0, 100)
+              });
+            }
+          } catch (jsonError) {
+            // 不是JSON格式，作为文本处理
+            qrResult.textContent = `掃瞄到: ${data}`;
+            gaEvent('qr_scan', {
+              event_category: 'QR Scan',
+              event_label: data.substring(0, 100)
+            });
+          }
+        }
+      } catch (e) {
+        console.error("處理出错:", e);
+        qrResult.textContent = `處理出错: ${e.message}`;
+      }
+    }
+
+    // 添加手动跳转按钮的事件监听
+    document.addEventListener('click', function(e) {
+      if (e.target && e.target.id === 'manual-redirect-btn') {
+        if (lastScannedUrl) {
+          window.location.href = lastScannedUrl;
+        }
       }
     });
 
