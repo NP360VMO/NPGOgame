@@ -1,4 +1,4 @@
-<!DOCTYPE html>  
+<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
@@ -14,9 +14,14 @@
     gtag('config', 'G-B3740R31MS'); // ← 改成你的測量 ID
   </script>
 
+  <!-- ✅ QR 掃描庫（不影響原本功能） -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
+
   <link rel="stylesheet" href="styles.css">
   <script src="spirits.js"></script>
+
   <style>
+    /* 保留原本樣式 */
     body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
     .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
     .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
@@ -50,6 +55,17 @@
       .grid { grid-template-columns: repeat(2, 1fr); gap: 10px; }
       .card-spirit img { width: 100px; }
     }
+
+    /* ✅ QR 掃描器樣式（僅新增，不覆蓋原樣式） */
+    .qr-modal { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
+    .qr-scanner-container { position: relative; width: 80%; max-width: 520px; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
+    #qr-video { width: 100%; display: block; }
+    .qr-scanner-overlay { position: absolute; inset: 0; box-sizing: border-box; border: 2px solid #4CAF50; pointer-events: none; }
+    .qr-scanner-overlay::before { content: ''; position: absolute; top: 50%; left: 50%; width: 70%; height: 70%; transform: translate(-50%, -50%); border: 1px solid rgba(255,255,255,0.5); box-sizing: border-box; }
+    .qr-scanner-controls { position: absolute; bottom: 0; left: 0; width: 100%; padding: 15px; background: rgba(0,0,0,0.7); display: flex; justify-content: center; }
+    .qr-close-btn { background: #f44336; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; cursor: pointer; font-weight: 800; }
+    .qr-result { position: absolute; top: 20px; left: 0; width: 100%; text-align: center; color: white; font-weight: bold; background: rgba(0,0,0,0.5); padding: 10px; }
+    .camera-error { display: none; text-align: center; background: #fff4f4; color: #dc3545; padding: 15px; border-radius: 8px; margin: 20px 0; }
   </style>
 </head>
 <body class="theme-sky">
@@ -74,8 +90,9 @@
       <div class="home-actions">
         <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
         <a class="btn" href="map.html">🗺️ 前往地圖</a>
-      <div style="height:20px;"></div>
-        
+        <!-- ✅ 新增：開啟 QR Code 掃描器的按鈕（沿用原本 .btn 樣式） -->
+        <button id="qr-scan-btn" class="btn">📷 掃描QR碼</button>
+        <div style="height:20px;"></div>
       </div>
 
       <div class="gallery-card">
@@ -89,13 +106,17 @@
         <!-- 兌換區域（收集≥6時顯示） -->
         <div id="redeem-area" class="redeem-area" aria-live="polite"></div>
       </div>
+
+      <!-- ✅ 相機權限錯誤提示（僅在無法開相機時顯示） -->
+      <div id="camera-error" class="camera-error">
+        無法啟動攝像頭。請確保您已授予相機權限，或使用手機內的 QR code 掃瞄器進行遊戲。
+      </div>
     </div>
 
     <div class="grid-wrap">
       <div id="collected" class="grid"></div>
     </div>
 
-    
     <div class="home-footer">
       <a class="btn secondary" href="dex.html#dex">📖 去圖鑑解鎖線索</a>
       <a class="btn secondary" href="map.html" style="margin-left: 10px;">🗺️ 查看地圖</a>
@@ -108,7 +129,17 @@
         <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
       </div>
     </div>
+  </div>
 
+  <!-- ✅ QR 碼掃描器模態框（不影響原本結構） -->
+  <div id="qr-modal" class="qr-modal" aria-hidden="true" role="dialog" aria-label="QR 掃描器">
+    <div class="qr-scanner-container">
+      <video id="qr-video" playsinline></video>
+      <div class="qr-scanner-overlay"></div>
+      <div class="qr-scanner-controls">
+        <button id="qr-close-btn" class="qr-close-btn">關閉相機</button>
+      </div>
+      <div id="qr-result" class="qr-result"></div>
     </div>
   </div>
 
@@ -144,9 +175,7 @@
     });
 
     // --- GA 事件工具 ---
-    function gaEvent(name, params){
-      if (window.gtag) { window.gtag('event', name, params || {}); }
-    }
+    function gaEvent(name, params){ if (window.gtag) { window.gtag('event', name, params || {}); } }
 
     // --- Collected spirits render ---
     const container = document.getElementById('collected');
@@ -155,6 +184,7 @@
     const resetBtn = document.getElementById('reset-btn');
     const hintElement = document.getElementById('collection-hint');
     const redeemArea = document.getElementById('redeem-area');
+    const cameraError = document.getElementById('camera-error');
 
     const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
 
@@ -163,26 +193,15 @@
     const REDEEM_PASSWORD = 'vmovmo';
 
     function isRedeemed() {
-      try {
-        const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null');
-        return obj && obj.used === true;
-      } catch { return false; }
+      try { const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null'); return obj && obj.used === true; } catch { return false; }
     }
     function getRedeemTime() {
-      try {
-        const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null');
-        return obj && obj.time ? new Date(obj.time) : null;
-      } catch { return null; }
+      try { const obj = JSON.parse(localStorage.getItem(REDEEM_KEY) || 'null'); return obj && obj.time ? new Date(obj.time) : null; } catch { return null; }
     }
-    function setRedeemed() {
-      localStorage.setItem(REDEEM_KEY, JSON.stringify({ used: true, time: new Date().toISOString() }));
-    }
+    function setRedeemed() { localStorage.setItem(REDEEM_KEY, JSON.stringify({ used: true, time: new Date().toISOString() })); }
     function formatTime(dt) {
-      const y = dt.getFullYear();
-      const m = String(dt.getMonth()+1).padStart(2,'0');
-      const d = String(dt.getDate()).padStart(2,'0');
-      const hh = String(dt.getHours()).padStart(2,'0');
-      const mm = String(dt.getMinutes()).padStart(2,'0');
+      const y = dt.getFullYear(); const m = String(dt.getMonth()+1).padStart(2,'0'); const d = String(dt.getDate()).padStart(2,'0');
+      const hh = String(dt.getHours()).padStart(2,'0'); const mm = String(dt.getMinutes()).padStart(2,'0');
       return `${y}-${m}-${d} ${hh}:${mm}`;
     }
 
@@ -190,7 +209,6 @@
       const eligible = (collected.length >= 6); // 門檻：6隻或以上
       const redeemed = isRedeemed();
       redeemArea.innerHTML = '';
-
       if (!eligible) return;
 
       if (redeemed) {
@@ -201,8 +219,6 @@
         `;
         return;
       }
-
-      // 未兌換：顯示兌換按鈕與提示
       const btn = document.createElement('button');
       btn.className = 'redeem-btn';
       btn.textContent = '🎁 兌換獎品';
@@ -215,23 +231,17 @@
             <div class="redeem-status">✅ 已兌換（${formatTime(new Date())}）</div>
             <div class="redeem-note">感謝參與！</div>
           `;
-        } else {
-          alert('密碼錯誤，未能完成兌換。');
-        }
+        } else { alert('密碼錯誤，未能完成兌換。'); }
       });
 
       const note = document.createElement('div');
       note.className = 'redeem-note';
       note.textContent = '（收集滿 6 隻或以上方可兌換；由工作人員操作）';
-
-      redeemArea.appendChild(btn);
-      redeemArea.appendChild(note);
+      redeemArea.appendChild(btn); redeemArea.appendChild(note);
     }
 
     function renderCollected(total) {
-      container.innerHTML = '';
-      hintElement.innerHTML = ''; // 清空提示
-      
+      container.innerHTML = ''; hintElement.innerHTML = '';
       if (collected.length === 0) {
         container.innerHTML = `
           <div class="card-spirit empty" style="grid-column: 1 / -1;">
@@ -249,55 +259,150 @@
             </a>`;
           container.appendChild(div);
         });
-        
-        // 提示文案
         if (collected.length >= 6 && collected.length < total) {
           hintElement.innerHTML = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
         } else if (collected.length === total && total > 0) {
           hintElement.innerHTML = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
         }
       }
-      
-      const denom = total || 0;
-      const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
-      progressFill.style.width = pct + '%';
-      progressText.textContent = `${collected.length} / ${denom}`;
-
-      // ✅ GA 事件（只上報一次）
-      if (collected.length >= 6 && !localStorage.getItem('ga_evt_6')) {
-        gaEvent('collect_6_spirits', {
-          event_category: 'Game Progress',
-          value: collected.length
-        });
-        localStorage.setItem('ga_evt_6', '1');
-      }
-      if (denom > 0 && collected.length === denom && !localStorage.getItem('ga_evt_all')) {
-        gaEvent('collect_all_spirits', {
-          event_category: 'Game Progress',
-          value: collected.length
-        });
-        localStorage.setItem('ga_evt_all', '1');
-      }
-
-      // 更新兌換區域
+      const denom = total || 0; const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
+      progressFill.style.width = pct + '%'; progressText.textContent = `${collected.length} / ${denom}`;
+      if (collected.length >= 6 && !localStorage.getItem('ga_evt_6')) { gaEvent('collect_6_spirits', { event_category: 'Game Progress', value: collected.length }); localStorage.setItem('ga_evt_6', '1'); }
+      if (denom > 0 && collected.length === denom && !localStorage.getItem('ga_evt_all')) { gaEvent('collect_all_spirits', { event_category: 'Game Progress', value: collected.length }); localStorage.setItem('ga_evt_all', '1'); }
       updateRedeemUI();
     }
 
     // --- Auto-calc total spirits from dex.html / spirits.js ---
     function getTotalFromDex(){ return window.SPIRITS ? window.SPIRITS.length : 0; }
-
     function init(){ const total = getTotalFromDex(); renderCollected(total); }
 
     resetBtn.addEventListener('click', () => {
       if (confirm('確定要重置所有收集記錄與兌換狀態？此操作無法還原。')) {
         localStorage.removeItem('spirits');
         localStorage.removeItem('np_redeemed');
-        localStorage.removeItem('ga_evt_6');   // 也將 GA 旗標清空
-        localStorage.removeItem('ga_evt_all'); // 也將 GA 旗標清空
+        localStorage.removeItem('ga_evt_6');
+        localStorage.removeItem('ga_evt_all');
         location.reload();
       }
     });
 
+    // ==============================
+    // ✅ QR 碼掃描功能（僅新增）
+    // ==============================
+    const qrScanBtn = document.getElementById('qr-scan-btn');
+    const qrModal = document.getElementById('qr-modal');
+    const qrVideo = document.getElementById('qr-video');
+    const qrCloseBtn = document.getElementById('qr-close-btn');
+    const qrResult = document.getElementById('qr-result');
+
+    let scanning = false; let stream = null; let lastScannedUrl = null;
+
+    // 打開掃描器
+    if (qrScanBtn) {
+      qrScanBtn.addEventListener('click', () => {
+        qrModal.style.display = 'flex';
+        qrModal.setAttribute('aria-hidden', 'false');
+        qrResult.textContent = '';
+        startScanning();
+      });
+    }
+
+    // 關閉掃描器
+    qrCloseBtn.addEventListener('click', () => {
+      stopScanning();
+      qrModal.style.display = 'none';
+      qrModal.setAttribute('aria-hidden', 'true');
+      if (cameraError) cameraError.style.display = 'none';
+    });
+
+    // 開始掃描
+    async function startScanning() {
+      try {
+        if (cameraError) cameraError.style.display = 'none';
+        stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' } } });
+        qrVideo.srcObject = stream; await qrVideo.play();
+        scanning = true; requestAnimationFrame(tick);
+      } catch (err) {
+        console.error('無法訪問相機: ', err);
+        if (cameraError) cameraError.style.display = 'block';
+        qrModal.style.display = 'none';
+      }
+    }
+
+    // 停止掃描
+    function stopScanning() {
+      scanning = false;
+      if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
+    }
+
+    // 掃描循環
+    function tick() {
+      if (!scanning) return;
+      if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        canvas.width = qrVideo.videoWidth; canvas.height = qrVideo.videoHeight;
+        const ctx = canvas.getContext('2d'); ctx.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+        const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
+        if (code) {
+          qrResult.textContent = `找到QR code: ${code.data}`;
+          processQRCode(code.data);
+          scanning = false; setTimeout(() => { scanning = true; qrResult.textContent = ''; requestAnimationFrame(tick); }, 2000);
+        } else { requestAnimationFrame(tick); }
+      } else { requestAnimationFrame(tick); }
+    }
+
+    // URL 檢查
+    function isValidUrl(str) {
+      try {
+        if (!str.includes('://') && !str.startsWith('mailto:') && !str.startsWith('tel:')) { str = 'https://' + str; }
+        const url = new URL(str);
+        const valid = ['http:', 'https:', 'mailto:', 'tel:'];
+        return !!url.hostname || valid.includes(url.protocol);
+      } catch { return false; }
+    }
+
+    // 處理掃描結果
+    function processQRCode(data) {
+      try {
+        if (isValidUrl(data)) {
+          qrResult.textContent = `找到網頁: ${data}`; lastScannedUrl = data;
+          if (confirm(`掃瞄到網頁地址: ${data}\n\n是否要訪問網頁？`)) {
+            setTimeout(() => { window.location.href = data; }, 100);
+            stopScanning(); qrModal.style.display = 'none';
+          }
+          return;
+        }
+        // 嘗試解析 JSON 當作精靈資料
+        try {
+          const spirit = JSON.parse(data);
+          if (spirit && spirit.id && spirit.name) {
+            const already = collected.some(s => s.id === spirit.id);
+            if (!already) {
+              collected.push(spirit); localStorage.setItem('spirits', JSON.stringify(collected));
+              renderCollected(getTotalFromDex());
+              qrResult.textContent = `成功收集: ${spirit.name}`;
+              gaEvent('qr_scan_success', { event_category: 'QR Scan', event_label: spirit.name });
+            } else { qrResult.textContent = `已收集過: ${spirit.name}`; }
+            return;
+          }
+        } catch {}
+        // 其他文字
+        qrResult.textContent = `掃瞄到: ${data}`;
+        gaEvent('qr_scan', { event_category: 'QR Scan', event_label: (data || '').toString().slice(0,100) });
+      } catch (e) {
+        console.error('處理出錯:', e); qrResult.textContent = `處理出錯: ${e.message}`;
+      }
+    }
+
+    // 供未來使用：手動跳轉按鈕（如需）
+    document.addEventListener('click', (e) => {
+      if (e.target && e.target.id === 'manual-redirect-btn') {
+        if (lastScannedUrl) { window.location.href = lastScannedUrl; }
+      }
+    });
+
+    // 初始化
     init();
   </script>
 </body>
