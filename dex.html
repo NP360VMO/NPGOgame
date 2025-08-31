@@ -7,6 +7,8 @@
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="spirits.js"></script>
+  <!-- 引入jsQR库 -->
+  <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   
   <style>
     /* 背景與基礎樣式 */
@@ -400,12 +402,135 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.18);
     }
     
+    /* QR扫描器样式 */
+    .qr-modal { 
+      display: none; 
+      position: fixed; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      background: rgba(0,0,0,0.9); 
+      z-index: 1000; 
+      justify-content: center; 
+      align-items: center; 
+      flex-direction: column;
+    }
+    
+    .qr-scanner-container { 
+      position: relative; 
+      width: 80%; 
+      max-width: 500px; 
+      background: #000; 
+      border-radius: 12px; 
+      overflow: hidden; 
+      box-shadow: 0 0 20px rgba(0,0,0,0.5); 
+    }
+    
+    #qr-video { 
+      width: 100%; 
+      display: block; 
+    }
+    
+    .qr-scanner-overlay { 
+      position: absolute; 
+      top: 0; 
+      left: 0; 
+      width: 100%; 
+      height: 100%; 
+      box-sizing: border-box; 
+      border: 2px solid #4CAF50; 
+      pointer-events: none; 
+    }
+    
+    .qr-scanner-overlay::before { 
+      content: ''; 
+      position: absolute; 
+      top: 50%; 
+      left: 50%; 
+      width: 70%; 
+      height: 70%; 
+      transform: translate(-50%, -50%); 
+      border: 1px solid rgba(255,255,255,0.5); 
+      box-sizing: border-box; 
+    }
+    
+    .qr-scanner-controls { 
+      position: absolute; 
+      bottom: 0; 
+      left: 0; 
+      width: 100%; 
+      padding: 15px; 
+      background: rgba(0,0,0,0.7); 
+      display: flex; 
+      justify-content: center; 
+    }
+    
+    .qr-close-btn { 
+      background: #f44336; 
+      color: white; 
+      border: none; 
+      padding: 10px 20px; 
+      border-radius: 5px; 
+      cursor: pointer; 
+      font-weight: bold; 
+    }
+    
+    .qr-result { 
+      position: absolute; 
+      top: 20px; 
+      left: 0; 
+      width: 100%; 
+      text-align: center; 
+      color: white; 
+      font-weight: bold; 
+      background: rgba(0,0,0,0.5); 
+      padding: 10px; 
+    }
+    
+    .camera-error {
+      display: none;
+      text-align: center;
+      background: #fff4f4;
+      color: #dc3545;
+      padding: 15px;
+      border-radius: 8px;
+      margin: 20px 0;
+    }
+    
+    /* 掃描按鈕 */
+    .scan-btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 10px 16px;
+      border-radius: 999px;
+      border: 2px solid var(--accent);
+      background: var(--accent);
+      color: white;
+      font-weight: 800;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s;
+      margin-left: 10px;
+    }
+    
+    .scan-btn:hover {
+      background: #3a3f99;
+      transform: translateY(-2px);
+    }
+    
     /* 響應式調整 */
     @media (max-width: 768px) {
       .dex-search { width: 100%; }
       .dex-controls { gap: 10px; }
       .dex-tab { padding: 8px 14px; }
       .dex-grid { gap: 14px; }
+      
+      .scan-btn {
+        margin-left: 0;
+        margin-top: 10px;
+      }
     }
     
     @media (max-width: 480px) {
@@ -439,7 +564,6 @@
       --accent-rgb: 183, 140, 96;
       --accent-light: #DAC4AD;
     }	
-	
   </style>
 </head>
 <body class="theme-sky">
@@ -447,7 +571,7 @@
   <div class="container">
     <div class="dex-hero">
       <div class="dex-title">精靈圖鑑</div>
-      <div class="dex-sub">在昂坪市集追蹤精靈的神秘蹤跡！點擊精靈圖示，揭開隱藏線索，解鎖奇幻秘密。部分害羞精靈只在特定地點現身，快來探索吧！</div>
+      <div class="dex-sub">掃碼市集各處的精靈QR Code，收集全部即可換領神秘獎賞！立即出發探索！</div>
 
       <div class="dex-controls">
         <div class="dex-search"><input id="q" type="search" placeholder="搜尋名稱或類型…"></div>
@@ -455,6 +579,7 @@
           <button class="dex-tab active" data-show="all">全部</button>
           <button class="dex-tab" data-show="known">已解鎖</button>
           <button class="dex-tab" data-show="unknown">未解鎖</button>
+          <button id="qr-scan-btn" class="scan-btn">📷 掃描QR碼</button>
         </div>
       </div>
     </div>
@@ -482,6 +607,23 @@
     <div class="dex-footer">
       <a class="btn secondary" href="index.html"><i class="fas fa-arrow-left"></i> 返回主頁</a>
     </div>
+  </div>
+
+  <!-- QR码扫描器模态框 -->
+  <div id="qr-modal" class="qr-modal">
+    <div class="qr-scanner-container">
+      <video id="qr-video"></video>
+      <div class="qr-scanner-overlay"></div>
+      <div class="qr-scanner-controls">
+        <button id="qr-close-btn" class="qr-close-btn">關閉相機</button>
+      </div>
+      <div id="qr-result" class="qr-result"></div>
+    </div>
+  </div>
+
+  <!-- 摄像头错误提示 -->
+  <div id="camera-error" class="camera-error">
+    無法啟動攝像頭。請確保您已授予相機權限，或使用手機內的QR code掃瞄器進行遊戲。
   </div>
 
   <script>
@@ -515,7 +657,189 @@
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
 
+    // --- QR码扫描功能 ---
+    const qrScanBtn = document.getElementById('qr-scan-btn');
+    const qrModal = document.getElementById('qr-modal');
+    const qrVideo = document.getElementById('qr-video');
+    const qrCloseBtn = document.getElementById('qr-close-btn');
+    const qrResult = document.getElementById('qr-result');
+    const cameraError = document.getElementById('camera-error');
+    
+    let scanning = false;
+    let stream = null;
+    
+    // 打开扫描器
+    qrScanBtn.addEventListener('click', () => {
+      qrModal.style.display = 'flex';
+      qrResult.textContent = '';
+      startScanning();
+    });
+    
+    // 关闭扫描器
+    qrCloseBtn.addEventListener('click', () => {
+      stopScanning();
+      qrModal.style.display = 'none';
+      cameraError.style.display = 'none';
+    });
+    
+    // 开始扫描
+    async function startScanning() {
+      try {
+        cameraError.style.display = 'none';
+        stream = await navigator.mediaDevices.getUserMedia({ 
+          video: { 
+            facingMode: "environment" // 使用后置摄像头
+          } 
+        });
+        qrVideo.srcObject = stream;
+        await qrVideo.play();
+        
+        scanning = true;
+        requestAnimationFrame(tick);
+      } catch (err) {
+        console.error("无法访问摄像头: ", err);
+        cameraError.style.display = 'block';
+        qrModal.style.display = 'none';
+      }
+    }
+    
+    // 停止扫描
+    function stopScanning() {
+      scanning = false;
+      if (stream) {
+        stream.getTracks().forEach(track => track.stop());
+        stream = null;
+      }
+    }
+    
+    // 扫描循环
+    function tick() {
+      if (!scanning) return;
+      
+      if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
+        const canvas = document.createElement('canvas');
+        canvas.width = qrVideo.videoWidth;
+        canvas.height = qrVideo.videoHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(qrVideo, 0, 0, canvas.width, canvas.height);
+        
+        const imageData = context.getImageData(0, 0, canvas.width, canvas.height);
+        const code = jsQR(imageData.data, imageData.width, imageData.height, {
+          inversionAttempts: "dontInvert",
+        });
+        
+        if (code) {
+          // 找到QR码
+          qrResult.textContent = `找到QR码: ${code.data}`;
+          
+          // 处理扫描到的数据
+          processQRCode(code.data);
+          
+          // 暂停一下再继续扫描
+          scanning = false;
+          setTimeout(() => {
+            scanning = true;
+            qrResult.textContent = '';
+            requestAnimationFrame(tick);
+          }, 2000);
+        } else {
+          requestAnimationFrame(tick);
+        }
+      } else {
+        requestAnimationFrame(tick);
+      }
+    }
+    
+    // 改进的URL验证函数
+    function isValidUrl(string) {
+      try {
+        // 检查是否包含协议头，如果没有则添加https://
+        if (!string.includes('://')) {
+          string = 'https://' + string;
+        }
+        
+        const url = new URL(string);
+        
+        // 确保有有效的域名
+        if (!url.hostname) return false;
+        
+        // 检查常见协议
+        const validProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
+        if (!validProtocols.includes(url.protocol)) return false;
+        
+        return true;
+      } catch (_) {
+        return false;
+      }
+    }
+    
+    // 处理扫描到的QR码数据
+    function processQRCode(data) {
+      try {
+        // 检查是否是URL
+        if (isValidUrl(data)) {
+          qrResult.textContent = `找到網頁: ${data}`;
+          
+          // 显示确认对话框
+          if (confirm(`掃瞄到網頁地址: ${data}\n\n是否要訪問這個頁面？`)) {
+            // 使用location.href而不是window.open来避免弹出窗口阻止
+            setTimeout(() => {
+              window.location.href = data;
+            }, 100);
+            
+            // 可选：关闭扫描器
+            stopScanning();
+            qrModal.style.display = 'none';
+          }
+        } else {
+          // 尝试解析为JSON（精灵数据）
+          try {
+            const spiritData = JSON.parse(data);
+            
+            // 检查是否包含必要的精灵字段
+            if (spiritData.id && spiritData.name) {
+              // 添加到收集列表
+              const collectedArray = JSON.parse(localStorage.getItem('spirits') || '[]');
+              
+              // 检查是否已收集
+              const alreadyCollected = collectedArray.some(s => s.id === spiritData.id);
+              
+              if (!alreadyCollected) {
+                // 添加到收集列表
+                collectedArray.push(spiritData);
+                localStorage.setItem('spirits', JSON.stringify(collectedArray));
+                
+                // 更新UI
+                collected.add(spiritData.id);
+                render(getCurrentFilter(), q.value);
+                
+                // 显示成功消息
+                qrResult.textContent = `成功收集: ${spiritData.name}`;
+                alert(`🎉 成功收集到新的精靈：${spiritData.name}`);
+              } else {
+                qrResult.textContent = `已收集过: ${spiritData.name}`;
+                alert(`✅ 你已經收集過 ${spiritData.name} 了`);
+              }
+            } else {
+              // 不是有效的精灵数据
+              qrResult.textContent = `掃瞄到: ${data}`;
+            }
+          } catch (jsonError) {
+            // 不是JSON格式，作为文本处理
+            qrResult.textContent = `掃瞄到: ${data}`;
+          }
+        }
+      } catch (e) {
+        console.error("處理出错:", e);
+        qrResult.textContent = `處理出错: ${e.message}`;
+      }
+    }
+
     // 渲染函數
+    function getCurrentFilter() {
+      return document.querySelector('#status-filters .dex-tab.active')?.dataset.show || 'all';
+    }
+
     function render(show = 'all', keyword = '') {
       gridExplore.innerHTML = '';
       gridChallenge.innerHTML = '';
@@ -581,11 +905,17 @@
     }
 
     // 事件監聽
-    statusButtons.forEach(btn => btn.addEventListener('click', () => {
-      statusButtons.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      render(btn.dataset.show, q.value);
-    }));
+    statusButtons.forEach(btn => {
+      if (btn.id !== 'qr-scan-btn') {
+        btn.addEventListener('click', () => {
+          statusButtons.forEach(b => {
+            if (b.id !== 'qr-scan-btn') b.classList.remove('active');
+          });
+          btn.classList.add('active');
+          render(btn.dataset.show, q.value);
+        });
+      }
+    });
 
     q.addEventListener('input', () => {
       const active = document.querySelector('#status-filters .dex-tab.active')?.dataset.show || 'all';
