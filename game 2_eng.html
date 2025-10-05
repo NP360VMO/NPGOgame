@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>挑戰遊戲｜小黃彈彈 彈跳球</title>
+  <title>Challenge Game｜Little Yellow BB</title>
   <link rel="stylesheet" href="styles.css">
   <style>
 .stage{position:relative;max-width:720px;margin:0 auto;border-radius:16px;background:linear-gradient(180deg,#cdefff,#f8ffff)}.canvas-wrap{position:relative;padding:10px}canvas{background:#ffffff;border:2px solid #cfe4ff;border-radius:12px;display:block;margin:0 auto;box-shadow:0 10px 22px rgba(0,0,0,.06)}.hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px}.hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.hint .bubble{background:rgba(255,255,255,.9);border:1px solid var(--section-border);border-radius:14px;padding:8px 12px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn:active{transform:translateY(1px)}@media (max-width:560px){
@@ -14,19 +14,19 @@
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">挑戰遊戲 - 小黃彈彈（彈跳球）</div>
-        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+        <div class="title">Challenge Game - Little Yellow BB </div>
+        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit2.png" alt="小黃彈彈"></div>
+        <div class="img-wrap"><img src="images/game-spirit2.png" alt="Little Yellow BB "></div>
         <div class="intro">
-          <p><strong>玩法：</strong>控制擋板令小狗彈起追蝴蝶；得分達 <strong>5 分</strong> 即可解鎖。</p>
-          <p>滑鼠左右移動（或觸控拖動）即可控制擋板。</p>
+          <p><strong>How to Play:</strong> You must uide Little Yellow BB in chasing butterflies by bouncing her with the paddle. When you reach score <strong>5 points</strong> to unlock the next stage.</p>
+          <p>Tips: Slide your mouse left or right (or drag with your finger) to move the paddle!</p>
           <div class="status-bar">
-            <span class="pill info" id="pill-status">尚未開始</span>
-            <span class="pill ok" id="pill-score">得分：0 / 5</span>
-            <a class="btn secondary" href="game 2_eng.html">🌐 English Version </a>
+            <span class="pill info" id="pill-status">Not Started</span>
+            <span class="pill ok" id="pill-score">Score: 0 / 5</span>
+            <a class="btn secondary" href="game222.html">🌐 中文 </a>
           </div>
         </div>
       </div>
@@ -35,33 +35,33 @@
         <div class="game-wrap">
           <div class="stage">
             <div class="hud">
-              <span class="pill">🎯 命中蝴蝶可得 1 分</span>
-              <span class="pill">🛡 擋板反彈不中會跌落</span>
+              <span class="pill">🎯 Hit butterfly to get 1 point</span>
+              <span class="pill">🛡 Miss the paddle and you'll fall</span>
             </div>
             <div class="canvas-wrap">
               <canvas id="gameCanvas" width="300" height="400"></canvas>
-              <div class="hint" id="hint"><div class="bubble">← → 滑鼠移動控制（手機：拖動）</div></div>
+              <div class="hint" id="hint"><div class="bubble">← → Mouse to move (Mobile: Drag)</div></div>
             </div>
           </div>
 
           <div class="actions">
-            <button class="btn" id="btn-start">▶️ 開始遊戲</button>
-            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
+            <button class="btn" id="btn-start">▶️ Start Game</button>
+            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 Try Again</button>
           </div>
         </div>
 
         <div class="actions">
-          <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
-          <a class="btn secondary" href="index.html">🔙 返回主頁</a>
+          <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+          <a class="btn secondary" href="index_eng.html">🔙 Back to Home</a>
         </div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 已解鎖：小黃彈彈！</div>
+  <div class="toast" id="toast">🎉 Unlocked: Little Yellow BB !</div>
 
   <script>
-    // 圖片載入
+    // Image loading
     const canvas = document.getElementById("gameCanvas");
     const ctx = canvas.getContext("2d");
     const statusEl = document.getElementById("pill-status");
@@ -81,14 +81,14 @@
       star = { x: 100, y: 50, size: 120 };
       starHitbox = { width: 32, height: 32 };
       score = 0; waitingForPaddle = false; showingUnlockMessage = false; playing = false;
-      scoreEl.textContent = "得分：0 / 5";
-      statusEl.textContent = "尚未開始";
+      scoreEl.textContent = "Score: 0 / 5";
+      statusEl.textContent = "Not Started";
       hint.style.display = 'flex';
     }
 
     initVars();
 
-    // 控制：滑鼠 + 觸控
+    // Controls: Mouse + Touch
     function setPaddleByClientX(clientX){
       const rect = canvas.getBoundingClientRect();
       paddle.x = clientX - rect.left - paddle.width / 2;
@@ -101,7 +101,7 @@
     function drawStar(){
       if (!waitingForPaddle) {
         ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // 調試 Hitbox 時可開啟：
+        // Enable for Hitbox debugging:
         // ctx.strokeStyle = "rgba(255,0,0,0.6)";
         // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
       }
@@ -119,26 +119,26 @@
       if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
       if (ball.y < ball.radius) ball.dy *= -1;
 
-      // 擋板碰撞
+      // Paddle collision
       if (ball.y + ball.radius > canvas.height - paddle.height - 10 &&
           ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
         ball.dy *= -1;
         if (waitingForPaddle) { resetStar(); waitingForPaddle = false; }
       }
 
-      // 星星碰撞（以 Hitbox 為準）
+      // Star collision (based on Hitbox)
       if (!waitingForPaddle &&
           ball.x + ball.radius > star.x + (star.size - starHitbox.width)/2 &&
           ball.x - ball.radius < star.x + (star.size - starHitbox.width)/2 + starHitbox.width &&
           ball.y + ball.radius > star.y + (star.size - starHitbox.height)/2 &&
           ball.y - ball.radius < star.y + (star.size - starHitbox.height)/2 + starHitbox.height) {
         score++; waitingForPaddle = true;
-        scoreEl.textContent = `得分：${score} / 5`;
-        statusEl.textContent = '命中！彈回去再追下一隻～';
+        scoreEl.textContent = `Score: ${score} / 5`;
+        statusEl.textContent = 'Hit! Bounce back for the next one～';
         if (score >= 5) { unlockSpirit(); return; }
       }
 
-      if (ball.y > canvas.height) { stopGame(); statusEl.textContent = "💥 遊戲結束，請再試一次！"; btnRetry.style.display='inline-flex'; }
+      if (ball.y > canvas.height) { stopGame(); statusEl.textContent = "💥 Game Over, please try again!"; btnRetry.style.display='inline-flex'; }
     }
 
     function draw(){
@@ -148,7 +148,7 @@
 
     function startGame(){
       initVars(); resetStar();
-      statusEl.textContent = "遊戲開始！"; hint.style.display='none';
+      statusEl.textContent = "Game Started!"; hint.style.display='none';
       playing = true; btnStart.style.display='none'; btnRetry.style.display='none';
       clearInterval(gameLoop); gameLoop = setInterval(draw, 20);
     }
@@ -161,17 +161,17 @@
       setTimeout(()=> t.style.display='none', 1600);
     }
 
-    // ✅ 解鎖後 2 秒自動跳轉到精靈頁
+    // ✅ Automatically redirect to spirit page 2 seconds after unlocking
     function unlockSpirit(){
-      const spirit = { id:'spirit_game2', name:'小黃彈彈', image:'images/game-spirit2.png', page:'spirit_game2.html' };
+      const spirit = { id:'spirit_game2', name:'Little Yellow BB', image:'images/game-spirit2.png', page:'spirit_game2_eng.html' };
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        toast('🎉 已解鎖：小黃彈彈！'); statusEl.textContent='🎉 成功解鎖挑戰精靈：小黃彈彈！';
-      } else { statusEl.textContent='你已經擁有呢位精靈喇！'; }
+        toast('🎉 Unlocked: Little Yellow BB!'); statusEl.textContent='🎉 Successfully unlocked challenge NPmon: Little Yellow BB!';
+      } else { statusEl.textContent='You already have this NPmon!'; }
 
-      stopGame(); // 停止畫面更新
-      setTimeout(()=>{ window.location.href = spirit.page; }, 2000); // 自動跳轉
+      stopGame(); // Stop screen updates
+      setTimeout(()=>{ window.location.href = spirit.page; }, 2000); // Auto redirect
     }
 
     document.getElementById("btn-start").addEventListener("click", startGame);

@@ -1,0 +1,111 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mon Profile - Little Yellow BB </title>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-grass layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">Mon Profile - Little Yellow BB</div>
+        <div class="badge">Loyal · Joyful · Energetic</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit2.png" alt="Little Yellow BB" />
+        </div>
+        <div class="intro">
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Meet Little Yellow BB, the cutest puppy ever, bouncing around Ngong Ping with endless energy! She loves nothing more than chasing butterflies and zipping through every corner, ready to take you on a super fun adventure!</p>
+          <p>Sporting soft, golden-yellow fur that shines like morning sunshine, big sparkly amber eyes, and a fluffy tail that wags like cotton candy, this pup’s pure joy! Known as the “Spirit of Loyalty and Joy,” she spreads cozy, happy vibes with her gentle magic, making everyone around her smile!</p>
+        </div>
+      </div>
+
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Little Yellow BB</h3>
+        <p>Little Yellows, some of the oldest pups in China, have been loyal buddies for thousands of years! Southern China, including the Pearl River Delta near Hong Kong, is a hotspot where these adorable dogs first became our pals, showing off tons of unique traits.</p>
+        <p>In Hong Kong, these cute “Little Yellows” roam rural spots like Lantau Island’s villages, acting as trusty guard dogs. You might even spot them trotting through Ngong Ping’s alleys, adding a sprinkle of charm to your adventure!</p>
+      </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game2.html">🌐 中文 </a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game2',
+      name: 'Little Yellow BB',
+      image: 'images/game-spirit2.png',
+      page: 'spirit_game2_eng.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
+      } else {
+        document.getElementById('message').innerText = 'You already own Little Yellow BB!';
+      }
+    }
+  </script>
+</body>
+</html>

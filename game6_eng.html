@@ -1,9 +1,48 @@
-<!DOCTYPE html> 
-<html lang="zh">
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html> 
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>貪吃挑戰：珍奶雞蛋仔肚餓了</title>
+  <title>Challenge Game - Boba Egg Waffle</title>
 
     <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
@@ -12,10 +51,10 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    // 請改成你自己的 GA4 ID
+    // Replace with your own GA4 ID
     gtag('config', 'G-B3740R31MS');
 
-    // 👇 當進入 game6.html 就送出事件
+    // Send event when entering game6.html
     gtag('event', 'page_enter', {
       'page_title': 'Game 6',
       'page_path': '/game6.html'
@@ -86,13 +125,13 @@
       background: #fff; display: flex; flex-direction: column; align-items: center;
     }
 
-    /* 讓畫布容器置中 */
+    /* Center canvas container */
     #gameContainer{ max-width:100%; margin:10px auto; position:relative; width:100%;
       display:flex; justify-content:center; }
-    /* 畫布本身阻止瀏覽器手勢干擾 */
+    /* Canvas prevents browser gesture interference */
     #gameCanvas { background-color: #f0f0f0; border: 1px solid #ccc; display:block; max-width:100%; touch-action:none; }
 
-    /* 進度條 */
+    /* Progress bar */
     .progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 12px; }
     .bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #8ad398, #ffd166); }
 
@@ -110,7 +149,7 @@
       display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 
-    /* —— 虛擬方向鍵：放大、好按 —— */
+    /* Virtual directional controls: enlarged, easy to press */
     #virtualControls { display:flex; justify-content:center; margin-top:16px; flex-direction:column; align-items:center; width:100%; }
     #virtualControls .control-row { display:flex; justify-content:center; }
     #virtualControls .control-btn {
@@ -134,20 +173,20 @@
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">挑戰遊戲 - 珍奶雞蛋仔</div>
-        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+        <div class="title">Challenge Game - Boba Egg Waffle</div>
+        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit4.png" alt="珍奶雞蛋仔"></div>
+        <div class="img-wrap"><img src="images/game-spirit4.png" alt="Boba Egg Waffle"></div>
         <div class="intro">
-          <p><strong>玩法：</strong>使用方向鍵或虛擬按鈕控制珍奶雞蛋仔吃珍珠奶茶。在<strong>60秒</strong>內獲得<strong>10分</strong>即可解鎖精靈！</p>
-          <p>注意：撞到牆壁或自己身體會結束遊戲，挑戰你的反應與操控能力！</p>
+          <p><strong>How to Play:</strong> Guide Boba Egg Waffle to eat boba using arrow keys or virtual buttons. Collect <strong>10 points</strong> in <strong>60 seconds</strong> to unlock the Mon!</p>
+          <p>Adding Tips: Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection.</p>
           <div class="status-bar">
-            <span class="pill info" id="pill-status">準備開始</span>
-            <span class="pill" id="pill-score">分數：0 / 10</span>
-            <span class="pill warn" id="pill-timer">剩餘時間：60 秒</span>
-            <a class="btn secondary" href="game6_eng.html">🌐 English Version </a>
+            <span class="pill info" id="pill-status">Ready to Start</span>
+            <span class="pill" id="pill-score">Score: 0 / 10</span>
+            <span class="pill warn" id="pill-timer">Time Left: 60 seconds</span>
+            <a class="btn secondary" href="game 6.html">🌐 中文 </a>
           </div>
         </div>
       </div>
@@ -160,7 +199,7 @@
               <canvas id="gameCanvas"></canvas>
             </div>
 
-            <!-- 虛擬方向鍵 -->
+            <!-- Virtual directional controls -->
             <div id="virtualControls" style="display:none;">
               <div class="control-row">
                 <div class="control-btn" id="upBtn" disabled>↑</div>
@@ -174,28 +213,28 @@
           </div>
 
           <div class="actions">
-            <button class="btn" id="startBtn">▶️ 開始遊戲</button>
-            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 重新開始</button>
-            <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
+            <button class="btn" id="startBtn">▶️ Start Game</button>
+            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 Restart</button>
+            <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
           </div>
         </div>
-        <div class="actions"><a class="btn secondary" href="index.html">🔙 返回主頁</a></div>
+        <div class="actions"><a class="btn secondary" href="index_eng.html">🔙 Back to Home</a></div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 已解鎖：珍奶雞蛋仔！</div>
+  <div class="toast" id="toast">🎉 Unlocked: Boba Egg Waffle!</div>
 
   <script>
-    // 遊戲常量
+    // Game constants
     const GRID_SIZE = 15;
     let CELL_SIZE = 30;
 
-    // ✅ 放大比例（你可以微調）
-    const snakeScale = 1.25; // 蛇頭/蛇身放大 25%
-    const foodScale  = 1.35; // 食物放大 35%
+    // Scale factors (adjustable)
+    const snakeScale = 1.25; // Snake head/body scaled up by 25%
+    const foodScale  = 1.35; // Food scaled up by 35%
 
-    // 元素
+    // Elements
     const canvas = document.getElementById('gameCanvas');
     const ctx = canvas.getContext('2d');
     const pillStatus = document.getElementById('pill-status');
@@ -206,12 +245,12 @@
     const retryBtn   = document.getElementById('retryBtn');
     const toast      = document.getElementById('toast');
 
-    // 圖片
+    // Images
     const snakeHeadImage = new Image(); snakeHeadImage.src = 'images/snake_head.png';
     const snakeBodyImage = new Image(); snakeBodyImage.src = 'images/snake_body.png';
     const foodImage      = new Image(); foodImage.src = 'images/boba.png';
 
-    // 狀態
+    // State
     let snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
     let direction = { x: 0, y: 0 };
@@ -223,7 +262,7 @@
     let lastSecondTime = 0;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
 
-    // 尺寸
+    // Canvas sizing
     function resizeCanvas() {
       const maxWidth = Math.min(window.innerWidth - 40, 600);
       const maxHeight = Math.min(window.innerHeight - 300, 600);
@@ -235,7 +274,7 @@
       renderGame();
     }
 
-    // 時間條
+    // Time bar
     function updateTimeBar() {
       const percent = (timeLeft / 60) * 100;
       timeBar.style.width = percent + '%';
@@ -243,7 +282,7 @@
       timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
     }
 
-    // 初始化
+    // Initialize
     function initializeGame() {
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
@@ -258,7 +297,7 @@
         resetGameState(); startGame(); lastUpdateTime = 0; lastSecondTime = 0;
       });
 
-      // 方向鍵點按
+      // Directional button controls
       document.getElementById('upBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,-1); }, {passive:false});
       document.getElementById('downBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,1); }, {passive:false});
       document.getElementById('leftBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(-1,0); }, {passive:false});
@@ -268,7 +307,7 @@
       document.getElementById('leftBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(-1,0); });
       document.getElementById('rightBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(1,0); });
 
-      // —— 畫布滑動手勢控制 —— //
+      // Canvas swipe gesture controls
       let touchStart = null;
       canvas.addEventListener('touchstart', (e) => {
         if (!gameStarted || gameOver || e.touches.length>1) return;
@@ -276,7 +315,7 @@
         touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
       }, { passive:false });
       canvas.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) e.preventDefault(); // 避免頁面滾動
+        if (gameStarted && !gameOver) e.preventDefault(); // Prevent page scrolling
       }, { passive:false });
       canvas.addEventListener('touchend', (e) => {
         if (!touchStart || !gameStarted || gameOver) return;
@@ -286,7 +325,7 @@
         const dy = t.clientY - touchStart.y;
         const adx = Math.abs(dx), ady = Math.abs(dy);
         const dt  = Date.now() - touchStart.time;
-        const MIN_DIST = 18;  // 可調 16~24
+        const MIN_DIST = 18;  // Adjustable 16~24
         const MIN_TIME = 30;
         if (dt >= MIN_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
           if (adx > ady) changeDirection(dx>0 ? 1 : -1, 0);
@@ -296,7 +335,7 @@
       }, { passive:true });
     }
 
-    // 重置
+    // Reset
     function resetGameState() {
       snake = [{ x: 10, y: 10 }];
       food = generateFoodPosition();
@@ -306,10 +345,10 @@
       gameOver = false;
       gameStarted = false;
 
-      pillStatus.textContent = '準備開始';
+      pillStatus.textContent = 'Ready to Start';
       pillStatus.className = 'pill info';
-      pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
-      pillScore.textContent = `分數：${score} / 10`;
+      pillTimer.textContent = `Time Left: ${timeLeft} seconds`;
+      pillScore.textContent = `Score: ${score} / 10`;
 
       startBtn.style.display = 'inline-flex';
       retryBtn.style.display = 'none';
@@ -323,13 +362,13 @@
       renderGame();
     }
 
-    // 開始
+    // Start
     function startGame() {
       if (!gameStarted && !gameOver) {
         gameStarted = true;
         startBtn.style.display = 'none';
         retryBtn.style.display = 'inline-flex';
-        pillStatus.textContent = '遊戲進行中';
+        pillStatus.textContent = 'Game in Progress';
         pillStatus.className = 'pill ok';
         document.getElementById('upBtn').disabled = false;
         document.getElementById('downBtn').disabled = false;
@@ -340,13 +379,13 @@
       }
     }
 
-    // 方向
+    // Direction
     function changeDirection(x, y) {
-      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return; // 防反向
+      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return; // Prevent reverse
       if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) direction = { x, y };
     }
 
-    // 食物
+    // Food
     function generateFoodPosition() {
       let p;
       do { p = { x: Math.floor(Math.random()*GRID_SIZE), y: Math.floor(Math.random()*GRID_SIZE) }; }
@@ -354,7 +393,7 @@
       return p;
     }
 
-    // 鍵盤
+    // Keyboard
     function handleKeyPress(e) {
       if (!gameStarted && !gameOver) startGame();
       if (gameStarted && !gameOver) {
@@ -365,30 +404,30 @@
       }
     }
 
-    // 更新
+    // Update
     function updateGame() {
       if (gameOver || !gameStarted || (direction.x===0 && direction.y===0)) return;
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-      // 撞牆/自撞
+      // Wall/self collision
       if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE ||
           snake.some(seg => seg.x===head.x && seg.y===head.y)) {
         gameOver = true;
-        pillStatus.textContent = '遊戲結束';
+        pillStatus.textContent = 'Game Over';
         pillStatus.className = 'pill warn';
-        showToast(`遊戲結束！最終分數: ${score}`);
+        showToast(`Game Over! Final Score: ${score}`);
         return;
       }
 
       snake.unshift(head);
 
-      // 吃食物
+      // Eat food
       if (head.x === food.x && head.y === food.y) {
         score += 1;
-        pillScore.textContent = `分數：${score} / 10`;
+        pillScore.textContent = `Score: ${score} / 10`;
         food = generateFoodPosition();
         if (score >= 10) {
-          unlockSpirit(); // 一律導向
+          unlockSpirit(); // Always redirect
           gameOver = true;
           return;
         }
@@ -399,15 +438,15 @@
       renderGame();
     }
 
-    // 繪製（✅ 放大蛇/食物，並置中）
+    // Render (scaled snake/food, centered)
     function renderGame() {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
 
-      // 蛇
+      // Snake
       const sW = CELL_SIZE * snakeScale;
       const sH = CELL_SIZE * snakeScale;
-      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2; // 置中偏移
+      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2; // Center offset
       snake.forEach((seg, i) => {
         const img = i===0 ? snakeHeadImage : snakeBodyImage;
         ctx.drawImage(
@@ -418,7 +457,7 @@
         );
       });
 
-      // 食物
+      // Food
       const fW = CELL_SIZE * foodScale;
       const fH = CELL_SIZE * foodScale;
       const fOff = (CELL_SIZE * (foodScale - 1)) / 2;
@@ -430,17 +469,17 @@
       );
     }
 
-    // 提示
+    // Toast
     function showToast(msg) {
       toast.textContent = msg; toast.style.display = 'block';
       setTimeout(()=>{ toast.style.display='none'; }, 2000);
     }
 
-    // 解鎖 → 不論是否已解鎖過，都會導向
+    // Unlock → Redirect regardless of prior unlock
     function unlockSpirit() {
       const spirit = {
-        id:'spirit_game4', name:'珍奶雞蛋仔',
-        image:'images/game-spirit4.png', page:'spirit_game4.html',
+        id:'spirit_game4', name:'Boba Egg Waffle',
+        image:'images/game-spirit4.png', page:'spirit_game4_eng.html',
         unlockDate:new Date().toISOString(), score:score
       };
       let spirits = [];
@@ -448,39 +487,39 @@
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 成功解鎖挑戰精靈：珍奶雞蛋仔！');
-        pillStatus.textContent = '挑戰成功！';
+        showToast('🎉 Successfully Unlocked Challenge Spirit: Boba Egg Waffle!');
+        pillStatus.textContent = 'Challenge Completed!';
         pillStatus.className = 'pill ok';
       } else {
-        showToast('你已經解鎖過珍奶雞蛋仔了喔！');
+        showToast('You have already unlocked Boba Egg Waffle!');
       }
       setTimeout(()=>{ window.location.href = spirit.page + '#unlocked'; }, 1500);
     }
 
-    // 迴圈
+    // Loop
     function gameLoop(ts) {
       if (gameOver) return;
       if (!lastUpdateTime) lastUpdateTime = ts;
       if (!lastSecondTime) lastSecondTime = ts;
 
-      if (ts - lastUpdateTime >= 200) { // 200ms 更新一次移動
+      if (ts - lastUpdateTime >= 200) { // Update movement every 200ms
         updateGame(); lastUpdateTime = ts;
       }
       if (gameStarted && ts - lastSecondTime >= 1000) {
         timeLeft--; lastSecondTime = ts; updateTimeBar();
-        pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
+        pillTimer.textContent = `Time Left: ${timeLeft} seconds`;
         if (timeLeft <= 0 && !gameOver) {
           gameOver = true;
-          pillStatus.textContent = '時間到！';
+          pillStatus.textContent = 'Time’s Up!';
           pillStatus.className = 'pill warn';
-          showToast(`時間到！最終分數: ${score}`);
+          showToast(`Time’s Up! Final Score: ${score}`);
           return;
         }
       }
       requestAnimationFrame(gameLoop);
     }
 
-    // 啟動
+    // Start
     Promise.all([
       new Promise(r=>{ snakeHeadImage.onload = r; }),
       new Promise(r=>{ snakeBodyImage.onload = r; }),
@@ -489,8 +528,8 @@
       initializeGame();
       requestAnimationFrame(gameLoop);
     }).catch(err => {
-      console.error('圖片加載失敗:', err);
-      showToast('遊戲圖片加載失敗，請刷新頁面重試');
+      console.error('Image loading failed:', err);
+      showToast('Failed to load game images, please refresh and try again');
     });
   </script>
 </body>

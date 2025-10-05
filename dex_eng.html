@@ -1,17 +1,17 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>精靈圖鑑 - 昂坪360 GO</title>
+  <title>NPmon Collection - Ngong Ping 360 GO</title>
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <script src="spirits.js"></script>
-  <!-- 引入jsQR库 -->
+  <!-- Include jsQR library -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
   
   <style>
-    /* 背景與基礎樣式 */
+    /* Background and base styles */
     body { 
       background-image: linear-gradient(to bottom, rgba(255,255,255,.85), rgba(255,255,255,.75) 30%, rgba(255,255,255,.65) 100%), 
                        url('images/background.png'); 
@@ -21,7 +21,7 @@
       background-attachment: fixed; 
     }
     
-    /* 標題區改進 */
+    /* Improved title area */
     .dex-hero { 
       text-align: center; 
       padding: clamp(18px, 5vw, 40px) 12px 8px;
@@ -58,7 +58,7 @@
       line-height: 1.6;
     }
     
-    /* 控制區改進 */
+    /* Improved control area */
     .dex-controls { 
       display:flex; 
       gap:12px; 
@@ -132,7 +132,7 @@
       box-shadow: 0 4px 12px rgba(var(--accent-rgb), 0.3);
     }
     
-    /* 進度條改進 */
+    /* Improved progress bar */
     .dex-progress { 
       background: var(--card); 
       border:1px solid var(--section-border); 
@@ -197,7 +197,7 @@
       text-align: center;
     }
     
-    /* 圖鑑內容區 */
+    /* Collection content area */
     .dex-wrap { 
       max-width: 1100px; 
       margin: 24px auto 32px; 
@@ -259,7 +259,7 @@
       } 
     }
     
-    /* 精靈卡片改進 */
+    /* Improved spirit card */
     .dex-card { 
       background: var(--section-bg); 
       border:1px solid var(--section-border); 
@@ -331,7 +331,7 @@
       background: rgba(0,0,0,0.05);
     }
     
-    /* 解鎖徽章改進 */
+    /* Improved unlock badge */
     .dex-card .ribbon {
       position: absolute; 
       top: 12px; 
@@ -349,7 +349,7 @@
     
     .dex-card.unknown .ribbon { display: none; }
     
-    /* 鎖定圖標改進 */
+    /* Improved lock icon */
     .dex-card.unknown::after {
       content: "🔒";
       position: absolute; 
@@ -368,7 +368,7 @@
       100% { transform: scale(1); }
     }
     
-    /* 未解鎖卡片懸停效果 */
+    /* Unlocked card hover effect */
     .dex-card.unknown:hover { 
       box-shadow: 0 12px 28px rgba(0,0,0,.18); 
     }
@@ -383,10 +383,11 @@
       cursor: pointer; 
     }
     
-    /* 頁腳改進 */
+    /* Improved footer */
     .dex-footer { 
       text-align: center; 
       margin: 28px 0 36px; 
+      padding: 0 16px;
     }
     
     .dex-footer .btn {
@@ -402,7 +403,7 @@
       box-shadow: 0 6px 20px rgba(0,0,0,0.18);
     }
     
-    /* QR扫描器样式 */
+    /* QR Scanner styles */
     .qr-modal { 
       display: none; 
       position: fixed; 
@@ -498,7 +499,7 @@
       margin: 20px 0;
     }
     
-    /* 掃描按鈕 */
+    /* Scan button */
     .scan-btn {
       display: inline-flex;
       align-items: center;
@@ -520,7 +521,7 @@
       transform: translateY(-2px);
     }
     
-    /* 響應式調整 */
+    /* Responsive adjustments */
     @media (max-width: 768px) {
       .dex-search { width: 100%; }
       .dex-controls { gap: 10px; }
@@ -539,7 +540,7 @@
       .dex-card { padding: 12px; }
     }
     
-    /* 主題顏色變量 */
+    /* Theme color variables */
     .theme-sky {
       --accent-rgb: 86, 170, 255;
       --accent-light: #7ac0ff;
@@ -570,16 +571,16 @@
   <a id="dex"></a>
   <div class="container">
     <div class="dex-hero">
-      <div class="dex-title">精靈圖鑑</div>
-            <div class="dex-sub">掃碼市集各處的精靈QR Code，收集全部即可換領神秘獎賞！立即出發探索！</div>
+      <div class="dex-title">NPmon Collection</div>
+      <div class="dex-sub">Scan the QR codes scattered throughout the enchanting Ngong Ping Village to find all of the NPmon. They are hidden in every corner, are you ready to hunt all of them? You can redeem a mystery PRICE after completing the collection! So what are you waiting for!? Let’s get started!</div>
 
       <div class="dex-controls">
-        <div class="dex-search"><input id="q" type="search" placeholder="搜尋名稱或類型…"></div>
+        <div class="dex-search"><input id="q" type="search" placeholder="Search by name or type…"></div>
         <div class="dex-tabs" id="status-filters">
-          <button class="dex-tab active" data-show="all">全部</button>
-          <button class="dex-tab" data-show="known">已解鎖</button>
-          <button class="dex-tab" data-show="unknown">未解鎖</button>
-          <button id="qr-scan-btn" class="scan-btn">📷 掃描QR碼</button>
+          <button class="dex-tab active" data-show="all">All</button>
+          <button class="dex-tab" data-show="known">Unlocked</button>
+          <button class="dex-tab" data-show="unknown">Locked</button>
+          <button id="qr-scan-btn" class="scan-btn">📷 Scan QR Code</button>
         </div>
       </div>
     </div>
@@ -594,48 +595,48 @@
     <div class="dex-wrap">
       <div class="dex-columns">
         <section class="dex-section">
-          <h3 class="dex-sec-title">探索系</h3>
+          <h3 class="dex-sec-title">Exploration Series</h3>
           <div class="dex-grid" id="dex-explore"></div>
         </section>
         <section class="dex-section">
-          <h3 class="dex-sec-title">挑戰系</h3>
+          <h3 class="dex-sec-title">Challenge Series</h3>
           <div class="dex-grid" id="dex-challenge"></div>
         </section>
       </div>
     </div>
 
     <div class="dex-footer">
-      <a class="btn secondary" href="index.html"><i class="fas fa-arrow-left"></i> 返回主頁</a>
-      <a class="btn secondary" href="dex_eng.html">🌐 English Version </a>
+      <a class="btn secondary" href="index_eng.html"><i class="fas fa-arrow-left"></i> Back to Home</a>
+       <a class="btn secondary" href="dex.html">🌐 中文</a>
     </div>
   </div>
 
-  <!-- QR码扫描器模态框 -->
+  <!-- QR Code Scanner Modal -->
   <div id="qr-modal" class="qr-modal">
     <div class="qr-scanner-container">
       <video id="qr-video"></video>
       <div class="qr-scanner-overlay"></div>
       <div class="qr-scanner-controls">
-        <button id="qr-close-btn" class="qr-close-btn">關閉相機</button>
+        <button id="qr-close-btn" class="qr-close-btn">Close Camera</button>
       </div>
       <div id="qr-result" class="qr-result"></div>
     </div>
   </div>
 
-  <!-- 摄像头错误提示 -->
+  <!-- Camera error message -->
   <div id="camera-error" class="camera-error">
-    無法啟動攝像頭。請確保您已授予相機權限，或使用手機內的QR code掃瞄器進行遊戲。
+    Unable to start camera. Please ensure you have granted camera permission, or use your phone's built-in QR code scanner for the game.
   </div>
 
   <script>
-    // 主題同步
+    // Theme synchronization
     (function syncTheme(){
       const saved = localStorage.getItem('np_theme');
       if (!saved) return;
       document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
       document.body.classList.add(saved);
       
-      // 設置主題顏色變量
+      // Set theme color variables
       const root = document.documentElement;
       if (saved === 'theme-sky') {
         root.style.setProperty('--accent-rgb', '86, 170, 255');
@@ -658,7 +659,7 @@
     const progressFill = document.getElementById('progress-fill');
     const progressText = document.getElementById('progress-text');
 
-    // --- QR码扫描功能 ---
+    // --- QR Code scanning functionality ---
     const qrScanBtn = document.getElementById('qr-scan-btn');
     const qrModal = document.getElementById('qr-modal');
     const qrVideo = document.getElementById('qr-video');
@@ -669,27 +670,27 @@
     let scanning = false;
     let stream = null;
     
-    // 打开扫描器
+    // Open scanner
     qrScanBtn.addEventListener('click', () => {
       qrModal.style.display = 'flex';
       qrResult.textContent = '';
       startScanning();
     });
     
-    // 关闭扫描器
+    // Close scanner
     qrCloseBtn.addEventListener('click', () => {
       stopScanning();
       qrModal.style.display = 'none';
       cameraError.style.display = 'none';
     });
     
-    // 开始扫描
+    // Start scanning
     async function startScanning() {
       try {
         cameraError.style.display = 'none';
         stream = await navigator.mediaDevices.getUserMedia({ 
           video: { 
-            facingMode: "environment" // 使用后置摄像头
+            facingMode: "environment" // Use rear camera
           } 
         });
         qrVideo.srcObject = stream;
@@ -698,13 +699,13 @@
         scanning = true;
         requestAnimationFrame(tick);
       } catch (err) {
-        console.error("无法访问摄像头: ", err);
+        console.error("Unable to access camera: ", err);
         cameraError.style.display = 'block';
         qrModal.style.display = 'none';
       }
     }
     
-    // 停止扫描
+    // Stop scanning
     function stopScanning() {
       scanning = false;
       if (stream) {
@@ -713,7 +714,7 @@
       }
     }
     
-    // 扫描循环
+    // Scanning loop
     function tick() {
       if (!scanning) return;
       
@@ -730,13 +731,13 @@
         });
         
         if (code) {
-          // 找到QR码
-          qrResult.textContent = `找到QR码: ${code.data}`;
+          // Found QR code
+          qrResult.textContent = `Found QR code: ${code.data}`;
           
-          // 处理扫描到的数据
+          // Process scanned data
           processQRCode(code.data);
           
-          // 暂停一下再继续扫描
+          // Pause briefly before continuing
           scanning = false;
           setTimeout(() => {
             scanning = true;
@@ -751,20 +752,20 @@
       }
     }
     
-    // 改进的URL验证函数
+    // Improved URL validation function
     function isValidUrl(string) {
       try {
-        // 检查是否包含协议头，如果没有则添加https://
+        // Check if it contains protocol, if not add https://
         if (!string.includes('://')) {
           string = 'https://' + string;
         }
         
         const url = new URL(string);
         
-        // 确保有有效的域名
+        // Ensure valid domain name
         if (!url.hostname) return false;
         
-        // 检查常见协议
+        // Check common protocols
         const validProtocols = ['http:', 'https:', 'mailto:', 'tel:'];
         if (!validProtocols.includes(url.protocol)) return false;
         
@@ -774,69 +775,69 @@
       }
     }
     
-    // 处理扫描到的QR码数据
+    // Process scanned QR code data
     function processQRCode(data) {
       try {
-        // 检查是否是URL
+        // Check if it's a URL
         if (isValidUrl(data)) {
-          qrResult.textContent = `找到網頁: ${data}`;
+          qrResult.textContent = `Found webpage: ${data}`;
           
-          // 显示确认对话框
-          if (confirm(`掃瞄到網頁地址: ${data}\n\n是否要訪問這個頁面？`)) {
-            // 使用location.href而不是window.open来避免弹出窗口阻止
+          // Show confirmation dialog
+          if (confirm(`Scanned webpage address: ${data}\n\nDo you want to visit this page?`)) {
+            // Use location.href instead of window.open to avoid popup blocking
             setTimeout(() => {
               window.location.href = data;
             }, 100);
             
-            // 可选：关闭扫描器
+            // Optional: Close scanner
             stopScanning();
             qrModal.style.display = 'none';
           }
         } else {
-          // 尝试解析为JSON（精灵数据）
+          // Try to parse as JSON (spirit data)
           try {
             const spiritData = JSON.parse(data);
             
-            // 检查是否包含必要的精灵字段
+            // Check if it contains necessary spirit fields
             if (spiritData.id && spiritData.name) {
-              // 添加到收集列表
+              // Add to collection list
               const collectedArray = JSON.parse(localStorage.getItem('spirits') || '[]');
               
-              // 检查是否已收集
+              // Check if already collected
               const alreadyCollected = collectedArray.some(s => s.id === spiritData.id);
               
               if (!alreadyCollected) {
-                // 添加到收集列表
+                // Add to collection list
                 collectedArray.push(spiritData);
                 localStorage.setItem('spirits', JSON.stringify(collectedArray));
                 
-                // 更新UI
+                // Update UI
                 collected.add(spiritData.id);
                 render(getCurrentFilter(), q.value);
                 
-                // 显示成功消息
-                qrResult.textContent = `成功收集: ${spiritData.name}`;
-                alert(`🎉 成功收集到新的精靈：${spiritData.name}`);
+                // Show success message
+                qrResult.textContent = `Successfully collected: ${spiritData.name}`;
+                alert(`🎉 Successfully collected new spirit: ${spiritData.name}`);
               } else {
-                qrResult.textContent = `已收集过: ${spiritData.name}`;
-                alert(`✅ 你已經收集過 ${spiritData.name} 了`);
+                qrResult.textContent = `Already collected: ${spiritData.name}`;
+                alert(`✅ You have already collected ${spiritData.name}`);
               }
             } else {
-              // 不是有效的精灵数据
-              qrResult.textContent = `掃瞄到: ${data}`;
+              // Not valid spirit data
+              qrResult.textContent = `Scanned: ${data}`;
             }
           } catch (jsonError) {
-            // 不是JSON格式，作为文本处理
-            qrResult.textContent = `掃瞄到: ${data}`;
+            // Not JSON format, handle as text
+            qrResult.textContent = `Scanned: ${data}`;
           }
         }
       } catch (e) {
-        console.error("處理出错:", e);
-        qrResult.textContent = `處理出错: ${e.message}`;
+        console.error("Processing error:", e);
+        qrResult.textContent = `Processing error: ${e.message}`;
       }
     }
 
-    // 渲染函數
+    // Render function
     function getCurrentFilter() {
       return document.querySelector('#status-filters .dex-tab.active')?.dataset.show || 'all';
     }
@@ -865,7 +866,7 @@
 
         if (known) {
           card.innerHTML = `
-            <span class="ribbon">✅ 已解鎖</span>
+            <span class="ribbon">✅ Unlocked</span>
             <a href="${s.page}" style="text-decoration:none; color:inherit;">
               <img src="${s.image}" alt="${s.name}">
               <div class="dex-name">${s.name}</div>
@@ -886,26 +887,26 @@
       listExplore.forEach(s => gridExplore.appendChild(buildCard(s)));
       listChallenge.forEach(s => gridChallenge.appendChild(buildCard(s)));
 
-      // 更新進度條
+      // Update progress bar
       const total = allSpirits.length;
       const have = collected.size;
       const pct = Math.min(100, Math.round((have / total) * 100));
       progressFill.style.width = pct + '%';
       progressText.textContent = `${have} / ${total}`;
       
-      // 檢查收集成就
+      // Check collection achievements
       if (have === 6) {
         setTimeout(() => {
-          alert('🎉 恭喜收集到 6 隻精靈！前往動感影院預約櫃位兌換禮物');
+          alert('🎉 Congratulations on collecting 6 spirits! Go to the Motion 360 Cinema counter to redeem your gift');
         }, 800);
       } else if (have === total) {
         setTimeout(() => {
-          alert('🏆 恭喜收集完成！前往動感影院預約櫃位兌換限定禮物');
+          alert('🏆 Congratulations on completing the collection! Go to the Motion 360 Cinema counter to redeem your limited edition gift');
         }, 800);
       }
     }
 
-    // 事件監聽
+    // Event listeners
     statusButtons.forEach(btn => {
       if (btn.id !== 'qr-scan-btn') {
         btn.addEventListener('click', () => {
@@ -923,7 +924,7 @@
       render(active, q.value);
     });
 
-    // 初始渲染
+    // Initial render
     render('all', '');
   </script>
 </body>

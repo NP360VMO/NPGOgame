@@ -1,9 +1,48 @@
-<!DOCTYPE html>
-<html lang="zh">
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>挑戰遊戲｜黃哞哞 快閃反應</title>
+  <title>Challenge Game | Golden Moo Moo</title>
   <link rel="stylesheet" href="styles.css">
   <style>
     :root{
@@ -41,11 +80,11 @@
     .play-area{position:relative;border-radius:12px;min-height:360px;max-width:720px;margin:0 auto;background:#fff;}
     #gameArea{position:relative;width:100%;height:420px;overflow:hidden;border-radius:12px}
 
-    /* 頂部進度條 */
+    /* Top progress bar */
     .progress{position:absolute;left:0;top:0;width:100%;height:8px;background:#f1f1f1}
     .bar{height:100%;width:100%;transform-origin:left center;background:linear-gradient(90deg,#8ad398,#ffd166);}
 
-    /* 目標動畫 */
+    /* Target animation */
     #target{width:100px;height:100px;position:absolute;display:none;cursor:pointer;user-select:none;-webkit-user-drag:none;touch-action:manipulation;
       filter:drop-shadow(0 10px 22px rgba(0,0,0,.16))}
     .pop{animation:pop .18s ease-out}
@@ -71,20 +110,20 @@
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">挑戰遊戲 - 黃哞哞</div>
-        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+        <div class="title">Challenge Game -  Golden Moo Moo</div>
+        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit1.png" alt="黃哞哞"></div>
+        <div class="img-wrap"><img src="images/game-spirit1.png" alt="Golden Moo Moo"></div>
         <div class="intro">
-          <p><strong>玩法：</strong>於 <strong>1.5 秒</strong> 內點擊畫面中出現嘅 <strong>黃哞哞</strong>；在 <strong>20 秒</strong> 內連續成功 <strong>10 次</strong> 即可解鎖。</p>
-          <p>成功次數愈多，出現時間會愈短；挑戰你嘅反應！</p>
+          <p><strong>How to Play:</strong>You must click  <strong>Golden Moo Moo</strong> within <strong>1.5 seconds</strong> of  him appearing. Land <strong>10 consecutive clicks</strong> within <strong>20 seconds</strong> to unlock the next stage.</p>
+          <p>The more successful clicks, the shorter the appearance time; test your reaction!</p>
           <div class="status-bar">
-            <span class="pill info" id="pill-status">尚未開始</span>
-            <span class="pill" id="pill-success">成功：0 / 10</span>
-            <span class="pill warn" id="pill-timer">剩餘時間：20 秒</span>
-            <a class="btn secondary" href="game1_eng.html">🌐 English Version </a>
+            <span class="pill info" id="pill-status">Not Started</span>
+            <span class="pill" id="pill-success">Success: 0 / 10</span>
+            <span class="pill warn" id="pill-timer">Time Left: 20 seconds</span>
+            <a class="btn secondary" href="game1.html">🌐 中文 </a>
           </div>
         </div>
       </div>
@@ -94,24 +133,24 @@
           <div class="play-area">
             <div class="progress"><div class="bar" id="timeBar"></div></div>
             <div id="gameArea">
-              <img src="images/game-spirit1.png" id="target" alt="黃哞哞">
+              <img src="images/game-spirit1.png" id="target" alt="Golden Moo Moo">
             </div>
           </div>
           <div class="actions">
-            <button class="btn" id="btn-start">▶️ 開始遊戲</button>
-            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
-            <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
+            <button class="btn" id="btn-start">▶️ Start Game</button>
+            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 Restart</button>
+            <a class="btn secondary" href="dex_eng.html#dex">📖 Back to Dex</a>
           </div>
         </div>
-        <div class="actions"><a class="btn secondary" href="index.html">🔙 返回主頁</a></div>
+        <div class="actions"><a class="btn secondary" href="index_eng.html">🔙 Back to Home</a></div>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 已解鎖：黃哞哞！</div>
+  <div class="toast" id="toast">🎉 Unlocked: Golden Moo Moo!</div>
 
   <script>
-    // 主題同步（如首頁選過主題）
+    // Theme synchronization (if theme selected on homepage)
     (function syncTheme(){
       const saved = localStorage.getItem('np_theme');
       if (!saved) return;
@@ -134,12 +173,12 @@
     function setTimeBar(){
       const pct = Math.max(0,totalTime/20)*100;
       timeBar.style.width = pct + '%';
-      const hue = Math.max(0, Math.min(120, pct*1.2)); // 0~120（綠→黃→紅）
+      const hue = Math.max(0, Math.min(120, pct*1.2)); // 0~120 (green→yellow→red)
       timeBar.style.background = `linear-gradient(90deg,hsl(${hue},60%,55%),#ffd166)`;
     }
 
     function updateTimerDisplay(){ 
-      pillTimer.textContent = `剩餘時間：${Math.ceil(Math.max(0,totalTime))} 秒`; 
+      pillTimer.textContent = `Time Left: ${Math.ceil(Math.max(0,totalTime))} seconds`; 
       setTimeBar();
     }
     
@@ -151,7 +190,7 @@
       totalTime -= dt;
       updateTimerDisplay();
       if(totalTime <= 0){
-        endGame('⏱️ 時間到！請再試一次');
+        endGame('⏱️ Time’s Up! Try Again');
         return;
       }
       requestAnimationFrame(timerLoop);
@@ -163,30 +202,30 @@
       target.style.display = 'none';
       running = false;
       pillStatus.textContent = message;
-      btnRetry.style.display = 'inline-flex';   // 時間到時可立即重開
+      btnRetry.style.display = 'inline-flex';   // Allow immediate restart when time’s up
       btnStart.style.display = 'none';
     }
 
     function showTarget(){
       const areaRect = gameArea.getBoundingClientRect();
       const size = target.getBoundingClientRect();
-      const margin = 29; // 邊界緩衝距離
+      const margin = 29; // Boundary buffer
       const x = margin + Math.random() * Math.max(0, areaRect.width  - size.width  - margin*2);
       const y = margin + Math.random() * Math.max(0, areaRect.height - size.height - margin*2);
       target.style.left = x + 'px';
       target.style.top  = y + 'px';
       target.style.display = 'block';
       target.classList.remove('pop');
-      void target.offsetWidth; // 重新觸發動畫
+      void target.offsetWidth; // Retrigger animation
       target.classList.add('pop');
 
       timeoutId = setTimeout(() => {
-        // 太慢：立即提供「重新開始」
+        // Too slow: provide immediate restart option
         target.style.display = 'none';
-        pillStatus.textContent = '太慢了！請再試一次';
+        pillStatus.textContent = 'Too Slow! Try Again';
         success = 0;
-        pillSuccess.textContent = `成功：${success} / 10`;
-        btnRetry.style.display = 'inline-flex'; // 立刻可重開
+        pillSuccess.textContent = `Success: ${success} / 10`;
+        btnRetry.style.display = 'inline-flex'; // Immediate restart available
       }, showDelay);
     }
 
@@ -195,13 +234,13 @@
       clearTimeout(timeoutId);
       target.style.display = 'none';
       success++;
-      pillSuccess.textContent = `成功：${success} / 10`;
+      pillSuccess.textContent = `Success: ${success} / 10`;
       showDelay = Math.max(400, showDelay - 50);
       if (success >= 10) {
         clearInterval(intervalId);
         unlockSpirit();
       } else {
-        pillStatus.textContent = `成功 ${success} 次，再接再厲！`;
+        pillStatus.textContent = `Success ${success} times, keep going!`;
         setTimeout(showTarget, 420);
       }
     }
@@ -211,9 +250,9 @@
 
     function startGame(){
       success = 0; totalTime = 20; showDelay = 1500; running = true;
-      pillStatus.textContent = '遊戲開始！準備好點擊黃哞哞';
+      pillStatus.textContent = 'Game Started! Get ready to click Golden Moo Moo';
       updateTimerDisplay();
-      pillSuccess.textContent = `成功：0 / 10`;
+      pillSuccess.textContent = `Success: 0 / 10`;
       btnStart.style.display = 'none';
       btnRetry.style.display = 'none';
       clearInterval(intervalId); clearTimeout(timeoutId);
@@ -229,29 +268,29 @@
     }
 
     function unlockSpirit(){
-      const spirit = { id:'spirit_game1', name:'黃哞哞', image:'images/game-spirit1.png', page:'spirit_game1.html',
+      const spirit = { id:'spirit_game1', name:'Golden Moo Moo', image:'images/game-spirit1.png', page:'spirit_game1_eng.html',
         unlockDate:new Date().toISOString(), score:success };
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 已解鎖：黃哞哞！'); pillStatus.textContent = '🎉 成功解鎖挑戰精靈：黃哞哞！';
+        showToast('🎉 Unlocked: Golden Moo Moo!'); pillStatus.textContent = '🎉 Successfully Unlocked Challenge Spirit: Golden Moo Moo!';
       } else {
-        pillStatus.textContent = '你已經解鎖過黃哞哞了喔！';
+        pillStatus.textContent = 'You have already unlocked Golden Moo Moo!';
       }
 
       target.style.display = 'none'; running = false; clearInterval(intervalId);
 
-      // 2 秒後自動轉去精靈頁
+      // Redirect to spirit page after 2 seconds
       setTimeout(() => {
-        window.location.href = 'spirit_game1.html';
+        window.location.href = 'spirit_game1_eng.html';
       }, 2000);
     }
 
-    // 按鈕
+    // Buttons
     btnStart.addEventListener('click', startGame);
     btnRetry.addEventListener('click', startGame);
 
-    // 可選：按空白鍵快速重開（遊戲未進行時）
+    // Optional: Press space to quick restart (when game is not running)
     document.addEventListener('keydown', (e)=>{
       if(e.code==='Space' && !running){
         e.preventDefault();

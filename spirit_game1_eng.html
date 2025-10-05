@@ -1,0 +1,124 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spirit Profile - Golden Moo Moo</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-warm layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">Mon Profile - Golden Moo Moo</div>
+        <div class="badge">Diligent · Guardian · Steady</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit1.png" alt="Golden Moo Moo" />
+        </div>
+        <div class="intro">
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Hey there, Golden Moo Mon—our super-speedy guardian of Ngong Ping’s wild forests and the heartwarming best friend of our whole village! This joyful pup steals the hearts of everyone who encounters him; we've woven an unbreakable, soul-deep bond with him, and oh, how we cherish and adore him endlessly!</p>
+          <p>With his chunky build and radiant golden-yellow fur shimmering like a sun-kissed rice field, plus those adorable curved horns that whisper "cool!", his tender “Spirit of Diligence and Guardianship.” He pours its heartfelt magic into fueling hard work and nurturing the land, sparking explosive crop growth and wrapping weary travelers in a warm, invigorating energy hug!</p>
+        </div>
+      </div>
+
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Southern Yellow Cattle</h3>
+        <p>The Southern Yellow Cattle is a super cute member of China’s three big yellow cattle breeds, hanging out in southern spots like Guangdong, Fujian, Hainan, and even around Lantau Island!</p>
+        <p>These adorable feral cattle love to wander the fields in Lantau’s cozy rural areas, like Mui Wo and Lamma Island. Spot them chilling in the grass, adding a sweet, natural vibe to your travels!</p>
+      </div>
+
+      <div class="grid actions-info">
+        <div class="section">
+          <h3>✅ Proper Ways to Interact with Cattle</h3>
+          <ul>
+            <li>Stay calm and quiet, avoiding loud shouts or impulsive actions to prevent startling the cattle.</li>
+            <li>Keep a safe distance from the cattle, and do not touch, chase, or pat them, especially calves; mother cows may attack to protect their young.</li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>🚫 Behaviors to Avoid Around Cattle</h3>
+          <ul>
+            <li>Do not feed them any food, including vegetables, meat, or processed foods.</li>
+            <li>Avoid using flash photography, especially in low-light conditions, to prevent startling them.</li>
+            <li>Do not make loud noises, create disturbances, or harass cattle with objects.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game1.html">🌐 中文 </a>
+            </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
+              </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game1',
+      name: 'Golden Moo Moo',
+      image: 'images/game-spirit1.png',
+      page: 'spirit_game1_eng.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
+      } else {
+        document.getElementById('message').innerText = 'You already own Golden Moo Moo!';
+      }
+    }
+  </script>
+</body>
+</html>

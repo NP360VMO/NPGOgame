@@ -1,27 +1,27 @@
 <!DOCTYPE html>
-<html lang="zh">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>昂坪360 GO</title>
+  <title>Ngong Ping 360 GO</title>
 
-  <!-- ✅ Google tag (gtag.js) — 換成測量 ID -->
+  <!-- ✅ Google tag (gtag.js) — Replace with Measurement ID -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
     function gtag(){ dataLayer.push(arguments); }
     gtag('js', new Date());
-    gtag('config', 'G-B3740R31MS'); // ← 改成測量 ID
+    gtag('config', 'G-B3740R31MS'); // ← Replace with Measurement ID
   </script>
 
-  <!-- ✅ QR 掃描庫（不影響原本功能） -->
+  <!-- ✅ QR Code Scanning Library (does not affect original functionality) -->
   <script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.min.js"></script>
 
   <link rel="stylesheet" href="styles.css">
   <script src="spirits.js"></script>
 
   <style>
-    /* 保留原本樣式 */
+    /* Keep original styles */
     body { background-image: url('images/background.png'); background-size: cover; background-position: center; background-repeat: no-repeat; background-attachment: fixed; }
     .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
     .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
@@ -45,7 +45,7 @@
     .home-footer { text-align:center; margin: 18px 0 24px; margin-bottom: 30px; }
     .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
 
-    /* 兌換區塊樣式 */
+    /* Redemption block styles */
     .redeem-area { margin-top: 8px; text-align: center; }
     .redeem-btn { display:inline-flex; align-items:center; gap:6px; padding:10px 14px; border-radius:12px; border: 2px solid var(--accent); background: var(--accent); color:#fff; font-weight:800; cursor:pointer; }
     .redeem-note { margin-top:6px; font-size:12px; color:rgba(0,0,0,.6); }
@@ -56,7 +56,7 @@
       .card-spirit img { width: 100px; }
     }
 
-    /* ✅ QR 掃描器樣式（僅新增，不覆蓋原樣式） */
+    /* ✅ QR Scanner styles (only added, does not override original styles) */
     .qr-modal { display: none; position: fixed; inset: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 1000; justify-content: center; align-items: center; flex-direction: column; }
     .qr-scanner-container { position: relative; width: 80%; max-width: 520px; background: #000; border-radius: 12px; overflow: hidden; box-shadow: 0 0 20px rgba(0,0,0,0.5); }
     #qr-video { width: 100%; display: block; }
@@ -92,65 +92,65 @@
     <div class="home-hero">
       <div class="home-topbar">
   <div class="theme-select">
-    🎨 主題：
+    🎨 Theme：
     <select id="theme-picker" aria-label="選擇主題">
-      <option value="theme-sky">天空藍</option>
-      <option value="theme-grass">草地綠</option>
-      <option value="theme-warm">暖黃</option>
-      <option value="theme-dimsum">飲茶橙</option>
-      <option value="theme-boba">奶茶棕</option>
+      <option value="theme-sky">Sky Blue</option>
+      <option value="theme-grass">Grass Green</option>
+      <option value="theme-warm">Warm Yellow</option>
+      <option value="theme-dimsum">Drink Tea Orange</option>
+      <option value="theme-boba">Milk Tea Brown</option>
     </select>
   </div>
-  <button id="audio-btn" class="audio-ctl">▶️ 背景音樂</button>
+  <button id="audio-btn" class="audio-ctl">▶️ Background Music</button>
   <!-- 新增英文版按鈕 -->
-  <a href="index_eng.html" class="audio-ctl" style="text-decoration: none;">🌐 English Version</a>
+  <a href="index.html" class="audio-ctl" style="text-decoration: none;">🌐 中文</a>
 </div>
 
-      <div class="home-title">昂坪360 GO</div>
-      <div class="home-sub">在昂坪市集追尋精靈的隱秘身影，解鎖更多神秘線索，開啟一場奇幻冒險！</div>
+      <div class="home-title">Ngong Ping 360 GO</div>
+      <div class="home-sub">Find the secret NPmons in Ngong Ping Village, solve more hidden clues, and start an exciting magical journey!</div>
       
-  <!-- === 可收合：遊戲玩法（與 index 視覺一致） === -->
+  <!-- === Collapsible: Game Guide (consistent with index visuals) === -->
   <div class="howto-card card-collapsible">
     <details id="howto" class="collapsible">
-      <summary class="collapsible-head">🎮 遊戲玩法（點擊展開 / 收合）</summary>
+      <summary class="collapsible-head">🎮 Game Guide (Click to Expand / Collapse)</summary>
       <div class="collapsible-body">
         <div class="howto-copy">
-          <p>歡迎來到昂坪市集！這裡不僅充滿文化氣息，更隱藏著許多可愛的精靈夥伴，等你來發現。</p>
-          <p><strong>玩法說明：</strong>拿起手機化身探險家，細心探索市集每個角落；當你看見「精靈 QR Code 立牌」，輕鬆一掃，該精靈便會立即收錄到你的手機圖鑑中。</p>
-          <p><strong>收集目標：</strong>每收集一隻精靈，就離完成更近一步；收集六隻精靈，可獲一次抽取神秘獎勵機會。集齊所有精靈，還可獲得隱藏版獎勵！請於17:00前到動感影院預約櫃位兌換禮物！</p>
-          <p>現在就出發，展開這場融合科技與文化的趣味探索，把昂坪的精靈全部帶回家吧！</p>
+          <p>Welcome to Ngong Ping Village! This place is not only full of cultural atmosphere. There are many delightful NPmon partners hidden here, waiting for everyone to discover them.</p>
+          <p><strong>How to Play:</strong> Take your phone and become a NPmon’s explorer, carefully explore every corner of the village; when you find a "NPmon QR Code Sign", simply scan it, and the NPmon will be immediately captured to your phone's collection.</p>
+          <p><strong>Collection Goal:</strong> Each NPmon you successfully collected can bring you one step closer to completion; collecting six NPmons gives you one chance to draw a mystery reward. Collect all NPmons to receive a hidden reward! Please redeem your gift at the Motion 360 counter before 17:00!</p>
+          <p>Set off now and start this fun exploration that blends technology and culture, and take all the NPmons of Ngong Ping home with you!</p>
         </div>
         <div class="howto-links">
-          <a class="btn" href="dex.html#dex">📖 前往精靈圖鑑</a>
-          <a class="btn secondary" href="map.html">🗺️ 開啟精靈地圖</a>
+          <a class="btn" href="dex_eng.html#dex">📖 Go to NPmon Collection</a>
+          <a class="btn secondary" href="map_eng.html">🗺️ Open NPmon Map</a>
         </div>
 </div>
     </details>
   </div>
 
 <div class="home-actions">
-        <a class="btn" href="dex.html#dex">📖 查看精靈圖鑑</a>
-        <a class="btn" href="map.html">🗺️ 前往地圖</a>
-        <!-- ✅ 新增：開啟 QR Code 掃描器的按鈕（沿用原本 .btn 樣式） -->
-        <button id="qr-scan-btn" class="btn">📷 掃描QR碼</button>
+        <a class="btn" href="dex_eng.html#dex">📖 View NPmon Collection</a>
+        <a class="btn" href="map_eng.html">🗺️ Go to Map</a>
+        <!-- ✅ Added: Button to open QR Code Scanner (uses original .btn style) -->
+        <button id="qr-scan-btn" class="btn">📷 Scan QR Code</button>
         <div style="height:20px;"></div>
       </div>
 
       <div class="gallery-card">
-        <div class="home-sub" style="margin-bottom:6px;"><strong>已收集的精靈</strong></div>
+        <div class="home-sub" style="margin-bottom:6px;"><strong>Collected NPmons</strong></div>
         <div class="progress">
           <div class="progress-bar"><div id="progress-fill" class="progress-fill"></div></div>
           <div id="progress-text" style="font-weight:800; color:var(--accent-ink);">0 / 0</div>
         </div>
-        <!-- 提示訊息區域 -->
+        <!-- Hint message area -->
         <div id="collection-hint" style="margin-top: 8px; font-size: 14px; color: var(--accent-ink); font-weight: 600; text-align: center;" aria-live="polite"></div>
-        <!-- 兌換區域（收集≥6時顯示） -->
+        <!-- Redemption area (shown when collected ≥6) -->
         <div id="redeem-area" class="redeem-area" aria-live="polite"></div>
       </div>
 
-      <!-- ✅ 相機權限錯誤提示（僅在無法開相機時顯示） -->
+      <!-- ✅ Camera permission error prompt (only shown when camera cannot be accessed) -->
       <div id="camera-error" class="camera-error">
-        無法啟動攝像頭。請確保您已授予相機權限，或使用手機內的 QR code 掃瞄器進行遊戲。
+        Unable to start camera. Please ensure you have granted camera permission, or use your phone's built-in QR code scanner for the game.
       </div>
     </div>
 
@@ -159,26 +159,26 @@
     </div>
 
     <div class="home-footer">
-      <a class="btn secondary" href="dex.html#dex">📖 去圖鑑解鎖線索</a>
-      <a class="btn secondary" href="map.html" style="margin-left: 10px;">🗺️ 查看地圖</a>
+      <a class="btn secondary" href="dex_eng.html#dex">📖 Go to Collection for Clues</a>
+      <a class="btn secondary" href="map_eng.html" style="margin-left: 10px;">🗺️ View Map</a>
     </div>
 
     <div style="max-width: 1024px; margin: 12px auto 24px; padding: 0 12px; margin-bottom: 30px;">
       <div style="height:1px; background: var(--section-border); margin: 12px 0 8px;"></div>
       <div style="display:flex; align-items:center; justify-content: space-between; gap:10px; flex-wrap:wrap;">
-        <small style="color: rgba(0,0,0,.6);">⚠️ 小心操作：重置會清除你所有已收集的精靈紀錄與兌換狀態，且無法還原。</small>
-        <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 重置收集記錄</button>
+        <small style="color: rgba(0,0,0,.6);">⚠️ Caution: Resetting will clear all your collected NPmon records and redemption status, and cannot be undone.</small>
+        <button id="reset-btn" class="btn secondary" style="padding:8px 12px;">🔄 Reset Collection</button>
       </div>
     </div>
   </div>
 
-  <!-- ✅ QR 碼掃描器模態框（不影響原本結構） -->
-  <div id="qr-modal" class="qr-modal" aria-hidden="true" role="dialog" aria-label="QR 掃描器">
+  <!-- ✅ QR Code Scanner Modal (does not affect original structure) -->
+  <div id="qr-modal" class="qr-modal" aria-hidden="true" role="dialog" aria-label="QR Scanner">
     <div class="qr-scanner-container">
       <video id="qr-video" playsinline></video>
       <div class="qr-scanner-overlay"></div>
       <div class="qr-scanner-controls">
-        <button id="qr-close-btn" class="qr-close-btn">關閉相機</button>
+        <button id="qr-close-btn" class="qr-close-btn">Close Camera</button>
       </div>
       <div id="qr-result" class="qr-result"></div>
     </div>
@@ -209,13 +209,13 @@
     let playing = false;
     audioBtn.addEventListener('click', () => {
       if (!playing) {
-        audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ 背景音樂'; }).catch(() => alert('瀏覽器封鎖了自動播放，請再按一次播放。'));
+        audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ BGM'; }).catch(() => alert('Browser blocked autoplay, please press play again.'));
       } else {
-        audio.pause(); playing = false; audioBtn.textContent = '▶️ 背景音樂';
+        audio.pause(); playing = false; audioBtn.textContent = '▶️ BGM';
       }
     });
 
-    // --- GA 事件工具 ---
+    // --- GA Event Tool ---
     function gaEvent(name, params){ if (window.gtag) { window.gtag('event', name, params || {}); } }
 
     // --- Collected spirits render ---
@@ -229,7 +229,7 @@
 
     const collected = JSON.parse(localStorage.getItem('spirits') || '[]');
 
-    // --- 兌換狀態（純前端） ---
+    // --- Redemption status (frontend only) ---
     const REDEEM_KEY = 'np_redeemed'; // { used: boolean, time: ISO }
     const REDEEM_PASSWORD = 'vmovmo';
 
@@ -247,7 +247,7 @@
     }
 
     function updateRedeemUI() {
-      const eligible = (collected.length >= 6); // 門檻：6隻或以上
+      const eligible = (collected.length >= 6); // Threshold: 6 or more
       const redeemed = isRedeemed();
       redeemArea.innerHTML = '';
       if (!eligible) return;
@@ -255,29 +255,29 @@
       if (redeemed) {
         const t = getRedeemTime();
         redeemArea.innerHTML = `
-          <div class="redeem-status">✅ 已兌換${t ? '（'+formatTime(t)+'）' : ''}</div>
-          <div class="redeem-note">如需協助請聯絡現場工作人員。</div>
+          <div class="redeem-status">✅ Redeemed${t ? ' ('+formatTime(t)+')' : ''}</div>
+          <div class="redeem-note">Please contact on-site staff for assistance.</div>
         `;
         return;
       }
       const btn = document.createElement('button');
       btn.className = 'redeem-btn';
-      btn.textContent = '🎁 兌換獎品';
+      btn.textContent = '🎁 Redeem Prize';
       btn.addEventListener('click', () => {
-        const input = prompt('請由工作人員輸入兌換密碼：');
+        const input = prompt('Please have staff enter the redemption password:');
         if (input === null) return;
         if (input === REDEEM_PASSWORD) {
           setRedeemed();
           redeemArea.innerHTML = `
-            <div class="redeem-status">✅ 已兌換（${formatTime(new Date())}）</div>
-            <div class="redeem-note">感謝參與！</div>
+            <div class="redeem-status">✅ Redeemed (${formatTime(new Date())})</div>
+            <div class="redeem-note">Thank you for participating!</div>
           `;
-        } else { alert('密碼錯誤，未能完成兌換。'); }
+        } else { alert('Incorrect password, redemption failed.'); }
       });
 
       const note = document.createElement('div');
       note.className = 'redeem-note';
-      note.textContent = '（收集滿 6 隻或以上方可兌換；由工作人員操作）';
+      note.textContent = '(Collect 6 or more to redeem; operated by staff)';
       redeemArea.appendChild(btn); redeemArea.appendChild(note);
     }
 
@@ -286,8 +286,8 @@
       if (collected.length === 0) {
         container.innerHTML = `
           <div class="card-spirit empty" style="grid-column: 1 / -1;">
-            <p>你還未收集任何精靈，快到市集探索吧！</p>
-            <p><a class="btn" href="dex.html#dex">📖 前往精靈圖鑑</a></p>
+            <p>You haven't collected any spirits yet, go explore the village!</p>
+            <p><a class="btn" href="dex_eng.html#dex">📖 Go to Spirit Collection</a></p>
           </div>`;
       } else {
         collected.forEach(spirit => {
@@ -301,9 +301,9 @@
           container.appendChild(div);
         });
         if (collected.length >= 6 && collected.length < total) {
-          hintElement.innerHTML = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
+          hintElement.innerHTML = 'Congratulations on collecting 6 spirits! Please redeem your gift at the Motion 360 Cinema counter before 17:00';
         } else if (collected.length === total && total > 0) {
-          hintElement.innerHTML = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
+          hintElement.innerHTML = '🏆 Congratulations on completing the collection! Redeem your limited gift at the Motion 360 Cinema counter before 17:00';
         }
       }
       const denom = total || 0; const pct = denom ? Math.min(100, Math.round((collected.length / denom) * 100)) : 0;
@@ -318,7 +318,7 @@
     function init(){ const total = getTotalFromDex(); renderCollected(total); }
 
     resetBtn.addEventListener('click', () => {
-      if (confirm('確定要重置所有收集記錄與兌換狀態？此操作無法還原。')) {
+      if (confirm('Are you sure you want to reset all collection records and redemption status? This action cannot be undone.')) {
         localStorage.removeItem('spirits');
         localStorage.removeItem('np_redeemed');
         localStorage.removeItem('ga_evt_6');
@@ -328,7 +328,7 @@
     });
 
     // ==============================
-    // ✅ QR 碼掃描功能（僅新增）
+    // ✅ QR Code Scanning Functionality (only added)
     // ==============================
     const qrScanBtn = document.getElementById('qr-scan-btn');
     const qrModal = document.getElementById('qr-modal');
@@ -338,7 +338,7 @@
 
     let scanning = false; let stream = null; let lastScannedUrl = null;
 
-    // 打開掃描器
+    // Open scanner
     if (qrScanBtn) {
       qrScanBtn.addEventListener('click', () => {
         qrModal.style.display = 'flex';
@@ -348,7 +348,7 @@
       });
     }
 
-    // 關閉掃描器
+    // Close scanner
     qrCloseBtn.addEventListener('click', () => {
       stopScanning();
       qrModal.style.display = 'none';
@@ -356,7 +356,7 @@
       if (cameraError) cameraError.style.display = 'none';
     });
 
-    // 開始掃描
+    // Start scanning
     async function startScanning() {
       try {
         if (cameraError) cameraError.style.display = 'none';
@@ -364,19 +364,19 @@
         qrVideo.srcObject = stream; await qrVideo.play();
         scanning = true; requestAnimationFrame(tick);
       } catch (err) {
-        console.error('無法訪問相機: ', err);
+        console.error('Unable to access camera: ', err);
         if (cameraError) cameraError.style.display = 'block';
         qrModal.style.display = 'none';
       }
     }
 
-    // 停止掃描
+    // Stop scanning
     function stopScanning() {
       scanning = false;
       if (stream) { stream.getTracks().forEach(t => t.stop()); stream = null; }
     }
 
-    // 掃描循環
+    // Scanning loop
     function tick() {
       if (!scanning) return;
       if (qrVideo.readyState === qrVideo.HAVE_ENOUGH_DATA) {
@@ -386,14 +386,14 @@
         const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
         const code = jsQR(imageData.data, imageData.width, imageData.height, { inversionAttempts: 'dontInvert' });
         if (code) {
-          qrResult.textContent = `找到QR code: ${code.data}`;
+          qrResult.textContent = `Found QR code: ${code.data}`;
           processQRCode(code.data);
           scanning = false; setTimeout(() => { scanning = true; qrResult.textContent = ''; requestAnimationFrame(tick); }, 2000);
         } else { requestAnimationFrame(tick); }
       } else { requestAnimationFrame(tick); }
     }
 
-    // URL 檢查
+    // URL validation
     function isValidUrl(str) {
       try {
         if (!str.includes('://') && !str.startsWith('mailto:') && !str.startsWith('tel:')) { str = 'https://' + str; }
@@ -403,18 +403,18 @@
       } catch { return false; }
     }
 
-    // 處理掃描結果
+    // Process scan result
     function processQRCode(data) {
       try {
         if (isValidUrl(data)) {
-          qrResult.textContent = `找到網頁: ${data}`; lastScannedUrl = data;
-          if (confirm(`掃瞄到網頁地址: ${data}\n\n是否要訪問網頁？`)) {
+          qrResult.textContent = `Found webpage: ${data}`; lastScannedUrl = data;
+          if (confirm(`Scanned webpage address: ${data}\n\nDo you want to visit the webpage?`)) {
             setTimeout(() => { window.location.href = data; }, 100);
             stopScanning(); qrModal.style.display = 'none';
           }
           return;
         }
-        // 嘗試解析 JSON 當作精靈資料
+        // Try to parse JSON as spirit data
         try {
           const spirit = JSON.parse(data);
           if (spirit && spirit.id && spirit.name) {
@@ -422,28 +422,28 @@
             if (!already) {
               collected.push(spirit); localStorage.setItem('spirits', JSON.stringify(collected));
               renderCollected(getTotalFromDex());
-              qrResult.textContent = `成功收集: ${spirit.name}`;
+              qrResult.textContent = `Successfully collected: ${spirit.name}`;
               gaEvent('qr_scan_success', { event_category: 'QR Scan', event_label: spirit.name });
-            } else { qrResult.textContent = `已收集過: ${spirit.name}`; }
+            } else { qrResult.textContent = `Already collected: ${spirit.name}`; }
             return;
           }
         } catch {}
-        // 其他文字
-        qrResult.textContent = `掃瞄到: ${data}`;
+        // Other text
+        qrResult.textContent = `Scanned: ${data}`;
         gaEvent('qr_scan', { event_category: 'QR Scan', event_label: (data || '').toString().slice(0,100) });
       } catch (e) {
-        console.error('處理出錯:', e); qrResult.textContent = `處理出錯: ${e.message}`;
+        console.error('Processing error:', e); qrResult.textContent = `Processing error: ${e.message}`;
       }
     }
 
-    // 供未來使用：手動跳轉按鈕（如需）
+    // For future use: Manual redirect button (if needed)
     document.addEventListener('click', (e) => {
       if (e.target && e.target.id === 'manual-redirect-btn') {
         if (lastScannedUrl) { window.location.href = lastScannedUrl; }
       }
     });
 
-    // 初始化
+    // Initialize
     init();
   </script>
 

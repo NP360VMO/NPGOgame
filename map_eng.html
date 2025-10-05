@@ -1,0 +1,345 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ngong Ping 360 GO - NPmon Map</title>
+
+  <!-- External resources consistent with index -->
+  <link rel="stylesheet" href="styles.css">
+  <script src="spirits.js"></script>
+
+  <style>
+    /* === Base styles aligned with index (excerpted from index) === */
+    body {
+      background-image: url('images/background.png');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    .home-hero { text-align: center; padding: clamp(20px, 6vw, 56px) 12px 12px; }
+    .home-topbar { display:flex; justify-content: center; gap:10px; flex-wrap:wrap; margin-bottom: 10px;}
+    .theme-select { display:inline-flex; align-items:center; gap:6px; border:2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 6px 10px; font-weight: 800; }
+    .theme-select select { border:none; background: transparent; font-weight: 800; color: var(--accent-ink); outline: none; }
+    .home-title { font-size: clamp(24px, 5vw, 42px); font-weight: 900; color: var(--accent-ink); margin: 0 0 6px; text-shadow: 0 2px 6px rgba(255,255,255,.6); }
+    .home-sub { font-size: clamp(14px, 3.2vw, 18px); color: rgba(0,0,0,.75); margin: 0 0 12px; text-shadow: 0 1px 4px rgba(255,255,255,.7); }
+    .home-actions { display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin-top: 12px; margin-bottom: 30px; }
+    .audio-ctl { appearance: none; border: 2px solid var(--accent); background: #ffffffaa; color: var(--accent-ink); border-radius: 999px; padding: 8px 12px; font-weight: 800; cursor: pointer; }
+
+    /* === Map card and area (based on index card style) === */
+    .map-card { background: var(--card); border:1px solid var(--section-border); border-radius:16px; padding:14px; box-shadow: 0 8px 24px rgba(0,0,0,.06); backdrop-filter: blur(2px); }
+    .map-container {
+      position: relative;
+      width: 100%;
+      max-width: 1278px;
+      aspect-ratio: 1278 / 702;
+      margin: 16px auto 28px;
+    }
+    .map-area {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      background: url('images/map.png') no-repeat center center;
+      background-size: contain;
+      border-radius: 12px;
+      overflow: hidden;
+    }
+
+    /* Spirit markers */
+    .spirit-marker {
+      position: absolute;
+      width: 50px; height: 50px;
+      cursor: pointer;
+      transform: translate(-50%, -50%);
+      transition: transform .2s ease, box-shadow .2s ease;
+      z-index: 10;
+      border-radius: 50%;
+      overflow: hidden;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+      border: 2px solid #fff;
+    }
+    .spirit-marker:hover {
+      transform: translate(-50%, -50%) scale(1.12);
+      box-shadow: 0 6px 12px rgba(0,0,0,0.4);
+      z-index: 11;
+    }
+    .spirit-marker img { width: 100%; height: 100%; object-fit: cover; }
+
+    /* Spirit info card (centered popup) */
+    .spirit-info {
+      display: none;
+      position: fixed;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%);
+      background: var(--card);
+      border: 1px solid var(--section-border);
+      border-radius: 12px;
+      padding: 20px;
+      width: 90%;
+      max-width: 320px;
+      max-height: 80vh;
+      overflow-y: auto;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+      z-index: 1000;
+      backdrop-filter: blur(4px);
+    }
+    .spirit-info.active { display: block; animation: fadeIn 0.3s ease; }
+    .spirit-info img { width: 100%; height: auto; border-radius: 8px; margin-bottom: 12px; }
+    .spirit-info h3 { color: var(--accent-ink); margin-bottom: 8px; font-size: 1.2rem; }
+    .spirit-info p  { font-size: 14px; color: var(--ink); line-height: 1.5; }
+
+    /* Close button and overlay */
+    .close-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; font-size: 20px; cursor: pointer; color: var(--accent-ink); z-index: 1001; }
+    .overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 999; }
+    .overlay.active { display: block; }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translate(-50%, -50%) scale(0.9); }
+      to   { opacity: 1; transform: translate(-50%, -50%) scale(1); }
+    }
+
+    /* RWD */
+    @media (max-width: 768px) {
+      .spirit-marker { width: 40px; height: 40px; }
+      .spirit-info { width: 85%; max-width: 280px; padding: 15px; }
+      .spirit-info h3 { font-size: 1.1rem; }
+      .spirit-info p  { font-size: 13px; }
+    }
+    @media (max-width: 480px) {
+      .spirit-marker { width: 32px; height: 32px; }
+      .spirit-info { width: 90%; max-width: 250px; padding: 12px; }
+      .spirit-info h3 { font-size: 1rem; }
+    }
+  </style>
+</head>
+
+<body class="theme-sky">
+  <!-- Overlay (used when displaying spirit info) -->
+  <div class="overlay" id="info-overlay" aria-hidden="true"></div>
+
+  <div class="container">
+    <div class="home-hero">
+      <div class="home-topbar">
+        <div class="theme-select">
+          🎨 Theme:
+          <select id="theme-picker" aria-label="Select Theme">
+            <option value="theme-sky">Sky Blue</option>
+            <option value="theme-grass">Grass Green</option>
+            <option value="theme-warm">Warm Yellow</option>
+            <option value="theme-dimsum">Dim Sum Orange</option>
+            <option value="theme-boba">Boba Brown</option>
+          </select>
+        </div>
+        <button id="audio-btn" class="audio-ctl" type="button" aria-label="Toggle Background Music">▶️ Background Music</button>
+      </div>
+
+      <div class="home-title">Ngong Ping 360 GO: Unlock the NPmon Map!</div>
+      <div class="home-sub">Tap the dots on the map to find hidden NPmons in Ngong Ping Village! Super fun Chase!</div>
+
+      <div class="home-actions">
+        <a class="btn" href="index_eng.html">🏠 Back to Home</a>
+        <a class="btn" href="dex_eng.html">📖 NPmon Dex</a>
+        <a class="btn" href="map.html">🌐 中文</a>
+      </div>
+
+      <div class="map-card">
+        <div class="map-container" role="region" aria-label="Spirit Map">
+          <div class="map-area">
+            <!-- Spirit markers (coordinates in percentage; adjust as needed) -->
+            <div class="spirit-marker" style="top: 85%; left: 20%;" data-spirit="1" tabindex="0" aria-label="Cable Cloud (Standardmon)">
+              <img src="images/cablecar-spirit.png" alt="Cable Cloud (Standardmon)">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 50%;" data-spirit="2" tabindex="0" aria-label="Cable Cloud (Crsytalmon)">
+              <img src="images/crystal-spirit.png" alt="Cable Cloud (Crsytalmon)">
+            </div>
+            <div class="spirit-marker" style="top: 45%; left: 90%;" data-spirit="3" tabindex="0" aria-label="Golden Moon Mon">
+              <img src="images/game-spirit1.png" alt="Golden Moon Mon">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 60%;" data-spirit="4" tabindex="0" aria-label="Little Yellow BB">
+              <img src="images/game-spirit2.png" alt="Little Yellow BB">
+            </div>
+            <div class="spirit-marker" style="top: 67%; left: 20%;" data-spirit="5" tabindex="0" aria-label="Dim Sum Boy">
+              <img src="images/game-spirit3.png" alt="Dim Sum Boy">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 65%;" data-spirit="6" tabindex="0" aria-label="Boba Egg Waffle">
+              <img src="images/game-spirit4.png" alt="Boba Egg Waffle Mon">
+            </div>
+            <div class="spirit-marker" style="top: 55%; left: 72%;" data-spirit="7" tabindex="0" aria-label="Cable Cloud (Crystal+mon)">
+              <img src="images/panorama-spirit.png" alt="Cable Cloud (Crystal+mon)">
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="home-actions" style="margin-top:20px;">
+        <a class="btn secondary" href="dex_eng.html#dex">📖 Explore More NPmons</a>
+      </div>
+    </div>
+  </div>
+
+  <!-- Background music element (same ID as index) -->
+  <audio id="bgm" preload="auto" loop playsinline>
+    <source src="BGM/BGM4.mp3" type="audio/mpeg">
+    Your browser does not support the audio element.
+  </audio>
+
+  <!-- Spirit info cards (placed at the end to avoid overflow issues) -->
+  <div class="spirit-info" id="spirit-1" role="dialog" aria-modal="true" aria-label="Cable Cloud (Standard Form) Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/cablecar-spirit.png" alt="Cable Cloud (Standard Form)">
+    <h3>Cable Cloud (Standardmon)</h3>
+    <p>Cable Cloud (Standardmon) is one of the earliest guardian spirits of Ngong Ping, full of energy and enthusiasm! In the form of a lively cable car, it carries travelers from all over the world, soaring from Tung Chung to Ngong Ping through rolling hills and shimmering straits.</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-2" role="dialog" aria-modal="true" aria-label="Cable Cloud (Crystal Form) Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/crystal-spirit.png" alt="Cable Cloud (Crystal Form)">
+    <h3>Cable Cloud (Crsytalmon)</h3>
+    <p>Cable Cloud (Crsytalmon) is a transparent spirit embodied by a crystal cable car, with clear eyes and an adventurous heart, symbolizing an open mind and the courage to take the first step.</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-3" role="dialog" aria-modal="true" aria-label=" Golden Moo Moo Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/game-spirit1.png" alt="Yellow Moo Moo">
+    <h3> Golden Moo Moo</h3>
+    <p> Golden Moo Moo is a guardian of Ngong Ping's mountain forests, agile and swift. It loves playing "quick flash games" with people, and only the fastest can become its friend.</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-4" role="dialog" aria-modal="true" aria-label="Little Yellow BB Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/game-spirit2.png" alt="Little Yellow Bouncy Ball">
+    <h3>Little Yellow BB</h3>
+    <p>Little Yellow BB is a cheerful puppy that loves to jump, run, and chase butterflies. It will take you on a hopping journey to explore every corner of Ngong Ping, full of boundless energy!</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-5" role="dialog" aria-modal="true" aria-label="Dim Sum Boy Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/game-spirit3.png" alt="Dim Sum Boy">
+    <h3>Dim Sum Boy</h3>
+    <p>Dim Sum Boy is a delivery boy who loves dim sum culture and will introduce you to it through a fun match-three game!</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-6" role="dialog" aria-modal="true" aria-label="Boba Egg Waffle Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/game-spirit4.png" alt="Boba Egg Waffle">
+    <h3>Boba Egg Waffle Mon</h3>
+    <p>Boba Egg Waffle Mon is a foodie spirit that loves street food culture and will take you on a snake game adventure to explore street delicacies!</p>
+  </div>
+
+  <div class="spirit-info" id="spirit-7" role="dialog" aria-modal="true" aria-label="Cable Cloud (Panoramic Form) Info">
+    <button class="close-btn" type="button" aria-label="Close">&times;</button>
+    <img src="images/panorama-spirit.png" alt="Cable Cloud (Panoramic Form)">
+    <h3>Cable Cloud (Crystal+ mon)</h3>
+    <p>Cable Cloud (Crystal+ mon) is a dreamy transparent spirit embodied by a panoramic cable car, the guardian of Ngong Ping's sky views. With the broadest perspective, it loves to observe from high and steady vantage points, watching over distant mountains, seas, and clouds for travelers, serving as the calmest observer on the journey.</p>
+  </div>
+
+  <script>
+    /* === Theme switching (localStorage: np_theme, same as index) === */
+    const themePicker = document.getElementById('theme-picker');
+    const savedTheme = localStorage.getItem('np_theme') || 'theme-sky';
+    document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+    document.body.classList.add(savedTheme);
+    themePicker.value = savedTheme;
+    themePicker.addEventListener('change', () => {
+      const val = themePicker.value;
+      document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
+      document.body.classList.add(val);
+      localStorage.setItem('np_theme', val);
+    });
+
+    /* === Music control (same as index) === */
+    const audio = document.getElementById('bgm');
+    const audioBtn = document.getElementById('audio-btn');
+    let playing = false;
+    if (audioBtn) {
+      audioBtn.addEventListener('click', () => {
+        if (!playing) {
+          audio.play().then(() => { playing = true; audioBtn.textContent = '⏸️ Background Music'; })
+          .catch(() => alert('Browser blocked auto-play, please click again to play.'));
+        } else {
+          audio.pause(); playing = false; audioBtn.textContent = '▶️ Background Music';
+        }
+      });
+    }
+
+    /* === Map popup logic (unchanged) === */
+    const markers = document.querySelectorAll('.spirit-marker');
+    const infoBoxes = document.querySelectorAll('.spirit-info');
+    const closeButtons = document.querySelectorAll('.close-btn');
+    const overlay = document.getElementById('info-overlay');
+
+    function closeAllInfos() {
+      infoBoxes.forEach(box => box.classList.remove('active'));
+      overlay.classList.remove('active');
+      overlay.setAttribute('aria-hidden', 'true');
+    }
+    function openInfo(id) {
+      const box = document.getElementById(`spirit-${id}`);
+      if (!box) return;
+      overlay.classList.add('active');
+      overlay.setAttribute('aria-hidden', 'false');
+      box.classList.add('active');
+    }
+
+    markers.forEach(marker => {
+      marker.addEventListener('click', (e) => {
+        const spiritId = marker.getAttribute('data-spirit');
+        openInfo(spiritId);
+        e.stopPropagation();
+      });
+      marker.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          const spiritId = marker.getAttribute('data-spirit');
+          openInfo(spiritId);
+          e.preventDefault();
+        }
+      });
+    });
+
+    closeButtons.forEach(button => {
+      button.addEventListener('click', (e) => { e.stopPropagation(); closeAllInfos(); });
+    });
+    overlay.addEventListener('click', closeAllInfos);
+  </script>
+</body>
+</html>

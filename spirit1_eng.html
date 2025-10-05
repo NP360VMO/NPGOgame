@@ -1,0 +1,108 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mon Profile - Cable Cloud (Standard Mon)</title>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-sky layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">Mon Profile - Cable Cloud (Standard Mon)</div>
+        <div class="badge">Sky Traveler · Steady · Friendly</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/cablecar-spirit.png" alt="Cable Cloud (Standard Mon)" />
+        </div>
+        <div class="intro">
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Meet Cable Cloud (Standard Mon), the energetic, chattiest buddy zooming through Ngong Ping’s skies in a lively cable car! Full with energy and laughs, this lively pal scoops up travellers from all over, soaring over rolling hills and sparkly straits from Tung Chung to Ngong Ping.</p>
+          <p>Every 25-minute ride is more than just breathtaking views — it’s a joyful adventure through history and culture! </p>
+          <p>Standard Mon’s the ultimate talker, dishing out Ngong Ping’s charm and quirky tales with a goofy grin. From the grand Big Buddha to the chill Po Lin Monastery and the bustling Ngong Ping Village, her stories make you laugh like you’re besties with Lantau Island’s soul!</p>
+          <p>Whether you're watching planes zoom in at Hong Kong International Airport or gasping at the stunning mountain-and-sea views, Crystal offers a fun, happy adventure that captures Ngong Ping's cool spirit!</p>
+        </div>
+      </div>
+
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop</h3>
+        <p>The Ngong Ping 360 Standard Cable Car features a diamond-shaped design with panoramic windows, allowing passengers to enjoy a 360-degree view of Lantau Island’s natural scenery.</p>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit1.html">🌐 中文 </a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit1',
+      name: 'Cable Cloud (Standardmon)',
+      image: 'images/cablecar-spirit.png',
+      page: 'spirit1_eng.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
+      } else {
+        document.getElementById('message').innerText = 'You already own Cable Cloud (Standardmon)!';
+      }
+    }
+  </script>
+</body>
+</html>
