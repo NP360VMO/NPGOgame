@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NP360 精靈 3D AR</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto}
+    header{padding:12px 16px;display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid #eee}
+    .toolbar button{padding:10px 14px;border-radius:12px;border:1px solid #ddd;background:#fff;cursor:pointer;margin-right:8px}
+    .toolbar button:active{transform:scale(0.98)}
+    model-viewer{width:100vw;height:70vh;background:#f6f7fb}
+    .hint{padding:10px 16px;color:#555}
+  </style>
+</head>
+<body>
+<header>
+  <div>📷 NP360 精靈 3D</div>
+  <div class="toolbar">
+    <button id="arBtn">在 AR 中查看</button>
+    <button id="snapBtn">截圖（非 AR 預覽）</button>
+  </div>
+</header>
+
+<model-viewer id="viewer"
+  src="cablecar_spirit_billboard_textured.glb"
+  ar
+  ar-modes="scene-viewer quick-look webxr"
+  camera-controls
+  environment-image="neutral"
+  exposure="1.0"
+  shadow-intensity="0.4"
+  poster=""
+  autoplay
+></model-viewer>
+
+<div class="hint">提示：在 AR 模式中請使用手機的系統截圖功能；在此頁非 AR 預覽可按「截圖」。</div>
+
+<script>
+  const mv = document.getElementById('viewer');
+  const arBtn = document.getElementById('arBtn');
+  const snapBtn = document.getElementById('snapBtn');
+
+  arBtn.addEventListener('click', () => mv.activateAR());
+
+  // 非 AR 模式下：輸出 3D 視圖截圖
+  snapBtn.addEventListener('click', async () => { 
+    try { 
+      const blob = await mv.toBlob({idealAspect: true});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url; a.download = 'np360_3d_preview.png'; a.click();
+      setTimeout(() => URL.revokeObjectURL(url), 2000);
+    } catch(e) {
+      alert('截圖失敗：' + e.message);
+    }
+  });
+</script>
+</body>
+</html>
