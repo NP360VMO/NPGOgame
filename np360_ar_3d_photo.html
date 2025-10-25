@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="zh-HK">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>NP360 精靈 3D 合照（GLB）</title>
+  <script type="module" src="https://unpkg.com/@google/model-viewer/dist/model-viewer.min.js"></script>
+  <style>
+    :root { --bg:#0b0f14; --card:#121a22; --text:#e7f0f7; --muted:#8aa2b2; --accent:#4fd1c5; }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,var(--bg),#0f1720);color:var(--text);
+         font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial,"Noto Sans",sans-serif}
+    .wrap{max-width:960px;margin:24px auto;padding:16px}
+    h1{font-size:22px;margin:8px 0 4px}
+    p.subtitle{margin:0 0 16px;color:var(--muted);font-size:14px}
+    .viewer-card{background:var(--card);border-radius:16px;box-shadow:0 12px 32px rgba(0,0,0,.28);padding:12px}
+    model-viewer{width:100%;height:62vh;max-height:620px;border-radius:12px;background:#0b0f14}
+    .toolbar{display:flex;flex-wrap:wrap;gap:8px;margin-top:12px}
+    button, .ar-button{appearance:none;border:none;border-radius:999px;padding:10px 14px;
+      background:#1c2733;color:var(--text);cursor:pointer;font-weight:600;letter-spacing:.2px}
+    button:hover{filter:brightness(1.1)}
+    .primary{background:var(--accent);color:#0b0f14}
+    .danger{background:#ef4444}
+    .grid{display:grid;grid-template-columns:1fr;gap:12px}
+    @media(min-width:860px){ .grid{grid-template-columns: 2fr 1fr} }
+    .panel{background:var(--card);border-radius:12px;padding:12px}
+    label{display:flex;align-items:center;gap:8px;font-size:14px;color:var(--muted)}
+    input[type="text"],input[type="number"]{width:100%;padding:10px;border-radius:8px;border:1px solid #22303f;background:#0e141b;color:var(--text)}
+    .countdown{position:fixed;inset:0;display:none;place-items:center;background:rgba(0,0,0,.35);backdrop-filter:blur(2px);z-index:20}
+    .countdown .num{font-size:18vmin;font-weight:800;text-shadow:0 6px 24px rgba(0,0,0,.4)}
+    .tip{font-size:12px;color:var(--muted);margin-top:6px}
+    .footer{opacity:.7;font-size:12px;margin-top:20px}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>📷 NP360 精靈 3D 合照（GLB）</h1>
+    <p class="subtitle">支援原生 AR（Android Chrome / iOS Quick Look 有 USDZ 時）與頁面內 3D 擷取（可加浮水印與倒數）。</p>
+
+    <div class="grid">
+      <div class="viewer-card">
+        <!-- 3D/AR viewer -->
+        <model-viewer id="mv"
+          src="./cablecar_spirit_extruded_textured.glb"
+          ar ar-modes="webxr scene-viewer quick-look"
+          camera-controls touch-action="pan-y"
+          environment-image="neutral"
+          shadow-intensity="0.6"
+          poster=""
+          autoplay
+          exposure="1.0"
+          camera-orbit="0deg 75deg 100%"
+          style="--poster-color: transparent;">
+          <button slot="ar-button" id="enter-ar" class="ar-button primary">🌐 進入 AR 合照</button>
+          <div id="ar-prompt" slot="ar-prompt">將裝置指向地面來放置模型</div>
+        </model-viewer>
+
+        <!-- toolbar -->
+        <div class="toolbar">
+          <button id="btn-rotate-left">↺ 轉左</button>
+          <button id="btn-rotate-right">↻ 轉右</button>
+          <button id="btn-zoom-in">＋ 放大</button>
+          <button id="btn-zoom-out">－ 縮小</button>
+          <button id="btn-reset">重置視角</button>
+          <button id="btn-countdown" class="primary">⏱ 倒數 3-2-1 拍照</button>
+          <button id="btn-snap">📸 立即截圖（頁面 3D）</button>
+          <button id="btn-clear" class="danger">清空浮水印</button>
+        </div>
+        <div class="tip">提示：<b>原生 AR</b> 的拍照在系統介面完成；「📸 截圖」為頁面內 3D 視角擷取，你可加上浮水印文字。</div>
+      </div>
+
+      <div class="panel">
+        <h3 style="margin-top:4px;margin-bottom:8px">🧩 浮水印設定（應用於頁面 3D 擷取）</h3>
+        <label>文字
+          <input id="wm-text" type="text" placeholder="例如：NP360 GO • 纜雲仔 at Ngong Ping" value="NP360 GO • Cable Car Spirit">
+        </label>
+        <label>大小（px）
+          <input id="wm-size" type="number" min="8" max="128" value="28">
+        </label>
+        <label>位置（左下角邊距 px）
+          <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;width:100%">
+            <input id="wm-margin-x" type="number" min="0" max="200" value="20" placeholder="X 邊距">
+            <input id="wm-margin-y" type="number" min="0" max="200" value="24" placeholder="Y 邊距">
+          </div>
+        </label>
+        <div class="tip">若要官方 Logo 浮水印，可將文字留空，或另行以 PNG 疊加的版本（可再幫你擴充）。</div>
+      </div>
+    </div>
+
+    <div class="footer">© NP360 — Demo page for GLB AR & 3D snapshot. Built with &lt;model-viewer&gt;.</div>
+  </div>
+
+  <div class="countdown" id="count">
+    <div class="num" id="count-num">3</div>
+  </div>
+
+  <script type="module">
+    const mv = document.getElementById('mv');
+    const btnRotateL = document.getElementById('btn-rotate-left');
+    const btnRotateR = document.getElementById('btn-rotate-right');
+    const btnZoomIn  = document.getElementById('btn-zoom-in');
+    const btnZoomOut = document.getElementById('btn-zoom-out');
+    const btnReset   = document.getElementById('btn-reset');
+    const btnSnap    = document.getElementById('btn-snap');
+    const btnCountdown = document.getElementById('btn-countdown');
+    const btnClear   = document.getElementById('btn-clear');
+    const wmText = document.getElementById('wm-text');
+    const wmSize = document.getElementById('wm-size');
+    const wmMarginX = document.getElementById('wm-margin-x');
+    const wmMarginY = document.getElementById('wm-margin-y');
+    const countWrap = document.getElementById('count');
+    const countNum  = document.getElementById('count-num');
+
+    // Helpers
+    function parseOrbit() {
+      const o = mv.getCameraOrbit();
+      return { theta: o.theta, phi: o.phi, radius: o.radius };
+    }
+
+    btnRotateL.addEventListener('click', ()=>{
+      const {theta, phi, radius} = parseOrbit();
+      mv.cameraOrbit = `${theta - 15}deg ${phi}deg ${radius}`;
+    });
+    btnRotateR.addEventListener('click', ()=>{
+      const {theta, phi, radius} = parseOrbit();
+      mv.cameraOrbit = `${theta + 15}deg ${phi}deg ${radius}`;
+    });
+    btnZoomIn.addEventListener('click', ()=>{
+      const {theta, phi, radius} = parseOrbit();
+      mv.cameraOrbit = `${theta}deg ${phi}deg ${radius * 0.9}`;
+    });
+    btnZoomOut.addEventListener('click', ()=>{
+      const {theta, phi, radius} = parseOrbit();
+      mv.cameraOrbit = `${theta}deg ${phi}deg ${radius / 0.9}`;
+    });
+    btnReset.addEventListener('click', ()=>{
+      mv.cameraOrbit = "0deg 75deg 100%";
+    });
+
+    // Take a snapshot of the model-viewer canvas (page 3D, not native AR)
+    async function takeSnapshotWithWatermark() {
+      try {
+        // Render snapshot from model-viewer
+        const blob = await mv.toBlob({ mimeType: 'image/png'});
+        const imgBitmap = await createImageBitmap(blob);
+
+        // Draw to canvas and add watermark text
+        const canvas = document.createElement('canvas');
+        canvas.width = imgBitmap.width;
+        canvas.height = imgBitmap.height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(imgBitmap, 0, 0);
+
+        const text = (wmText.value || '').trim();
+        if (text.length > 0) {
+          const size = Math.max(8, Math.min(128, parseInt(wmSize.value || '28', 10)));
+          const mx = Math.max(0, parseInt(wmMarginX.value || '20', 10));
+          const my = Math.max(0, parseInt(wmMarginY.value || '24', 10));
+
+          ctx.font = `bold ${size}px system-ui, -apple-system, Segoe UI`;
+          ctx.fillStyle = "rgba(0,0,0,0.5)";
+          ctx.strokeStyle = "rgba(0,0,0,0.6)";
+          ctx.lineWidth = Math.ceil(size/6);
+
+          // shadow/backplate
+          const metrics = ctx.measureText(text);
+          const pad = Math.ceil(size * 0.6);
+          const boxW = metrics.width + pad * 2;
+          const boxH = size + pad * 0.9;
+          const x = mx, y = canvas.height - my - boxH;
+          ctx.fillRect(x, y, boxW, boxH);
+
+          // text
+          ctx.fillStyle = "white";
+          ctx.fillText(text, x + pad, y + boxH - pad * 0.45);
+        }
+
+        // Download
+        canvas.toBlob((outBlob)=>{
+          const a = document.createElement('a');
+          const url = URL.createObjectURL(outBlob);
+          a.href = url; a.download = 'np360_3d_snapshot.png';
+          document.body.appendChild(a);
+          a.click();
+          a.remove();
+          setTimeout(()=>URL.revokeObjectURL(url), 1000);
+        }, 'image/png');
+      } catch (err) {
+        alert('截圖失敗：' + err.message);
+        console.error(err);
+      }
+    }
+
+    btnSnap.addEventListener('click', takeSnapshotWithWatermark);
+
+    // 3-2-1 countdown then snapshot
+    btnCountdown.addEventListener('click', async ()=>{
+      countWrap.style.display = 'grid';
+      for (let n of [3,2,1]){
+        countNum.textContent = n;
+        await new Promise(r=>setTimeout(r, 900));
+      }
+      countWrap.style.display = 'none';
+      takeSnapshotWithWatermark();
+    });
+
+    // Clear watermark text
+    btnClear.addEventListener('click', ()=>{
+      wmText.value = '';
+    });
+
+  </script>
+</body>
+</html>
