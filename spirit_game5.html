@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 大金</title>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-boba layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">精靈介紹 - 大金</div>
+        <div class="badge">街頭 · 幸福 · 美味</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit5.png" alt="大金" />
+        </div>
+        <div class="intro">
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>大金是一隻以香港唐狗為原型的地緣精靈，外型為金黃色毛髮、眼神溫和的犬型精靈！</p>
+<p>性格憨厚呆萌，喜歡親近人類，尤其習慣在警崗或街角附近睡覺休息，是社區中默默存在的溫暖守護者。</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>只要有人高呼「大金～」，牠就會立刻醒來，搖著尾巴奔向呼喊者。看似整天睡覺，其實對周圍環境與人的情緒有細微的感知力。</p>
+<p>傳說輕揉牠的耳後會帶來一日的好運與安心感。</p>
+
+        </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+  <a class="btn secondary" href="spirit_game5_eng.html">🌐 English Version </a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game5',
+      name: '大金',
+      image: 'images/game-spirit5.png',
+      page: 'spirit_game5.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有大金了喔！';
+      }
+    }
+  </script>
+</body>
+</html>

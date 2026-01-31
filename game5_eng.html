@@ -1,0 +1,1086 @@
+<!DOCTYPE html> 
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>Feeding Challenge: Dajin is Hungry</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-B3740R31MS');
+
+    gtag('event', 'page_enter', {
+      'page_title': 'Game 8 - Horizontal Catch Game',
+      'page_path': '/game8.html'
+    });
+  </script>
+
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --ink: #2f2a25;
+      --card: #fffdf9;
+      --accent: #ffb547;
+      --accent-ink: #6b400a;
+      --section-bg: #fff9f0;
+      --section-border: #e7d9c5;
+      --ok: #15a36d;
+      --warn: #e04848;
+      --info: #2b6eea;
+      --pearl: #f06292;
+      --tea: #81c784;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--section-border);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+    .header {
+      display: flex; justify-content: space-between; gap: 12px; align-items: center;
+      padding: 18px 20px; border-bottom: 1px solid var(--section-border);
+    }
+    .title { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
+    .badge {
+      font-weight: 700; background: #fff1d8; border: 1px solid #ffd9a0; color: #7a4a00;
+      border-radius: 999px; padding: 6px 10px;
+    }
+    .hero {
+      display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 18px 20px;
+      border-bottom: 1px solid var(--section-border);
+      background: linear-gradient(to bottom, rgba(255, 248, 236, 0.8), rgba(255, 255, 255, 0.6)), url("images/background.png");
+      background-size: cover; background-position: center;
+    }
+    .img-wrap { display: flex; align-items: center; justify-content: center; }
+    .img-wrap img { width: 96px; height: auto; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12)); }
+    .intro p { margin: 0.35rem 0; }
+    .status-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .pill {
+      border: 2px solid var(--section-border); background: #fff; border-radius: 999px;
+      padding: 6px 12px; font-weight: 800;
+    }
+    .pill.ok { border-color: #bfe6d6; color: var(--ok); }
+    .pill.warn { border-color: #ffd1d1; color: var(--warn); }
+    .pill.info { border-color: #cfe0ff; color: var(--info); }
+
+    .section { padding: 18px 20px; }
+    .game-wrap { background: var(--section-bg); border: 1px dashed var(--section-border); border-radius: 16px; padding: 12px; }
+    .play-area {
+      position: relative; border-radius: 12px; min-height: 360px; max-width: 720px; margin: 0 auto;
+      background: #fff; display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* Game Canvas - Horizontal Dimensions */
+    #gameContainer{ 
+      max-width:100%; 
+      margin:10px auto; 
+      position:relative; 
+      width:100%;
+      display:flex; 
+      justify-content:center; 
+    }
+    #gameCanvas { 
+      background-color: #f0f8ff; 
+      border: 1px solid #ccc; 
+      display:block; 
+      max-width:100%; 
+      touch-action:none; 
+      border-radius: 8px;
+    }
+
+    /* Progress Bar */
+    .progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 12px; }
+    .bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #81c784, #ffd166); }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+    .btn {
+      appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
+      background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+    .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
+    .btn:active { transform: translateY(1px); }
+
+    .toast {
+      position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px;
+      background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 900;
+      display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    /* Virtual Controls - Vertical Layout */
+    #virtualControls { 
+      display:flex; 
+      justify-content:center; 
+      margin-top:16px; 
+      flex-direction:column; 
+      align-items:center; 
+      width:100%; 
+    }
+    #virtualControls .control-row {
+      display:flex;
+      justify-content:center;
+    }
+    #virtualControls .control-btn {
+      width:72px; height:72px; border-radius:50%;
+      display:flex; justify-content:center; align-items:center; margin:8px;
+      font-size:28px; user-select:none; -webkit-tap-highlight-color:transparent;
+      border:1px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
+      background: rgba(0,0,0,0.06);
+    }
+    #virtualControls .control-btn:active { background: rgba(0,0,0,0.12); }
+    #virtualControls .control-btn:disabled { background: rgba(0,0,0,0.04); cursor: not-allowed; }
+
+    @media (max-width: 560px) {
+      .hero { grid-template-columns: 84px 1fr; }
+      .img-wrap img { width: 80px; }
+      #virtualControls .control-btn { width:64px; height:64px; font-size:24px; margin:6px; }
+    }
+    
+    /* Game Tip */
+    .game-tip {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    
+    /* Difficulty Indicator */
+    .difficulty-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .difficulty-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ddd;
+    }
+    .difficulty-dot.active {
+      background-color: #81c784;
+    }
+  </style>
+</head>
+<body class="theme-warm">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">Feeding Challenge: Dajin is Hungry</div>
+        <div class="badge">🎮 Challenge · Unlock by Winning</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap"><img src="images/game-spirit5.png" alt="Dajin" id="spiritImg"></div>
+        <div class="intro">
+          <p><strong>Gameplay:</strong> Use the up/down keys or virtual buttons to control Dajin and catch jerky pieces flying from the left. Catch <strong>12 pieces</strong> within <strong>60 seconds</strong> to unlock Dajin!</p>
+          <div class="status-bar">
+            <span class="pill info" id="pill-status">Ready to Start</span>
+            <span class="pill" id="pill-score">Score: 0 / 12</span>
+            <span class="pill warn" id="pill-timer">Time Left: 60 sec</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="game-wrap">
+          <div class="play-area">
+            <div class="progress"><div class="bar" id="timeBar" style="width: 100%"></div></div>
+            <div id="gameContainer">
+              <canvas id="gameCanvas"></canvas>
+            </div>
+            
+            <div class="game-tip">💡 Tip: Jerky speed gradually increases over time</div>
+            
+            <!-- Difficulty Indicator -->
+            <div class="difficulty-indicator">
+              <span>Difficulty:</span>
+              <div class="difficulty-dot active"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+            </div>
+
+            <!-- Virtual Controls - Vertical Layout -->
+            <div id="virtualControls" style="display:none;">
+              <div class="control-row">
+                <div class="control-btn" id="upBtn">↑</div>
+              </div>
+              <div class="control-row">
+                <div class="control-btn" id="downBtn">↓</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="startBtn">▶️ Start Game</button>
+            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 Restart</button>
+            <a class="btn secondary" href="dex_eng.html">📖 Back to Index</a>
+          </div>
+        </div>
+        <div class="actions"><a class="btn secondary" href="index_eng.html">🔙 Back to Home</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">🎉 Unlocked: Dajin!</div>
+
+  <script>
+    // Game Constants - Horizontal Game
+    const CANVAS_WIDTH = 600;
+    const CANVAS_HEIGHT = 400;
+    
+    // Adjustment 1: Increase spirit image size (originally 40x60, now 70x90)
+    const PLAYER_WIDTH = 40;
+    const PLAYER_HEIGHT = 60;
+    
+    // Adjustment 2: Reduce movement speed (originally 6, now 5)
+    const PLAYER_SPEED = 6;
+    
+    // Adjustment 3: Reduce initial jerky speed (originally 3, now 2.5)
+    const INITIAL_PEARL_SPEED = 2.5;
+    
+    // Adjustment 4: Reduce maximum jerky speed (originally 8, now 6)
+    const MAX_PEARL_SPEED = 7;
+    
+    const PEARL_RADIUS = 17; // Slightly increase jerky size
+    
+    // Adjustment 5: Reduce jerky spawn rate (originally 0.025, now 0.02)
+    const PEARL_SPAWN_RATE = 0.02;
+    
+    // Adjustment 6: Reduce target score (originally 15, now 12)
+    const TARGET_SCORE = 12;
+    
+    const GAME_TIME = 60;
+    const PLAYER_X_POSITION = CANVAS_WIDTH - 100; // Adjust position for better visibility
+    
+    // Adjustment 7: Increase miss tolerance (originally 5, now 8)
+    const MISSED_LIMIT = 8;
+
+    // Elements
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const pillStatus = document.getElementById('pill-status');
+    const pillTimer  = document.getElementById('pill-timer');
+    const pillScore  = document.getElementById('pill-score');
+    const timeBar    = document.getElementById('timeBar');
+    const startBtn   = document.getElementById('startBtn');
+    const retryBtn   = document.getElementById('retryBtn');
+    const toast      = document.getElementById('toast');
+    const upBtn      = document.getElementById('upBtn');
+    const downBtn    = document.getElementById('downBtn');
+    const virtualControls = document.getElementById('virtualControls');
+    const spiritImg = document.getElementById('spiritImg');
+
+    // Image Resources - Custom Images
+    const backgroundImage = new Image();
+    backgroundImage.src = 'images/game-bg.png'; // Custom background
+    
+    const pearlImage = new Image();
+    pearlImage.src = 'images/pearl.png'; // Custom jerky image
+    
+    const playerImage = new Image();
+    playerImage.src = 'images/game-spirit6.png'; // Custom spirit image
+
+    // Game State
+    let player = {
+      x: PLAYER_X_POSITION,
+      y: CANVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2,
+      width: PLAYER_WIDTH,
+      height: PLAYER_HEIGHT,
+      speed: PLAYER_SPEED
+    };
+    
+    let pearls = [];
+    let score = 0;
+    let missed = 0;
+    let timeLeft = GAME_TIME;
+    let gameOver = false;
+    let gameStarted = false;
+    let lastSecondTime = 0;
+    let pearlSpeed = INITIAL_PEARL_SPEED;
+    let keys = { up: false, down: false };
+    
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Image Loading Status
+    let imagesLoaded = {
+      background: false,
+      pearl: false,
+      player: false
+    };
+    
+    let imagesToLoad = 3;
+    let imagesLoadedCount = 0;
+
+    // Initialize Canvas
+    function initCanvas() {
+      // Adjust canvas size based on container
+      const container = document.getElementById('gameContainer');
+      const containerWidth = container.clientWidth;
+      const maxCanvasWidth = Math.min(containerWidth, 600);
+      
+      canvas.width = maxCanvasWidth;
+      canvas.height = Math.min(maxCanvasWidth * 0.67, 400); // Maintain 16:9 ratio
+      
+      // Adjust player position
+      player.x = canvas.width - 100;
+      player.y = canvas.height / 2 - player.height / 2;
+      
+      // Show virtual controls
+      virtualControls.style.display = isMobile ? 'flex' : 'none';
+    }
+
+    // Time Bar Update
+    function updateTimeBar() {
+      const percent = (timeLeft / GAME_TIME) * 100;
+      timeBar.style.width = percent + '%';
+      const hue = Math.max(0, Math.min(120, percent * 1.2));
+      timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
+      
+      // Update difficulty indicator
+      updateDifficultyIndicator();
+    }
+    
+    // Update Difficulty Indicator
+    function updateDifficultyIndicator() {
+      const difficultyDots = document.querySelectorAll('.difficulty-dot');
+      const timePercent = timeLeft / GAME_TIME;
+      
+      // Determine difficulty level based on time and score
+      let difficultyLevel = 1;
+      
+      if (timePercent < 0.2 || score >= 8) {
+        difficultyLevel = 5;
+      } else if (timePercent < 0.4 || score >= 6) {
+        difficultyLevel = 4;
+      } else if (timePercent < 0.6 || score >= 4) {
+        difficultyLevel = 3;
+      } else if (timePercent < 0.8 || score >= 2) {
+        difficultyLevel = 2;
+      }
+      
+      // Update dot colors
+      difficultyDots.forEach((dot, index) => {
+        if (index < difficultyLevel) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+
+    // Initialize Game
+    function initializeGame() {
+      initCanvas();
+      window.addEventListener('resize', initCanvas);
+      resetGameState();
+
+      // Keyboard Events
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+
+      // Start Button
+      startBtn.addEventListener('click', startGame);
+      startBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        startGame(); 
+      });
+
+      // Retry Button
+      retryBtn.addEventListener('click', () => {
+        resetGameState(); 
+        startGame(); 
+        lastSecondTime = 0;
+      });
+
+      // Virtual Button Events - Up/Down Controls
+      upBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        if (gameStarted && !gameOver) {
+          keys.up = true;
+          keys.down = false;
+        }
+      });
+      
+      downBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        if (gameStarted && !gameOver) {
+          keys.down = true;
+          keys.up = false;
+        }
+      });
+      
+      upBtn.addEventListener('touchend', (e) => { 
+        e.preventDefault(); 
+        keys.up = false;
+      });
+      
+      downBtn.addEventListener('touchend', (e) => { 
+        e.preventDefault(); 
+        keys.down = false;
+      });
+      
+      upBtn.addEventListener('click', () => { 
+        if (gameStarted && !gameOver) {
+          keys.up = true;
+          keys.down = false;
+          setTimeout(() => { keys.up = false; }, 100);
+        }
+      });
+      
+      downBtn.addEventListener('click', () => { 
+        if (gameStarted && !gameOver) {
+          keys.down = true;
+          keys.up = false;
+          setTimeout(() => { keys.down = false; }, 100);
+        }
+      });
+
+      // Swipe Gesture Control - Vertical Swipe
+      let touchStartY = 0;
+      canvas.addEventListener('touchstart', (e) => {
+        if (!gameStarted || gameOver) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        touchStartY = t.clientY;
+      }, { passive: false });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        if (gameStarted && !gameOver) e.preventDefault();
+      }, { passive: false });
+      
+      canvas.addEventListener('touchend', (e) => {
+        if (!gameStarted || gameOver || !touchStartY) return;
+        e.preventDefault();
+        const t = (e.changedTouches && e.changedTouches[0]) || null;
+        if (!t) return;
+        
+        const dy = t.clientY - touchStartY;
+        const MIN_DIST = 20;
+        
+        if (Math.abs(dy) > MIN_DIST) {
+          if (dy > 0) {
+            keys.down = true;
+            keys.up = false;
+          } else {
+            keys.up = true;
+            keys.down = false;
+          }
+          // Briefly maintain movement direction
+          setTimeout(() => {
+            keys.up = false;
+            keys.down = false;
+          }, 100);
+        }
+        
+        touchStartY = 0;
+      }, { passive: false });
+
+      // Load Images
+      loadImages();
+    }
+
+    // Load Images
+    function loadImages() {
+      // Background Image
+      backgroundImage.onload = function() {
+        imagesLoaded.background = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      backgroundImage.onerror = function() {
+        console.error('Background image loading failed');
+        imagesLoaded.background = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      
+      // Jerky Image
+      pearlImage.onload = function() {
+        imagesLoaded.pearl = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      pearlImage.onerror = function() {
+        console.error('Dajin image loading failed');
+        imagesLoaded.pearl = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      
+      // Player Image
+      playerImage.onload = function() {
+        imagesLoaded.player = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      playerImage.onerror = function() {
+        console.error('Image loading failed');
+        imagesLoaded.player = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+    }
+    
+    // Check All Images Loaded
+    function checkAllImagesLoaded() {
+      if (imagesLoadedCount === imagesToLoad) {
+        // All images loaded or failed to load
+        renderGame();
+      }
+    }
+
+    // Reset Game State
+    function resetGameState() {
+      player.y = CANVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2;
+      pearls = [];
+      score = 0;
+      missed = 0;
+      timeLeft = GAME_TIME;
+      gameOver = false;
+      gameStarted = false;
+      pearlSpeed = INITIAL_PEARL_SPEED;
+      keys = { up: false, down: false };
+
+      pillStatus.textContent = 'Ready to Start';
+      pillStatus.className = 'pill info';
+      pillTimer.textContent = `Time Left: ${timeLeft} sec`;
+      pillScore.textContent = `Score: ${score} / ${TARGET_SCORE}`;
+
+      startBtn.style.display = 'inline-flex';
+      retryBtn.style.display = 'none';
+
+      upBtn.disabled = false;
+      downBtn.disabled = false;
+
+      updateTimeBar();
+    }
+
+    // Start Game
+    function startGame() {
+      if (!gameStarted && !gameOver) {
+        gameStarted = true;
+        startBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-flex';
+        pillStatus.textContent = 'Game in Progress';
+        pillStatus.className = 'pill ok';
+        upBtn.disabled = false;
+        downBtn.disabled = false;
+        lastSecondTime = performance.now();
+        gameLoop();
+      }
+    }
+
+    // Key Down
+    function handleKeyDown(e) {
+      if (!gameStarted && !gameOver && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        startGame();
+      }
+      
+      if (gameStarted && !gameOver) {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+          keys.up = true;
+          keys.down = false;
+        } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+          keys.down = true;
+          keys.up = false;
+        }
+      }
+    }
+
+    // Key Up
+    function handleKeyUp(e) {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = false;
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = false;
+      }
+    }
+
+    // Update Player Position - Vertical Movement
+    function updatePlayer() {
+      if (keys.up && player.y > 0) {
+        player.y -= player.speed;
+      }
+      if (keys.down && player.y < canvas.height - player.height) {
+        player.y += player.speed;
+      }
+    }
+
+    // Generate Jerky - From Left Side Random Height
+    function generatePearl() {
+      // Adjustment: Lower spawn rate at game start
+      let currentSpawnRate = PEARL_SPAWN_RATE;
+      if (timeLeft > 45) currentSpawnRate *= 0.7; // Lower spawn rate in first 15 seconds
+      
+      if (Math.random() < currentSpawnRate) {
+        pearls.push({
+          x: -PEARL_RADIUS * 2,
+          y: Math.random() * (canvas.height - PEARL_RADIUS * 2) + PEARL_RADIUS,
+          radius: PEARL_RADIUS,
+          speed: pearlSpeed + Math.random() * 1.0, // Reduced random variation
+          color: `hsl(${Math.random() * 60 + 300}, 70%, 60%)` // Pink color scheme
+        });
+      }
+    }
+
+    // Update Jerky Position - Move from Left to Right
+    function updatePearls() {
+      for (let i = pearls.length - 1; i >= 0; i--) {
+        const pearl = pearls[i];
+        pearl.x += pearl.speed;
+
+        // Check if jerky is caught
+        // Jerky and player collision detection - More lenient detection
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+        
+        // Adjustment: Increase catch range (more lenient collision detection)
+        const catchWidth = player.width * 1.2;
+        const catchHeight = player.height * 1.2;
+        
+        if (pearl.x >= player.x - 10 && 
+            pearl.x <= player.x + player.width + 10 && 
+            pearl.y >= player.y - 10 && 
+            pearl.y <= player.y + player.height + 10) {
+          pearls.splice(i, 1);
+          score++;
+          pillScore.textContent = `Score: ${score} / ${TARGET_SCORE}`;
+          
+          // Play score sound (optional)
+          playScoreSound();
+          
+          if (score >= TARGET_SCORE) {
+            unlockSpirit();
+            gameOver = true;
+            return;
+          }
+          
+          // Adjustment: Increase speed every 4 points (previously 5 points)
+          if (score % 4 === 0 && pearlSpeed < MAX_PEARL_SPEED) {
+            pearlSpeed += 0.3; // Smaller increase
+          }
+          continue;
+        }
+
+        // Jerky flies out of right boundary
+        if (pearl.x > canvas.width + pearl.radius) {
+          pearls.splice(i, 1);
+          missed++;
+          
+          if (missed >= MISSED_LIMIT) {
+            gameOver = true;
+            pillStatus.textContent = 'Game Over';
+            pillStatus.className = 'pill warn';
+            showToast(`Game Over! Caught: ${score}, Missed: ${missed}`);
+            return;
+          }
+        }
+      }
+    }
+    
+    // Play Score Sound (Simple Beep)
+    function playScoreSound() {
+      try {
+        // Create a simple Web Audio API sound effect
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800 + score * 20; // Pitch increases with score
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } catch (e) {
+        // Silent handling if sound fails
+        console.log("Sound playback failed, but game continues");
+      }
+    }
+
+    // Draw Game
+    function renderGame() {
+      // Clear Canvas
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // Draw Background - Custom Background Image
+      if (imagesLoaded.background && backgroundImage.complete) {
+        // Draw background image (tiled or stretched to fit canvas)
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        // If background not loaded, use default background
+        ctx.fillStyle = '#e3f2fd';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw simple grid background
+        drawGrid();
+      }
+      
+      // Draw Flight Path (Left to Right)
+      drawFlightPath();
+      
+      // Draw Jerky - Custom Jerky Image
+      pearls.forEach(pearl => {
+        if (imagesLoaded.pearl && pearlImage.complete) {
+          // Use jerky image
+          const pearlSize = pearl.radius * 2;
+          ctx.drawImage(
+            pearlImage, 
+            pearl.x - pearl.radius, 
+            pearl.y - pearl.radius, 
+            pearlSize, 
+            pearlSize
+          );
+          
+          // Jerky trail effect
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(pearl.x - pearl.radius * 2, pearl.y);
+          ctx.lineTo(pearl.x, pearl.y);
+          ctx.strokeStyle = 'rgba(240, 98, 146, 0.4)';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.restore();
+        } else {
+          // If jerky image not loaded, draw jerky graphic
+          drawPearlGraphic(pearl);
+        }
+      });
+      
+      // Draw Player Spirit - Custom Spirit Image
+      drawPlayer();
+      
+      // Draw Score and Missed Count
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`Caught: ${score}`, 10, 25);
+      ctx.fillText(`Missed: ${missed}/${MISSED_LIMIT}`, 10, 50);
+      ctx.fillText(`Speed: ${pearlSpeed.toFixed(1)}`, canvas.width - 100, 25);
+      
+      // Draw Target Line (Right Side)
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(player.x - 10, 0);
+      ctx.lineTo(player.x - 10, canvas.height);
+      ctx.stroke();
+      
+      // Mark "Catch Zone"
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Catch Zone', player.x - 10, canvas.height - 10);
+      
+      // Game Status Hints
+      if (!gameStarted && !gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('Click to Start Game', canvas.width/2, canvas.height/2);
+        ctx.font = '16px Arial';
+        ctx.fillText('Use Up/Down keys or buttons to move Dajin', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText(`Target: ${TARGET_SCORE} jerky pieces, Tolerance: ${MISSED_LIMIT} pieces`, canvas.width/2, canvas.height/2 + 70);
+      }
+      
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        
+        if (score >= TARGET_SCORE) {
+          ctx.fillText('Challenge Complete!', canvas.width/2, canvas.height/2 - 30);
+          ctx.font = '20px Arial';
+          ctx.fillText(`Caught ${score} jerky pieces`, canvas.width/2, canvas.height/2);
+          ctx.font = '18px Arial';
+          ctx.fillText('Unlocking spirit...', canvas.width/2, canvas.height/2 + 40);
+        } else {
+          ctx.fillText('Game Over', canvas.width/2, canvas.height/2 - 30);
+          ctx.font = '18px Arial';
+          ctx.fillText(`Final Score: ${score} / ${TARGET_SCORE}`, canvas.width/2, canvas.height/2);
+          ctx.font = '16px Arial';
+          ctx.fillText('Click Restart button to try again', canvas.width/2, canvas.height/2 + 40);
+        }
+      }
+    }
+    
+    // Draw Jerky Graphic (if image not loaded)
+    function drawPearlGraphic(pearl) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pearl.x, pearl.y, pearl.radius, 0, Math.PI * 2);
+      ctx.fillStyle = pearl.color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // Jerky highlight
+      ctx.beginPath();
+      ctx.arc(pearl.x - pearl.radius * 0.3, pearl.y - pearl.radius * 0.3, pearl.radius * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
+      ctx.restore();
+    }
+    
+    // Draw Player Spirit (Custom Image)
+    function drawPlayer() {
+      ctx.save();
+      
+      // Draw spirit image (if available)
+      if (imagesLoaded.player && playerImage.complete) {
+        // Maintain aspect ratio, calculate appropriate drawing size
+        const imgAspectRatio = playerImage.naturalWidth / playerImage.naturalHeight;
+        let drawWidth = player.width;
+        let drawHeight = player.height;
+        
+        // Adjust based on image aspect ratio to maintain proportion
+        if (imgAspectRatio > 1) {
+          // Wide image, base on width
+          drawHeight = drawWidth / imgAspectRatio;
+        } else {
+          // Tall image, base on height
+          drawWidth = drawHeight * imgAspectRatio;
+        }
+        
+        // Center drawing
+        const drawX = player.x + (player.width - drawWidth) / 2;
+        const drawY = player.y + (player.height - drawHeight) / 2;
+        
+        ctx.drawImage(playerImage, drawX, drawY, drawWidth, drawHeight);
+        
+        // Draw spirit outline (optional)
+        ctx.strokeStyle = 'rgba(76, 175, 80, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(drawX, drawY, drawWidth, drawHeight);
+      } else {
+        // If image unavailable, draw alternative graphic
+        drawPlayerGraphic();
+      }
+      
+      // Draw Movement Direction Indicator
+      if (keys.up || keys.down) {
+        ctx.fillStyle = keys.up ? '#4CAF50' : '#FF9800';
+        ctx.beginPath();
+        const arrowX = player.x + player.width / 2;
+        const arrowY = keys.up ? player.y - 10 : player.y + player.height + 10;
+        const arrowSize = 8;
+        
+        if (keys.up) {
+          // Up arrow
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(arrowX - arrowSize, arrowY + arrowSize);
+          ctx.lineTo(arrowX + arrowSize, arrowY + arrowSize);
+        } else {
+          // Down arrow
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(arrowX - arrowSize, arrowY - arrowSize);
+          ctx.lineTo(arrowX + arrowSize, arrowY - arrowSize);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      ctx.restore();
+    }
+    
+    // Draw Player Alternative Graphic
+    function drawPlayerGraphic() {
+      // Larger alternative graphic
+      ctx.fillStyle = '#ffb547';
+      ctx.beginPath();
+      // Use roundRect if supported, otherwise rect
+      if (ctx.roundRect) {
+        ctx.roundRect(player.x, player.y, player.width, player.height, 15);
+      } else {
+        ctx.rect(player.x, player.y, player.width, player.height);
+      }
+      ctx.fill();
+      
+      // Add gradient effect
+      const gradient = ctx.createLinearGradient(
+        player.x, player.y, 
+        player.x, player.y + player.height
+      );
+      gradient.addColorStop(0, '#ffb547');
+      gradient.addColorStop(1, '#ff9800');
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 18px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('Spirit', player.x + player.width/2, player.y + player.height/2);
+      
+      // Add shadow effect
+      ctx.strokeStyle = '#ff9800';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(player.x, player.y, player.width, player.height);
+    }
+    
+    // Draw Grid Background
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.lineWidth = 1;
+      
+      // Vertical lines
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // Horizontal lines
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+    
+    // Draw Flight Path
+    function drawFlightPath() {
+      // Left starting point indicator
+      ctx.fillStyle = 'rgba(129, 199, 132, 0.3)';
+      ctx.fillRect(0, 0, 30, canvas.height);
+      
+      // Path direction arrows
+      ctx.fillStyle = 'rgba(129, 199, 132, 0.6)';
+      for (let y = 30; y < canvas.height; y += 60) {
+        ctx.beginPath();
+        ctx.moveTo(20, y);
+        ctx.lineTo(40, y - 10);
+        ctx.lineTo(40, y + 10);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // Flight direction text
+      ctx.fillStyle = '#81c784';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('Dajin Start', 25, 20);
+    }
+
+    // Show Toast
+    function showToast(msg) {
+      toast.textContent = msg; 
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // Unlock Spirit
+    function unlockSpirit() {
+      const spirit = {
+        id: 'spirit_game5', 
+        name: 'Dajin',
+        image: 'images/game-spirit5.png', 
+        page: 'spirit_game5.html',
+        unlockDate: new Date().toISOString(), 
+        score: score,
+        missed: missed,
+        timeLeft: timeLeft
+      };
+      
+      let spirits = [];
+      try { 
+        spirits = JSON.parse(localStorage.getItem('spirits') || '[]'); 
+      } catch(e) { 
+        spirits = []; 
+      }
+      
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        showToast('🎉 Challenge Spirit Unlocked: Dajin!');
+        pillStatus.textContent = 'Challenge Complete!';
+        pillStatus.className = 'pill ok';
+      } else {
+        showToast('You have already unlocked Dajin!');
+      }
+      
+      setTimeout(() => { 
+        // If page doesn't exist, redirect to home
+        try {
+          window.location.href = spirit.page + '#unlocked';
+        } catch(e) {
+          window.location.href = 'index.html';
+        }
+      }, 2000);
+    }
+
+    // Main Game Loop
+    function gameLoop() {
+      if (gameOver) {
+        renderGame();
+        return;
+      }
+      
+      const currentTime = performance.now();
+      
+      // Update Game State
+      if (gameStarted) {
+        updatePlayer();
+        generatePearl();
+        updatePearls();
+        renderGame();
+      }
+      
+      // Update Time
+      if (currentTime - lastSecondTime >= 1000) {
+        timeLeft--; 
+        lastSecondTime = currentTime; 
+        updateTimeBar();
+        pillTimer.textContent = `Time Left: ${timeLeft} sec`;
+        
+        if (timeLeft <= 0 && !gameOver) {
+          gameOver = true;
+          pillStatus.textContent = 'Time\'s Up!';
+          pillStatus.className = 'pill warn';
+          showToast(`Time\'s Up! Final Score: ${score}`);
+          renderGame();
+          return;
+        }
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // Initialize Game
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeGame();
+    });
+  </script>
+</body>
+</html>

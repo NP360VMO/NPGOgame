@@ -1,0 +1,1086 @@
+<!DOCTYPE html> 
+<html lang="zh">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
+  <title>投餵挑戰：大金肚餓了</title>
+
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+
+    gtag('config', 'G-B3740R31MS');
+
+    gtag('event', 'page_enter', {
+      'page_title': 'Game 8 - Horizontal Catch Game',
+      'page_path': '/game8.html'
+    });
+  </script>
+
+  <style>
+    :root {
+      --bg: #f7f3ea;
+      --ink: #2f2a25;
+      --card: #fffdf9;
+      --accent: #ffb547;
+      --accent-ink: #6b400a;
+      --section-bg: #fff9f0;
+      --section-border: #e7d9c5;
+      --ok: #15a36d;
+      --warn: #e04848;
+      --info: #2b6eea;
+      --pearl: #f06292;
+      --tea: #81c784;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, "PingFang HK", "Microsoft JhengHei", sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+    }
+    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
+    .card {
+      background: var(--card);
+      border: 1px solid var(--section-border);
+      border-radius: 20px;
+      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
+      overflow: hidden;
+    }
+    .header {
+      display: flex; justify-content: space-between; gap: 12px; align-items: center;
+      padding: 18px 20px; border-bottom: 1px solid var(--section-border);
+    }
+    .title { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
+    .badge {
+      font-weight: 700; background: #fff1d8; border: 1px solid #ffd9a0; color: #7a4a00;
+      border-radius: 999px; padding: 6px 10px;
+    }
+    .hero {
+      display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 18px 20px;
+      border-bottom: 1px solid var(--section-border);
+      background: linear-gradient(to bottom, rgba(255, 248, 236, 0.8), rgba(255, 255, 255, 0.6)), url("images/background.png");
+      background-size: cover; background-position: center;
+    }
+    .img-wrap { display: flex; align-items: center; justify-content: center; }
+    .img-wrap img { width: 96px; height: auto; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12)); }
+    .intro p { margin: 0.35rem 0; }
+    .status-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
+    .pill {
+      border: 2px solid var(--section-border); background: #fff; border-radius: 999px;
+      padding: 6px 12px; font-weight: 800;
+    }
+    .pill.ok { border-color: #bfe6d6; color: var(--ok); }
+    .pill.warn { border-color: #ffd1d1; color: var(--warn); }
+    .pill.info { border-color: #cfe0ff; color: var(--info); }
+
+    .section { padding: 18px 20px; }
+    .game-wrap { background: var(--section-bg); border: 1px dashed var(--section-border); border-radius: 16px; padding: 12px; }
+    .play-area {
+      position: relative; border-radius: 12px; min-height: 360px; max-width: 720px; margin: 0 auto;
+      background: #fff; display: flex; flex-direction: column; align-items: center;
+    }
+
+    /* 遊戲畫布 - 橫向尺寸 */
+    #gameContainer{ 
+      max-width:100%; 
+      margin:10px auto; 
+      position:relative; 
+      width:100%;
+      display:flex; 
+      justify-content:center; 
+    }
+    #gameCanvas { 
+      background-color: #f0f8ff; 
+      border: 1px solid #ccc; 
+      display:block; 
+      max-width:100%; 
+      touch-action:none; 
+      border-radius: 8px;
+    }
+
+    /* 進度條 */
+    .progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 12px; }
+    .bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #81c784, #ffd166); }
+
+    .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
+    .btn {
+      appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
+      background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+    }
+    .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
+    .btn:active { transform: translateY(1px); }
+
+    .toast {
+      position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px;
+      background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 900;
+      display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
+    }
+
+    /* 虛擬方向鍵 - 垂直排列 */
+    #virtualControls { 
+      display:flex; 
+      justify-content:center; 
+      margin-top:16px; 
+      flex-direction:column; 
+      align-items:center; 
+      width:100%; 
+    }
+    #virtualControls .control-row {
+      display:flex;
+      justify-content:center;
+    }
+    #virtualControls .control-btn {
+      width:72px; height:72px; border-radius:50%;
+      display:flex; justify-content:center; align-items:center; margin:8px;
+      font-size:28px; user-select:none; -webkit-tap-highlight-color:transparent;
+      border:1px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
+      background: rgba(0,0,0,0.06);
+    }
+    #virtualControls .control-btn:active { background: rgba(0,0,0,0.12); }
+    #virtualControls .control-btn:disabled { background: rgba(0,0,0,0.04); cursor: not-allowed; }
+
+    @media (max-width: 560px) {
+      .hero { grid-template-columns: 84px 1fr; }
+      .img-wrap img { width: 80px; }
+      #virtualControls .control-btn { width:64px; height:64px; font-size:24px; margin:6px; }
+    }
+    
+    /* 遊戲說明標籤 */
+    .game-tip {
+      background: #e8f5e9;
+      border-left: 4px solid #4caf50;
+      padding: 8px 12px;
+      border-radius: 0 8px 8px 0;
+      margin: 12px 0;
+      font-size: 14px;
+    }
+    
+    /* 難度指示器 */
+    .difficulty-indicator {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-top: 10px;
+      gap: 8px;
+      font-size: 14px;
+    }
+    .difficulty-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      background-color: #ddd;
+    }
+    .difficulty-dot.active {
+      background-color: #81c784;
+    }
+  </style>
+</head>
+<body class="theme-warm">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">投餵挑戰:大金肚餓了</div>
+        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap"><img src="images/game-spirit5.png" alt="大金" id="spiritImg"></div>
+        <div class="intro">
+          <p><strong>玩法：</strong>使用上下鍵或虛擬按鈕控制大金接住從左飛來的小肉乾。在<strong>60秒</strong>內接住<strong>12塊肉乾</strong>即可解鎖大金！</p>
+          <div class="status-bar">
+            <span class="pill info" id="pill-status">準備開始</span>
+            <span class="pill" id="pill-score">分數：0 / 12</span>
+            <span class="pill warn" id="pill-timer">剩餘時間：60 秒</span>
+          </div>
+        </div>
+      </div>
+
+      <div class="section">
+        <div class="game-wrap">
+          <div class="play-area">
+            <div class="progress"><div class="bar" id="timeBar" style="width: 100%"></div></div>
+            <div id="gameContainer">
+              <canvas id="gameCanvas"></canvas>
+            </div>
+            
+            <div class="game-tip">💡 提示：肉乾飛行速度會隨著時間逐漸加快</div>
+            
+            <!-- 難度指示器 -->
+            <div class="difficulty-indicator">
+              <span>難度：</span>
+              <div class="difficulty-dot active"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+              <div class="difficulty-dot"></div>
+            </div>
+
+            <!-- 虛擬方向鍵 - 垂直排列 -->
+            <div id="virtualControls" style="display:none;">
+              <div class="control-row">
+                <div class="control-btn" id="upBtn">↑</div>
+              </div>
+              <div class="control-row">
+                <div class="control-btn" id="downBtn">↓</div>
+              </div>
+            </div>
+          </div>
+
+          <div class="actions">
+            <button class="btn" id="startBtn">▶️ 開始遊戲</button>
+            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 重新開始</button>
+            <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
+          </div>
+        </div>
+        <div class="actions"><a class="btn secondary" href="index.html">🔙 返回主頁</a></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast">🎉 已解鎖：大金！</div>
+
+  <script>
+    // 遊戲常量 - 橫向遊戲
+    const CANVAS_WIDTH = 600;
+    const CANVAS_HEIGHT = 400;
+    
+    // 調整1：增加精靈圖片大小（原本40x60，現在70x90）
+    const PLAYER_WIDTH = 40;
+    const PLAYER_HEIGHT = 60;
+    
+    // 調整2：降低移動速度（原本6，現在5）
+    const PLAYER_SPEED = 6;
+    
+    // 調整3：降低珍珠初始速度（原本3，現在2.5）
+    const INITIAL_PEARL_SPEED = 2.5;
+    
+    // 調整4：降低珍珠最大速度（原本8，現在6）
+    const MAX_PEARL_SPEED = 7;
+    
+    const PEARL_RADIUS = 17; // 稍微增加珍珠大小
+    
+    // 調整5：降低珍珠生成率（原本0.025，現在0.02）
+    const PEARL_SPAWN_RATE = 0.02;
+    
+    // 調整6：降低目標分數（原本15，現在12）
+    const TARGET_SCORE = 12;
+    
+    const GAME_TIME = 60;
+    const PLAYER_X_POSITION = CANVAS_WIDTH - 100; // 調整位置讓精靈更明顯
+    
+    // 調整7：增加錯過容許次數（原本5，現在8）
+    const MISSED_LIMIT = 8;
+
+    // 元素
+    const canvas = document.getElementById('gameCanvas');
+    const ctx = canvas.getContext('2d');
+    const pillStatus = document.getElementById('pill-status');
+    const pillTimer  = document.getElementById('pill-timer');
+    const pillScore  = document.getElementById('pill-score');
+    const timeBar    = document.getElementById('timeBar');
+    const startBtn   = document.getElementById('startBtn');
+    const retryBtn   = document.getElementById('retryBtn');
+    const toast      = document.getElementById('toast');
+    const upBtn      = document.getElementById('upBtn');
+    const downBtn    = document.getElementById('downBtn');
+    const virtualControls = document.getElementById('virtualControls');
+    const spiritImg = document.getElementById('spiritImg');
+
+    // 圖片資源 - 使用自定義圖片
+    const backgroundImage = new Image();
+    backgroundImage.src = 'images/game-bg.png'; // 自定義背景圖
+    
+    const pearlImage = new Image();
+    pearlImage.src = 'images/pearl.png'; // 自定義珍珠圖片
+    
+    const playerImage = new Image();
+    playerImage.src = 'images/game-spirit6.png'; // 自定義精靈圖片
+
+    // 遊戲狀態
+    let player = {
+      x: PLAYER_X_POSITION,
+      y: CANVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2,
+      width: PLAYER_WIDTH,
+      height: PLAYER_HEIGHT,
+      speed: PLAYER_SPEED
+    };
+    
+    let pearls = [];
+    let score = 0;
+    let missed = 0;
+    let timeLeft = GAME_TIME;
+    let gameOver = false;
+    let gameStarted = false;
+    let lastSecondTime = 0;
+    let pearlSpeed = INITIAL_PEARL_SPEED;
+    let keys = { up: false, down: false };
+    
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // 圖片載入狀態
+    let imagesLoaded = {
+      background: false,
+      pearl: false,
+      player: false
+    };
+    
+    let imagesToLoad = 3;
+    let imagesLoadedCount = 0;
+
+    // 初始化畫布
+    function initCanvas() {
+      // 根據容器大小調整畫布尺寸
+      const container = document.getElementById('gameContainer');
+      const containerWidth = container.clientWidth;
+      const maxCanvasWidth = Math.min(containerWidth, 600);
+      
+      canvas.width = maxCanvasWidth;
+      canvas.height = Math.min(maxCanvasWidth * 0.67, 400); // 保持16:9比例
+      
+      // 調整玩家位置
+      player.x = canvas.width - 100;
+      player.y = canvas.height / 2 - player.height / 2;
+      
+      // 顯示虛擬控制按鈕
+      virtualControls.style.display = isMobile ? 'flex' : 'none';
+    }
+
+    // 時間條更新
+    function updateTimeBar() {
+      const percent = (timeLeft / GAME_TIME) * 100;
+      timeBar.style.width = percent + '%';
+      const hue = Math.max(0, Math.min(120, percent * 1.2));
+      timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
+      
+      // 更新難度指示器
+      updateDifficultyIndicator();
+    }
+    
+    // 更新難度指示器
+    function updateDifficultyIndicator() {
+      const difficultyDots = document.querySelectorAll('.difficulty-dot');
+      const timePercent = timeLeft / GAME_TIME;
+      
+      // 根據剩餘時間和得分決定難度等級
+      let difficultyLevel = 1;
+      
+      if (timePercent < 0.2 || score >= 8) {
+        difficultyLevel = 5;
+      } else if (timePercent < 0.4 || score >= 6) {
+        difficultyLevel = 4;
+      } else if (timePercent < 0.6 || score >= 4) {
+        difficultyLevel = 3;
+      } else if (timePercent < 0.8 || score >= 2) {
+        difficultyLevel = 2;
+      }
+      
+      // 更新點點顏色
+      difficultyDots.forEach((dot, index) => {
+        if (index < difficultyLevel) {
+          dot.classList.add('active');
+        } else {
+          dot.classList.remove('active');
+        }
+      });
+    }
+
+    // 初始化遊戲
+    function initializeGame() {
+      initCanvas();
+      window.addEventListener('resize', initCanvas);
+      resetGameState();
+
+      // 鍵盤事件
+      document.addEventListener('keydown', handleKeyDown);
+      document.addEventListener('keyup', handleKeyUp);
+
+      // 開始按鈕
+      startBtn.addEventListener('click', startGame);
+      startBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        startGame(); 
+      });
+
+      // 重試按鈕
+      retryBtn.addEventListener('click', () => {
+        resetGameState(); 
+        startGame(); 
+        lastSecondTime = 0;
+      });
+
+      // 虛擬按鈕事件 - 上下控制
+      upBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        if (gameStarted && !gameOver) {
+          keys.up = true;
+          keys.down = false;
+        }
+      });
+      
+      downBtn.addEventListener('touchstart', (e) => { 
+        e.preventDefault(); 
+        if (gameStarted && !gameOver) {
+          keys.down = true;
+          keys.up = false;
+        }
+      });
+      
+      upBtn.addEventListener('touchend', (e) => { 
+        e.preventDefault(); 
+        keys.up = false;
+      });
+      
+      downBtn.addEventListener('touchend', (e) => { 
+        e.preventDefault(); 
+        keys.down = false;
+      });
+      
+      upBtn.addEventListener('click', () => { 
+        if (gameStarted && !gameOver) {
+          keys.up = true;
+          keys.down = false;
+          setTimeout(() => { keys.up = false; }, 100);
+        }
+      });
+      
+      downBtn.addEventListener('click', () => { 
+        if (gameStarted && !gameOver) {
+          keys.down = true;
+          keys.up = false;
+          setTimeout(() => { keys.down = false; }, 100);
+        }
+      });
+
+      // 滑動手勢控制 - 垂直滑動
+      let touchStartY = 0;
+      canvas.addEventListener('touchstart', (e) => {
+        if (!gameStarted || gameOver) return;
+        e.preventDefault();
+        const t = e.touches[0];
+        touchStartY = t.clientY;
+      }, { passive: false });
+      
+      canvas.addEventListener('touchmove', (e) => {
+        if (gameStarted && !gameOver) e.preventDefault();
+      }, { passive: false });
+      
+      canvas.addEventListener('touchend', (e) => {
+        if (!gameStarted || gameOver || !touchStartY) return;
+        e.preventDefault();
+        const t = (e.changedTouches && e.changedTouches[0]) || null;
+        if (!t) return;
+        
+        const dy = t.clientY - touchStartY;
+        const MIN_DIST = 20;
+        
+        if (Math.abs(dy) > MIN_DIST) {
+          if (dy > 0) {
+            keys.down = true;
+            keys.up = false;
+          } else {
+            keys.up = true;
+            keys.down = false;
+          }
+          // 短暫保持移動方向
+          setTimeout(() => {
+            keys.up = false;
+            keys.down = false;
+          }, 100);
+        }
+        
+        touchStartY = 0;
+      }, { passive: false });
+
+      // 載入圖片
+      loadImages();
+    }
+
+    // 載入圖片
+    function loadImages() {
+      // 背景圖片
+      backgroundImage.onload = function() {
+        imagesLoaded.background = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      backgroundImage.onerror = function() {
+        console.error('背景圖片載入失敗');
+        imagesLoaded.background = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      
+      // 珍珠圖片
+      pearlImage.onload = function() {
+        imagesLoaded.pearl = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      pearlImage.onerror = function() {
+        console.error('大金載入失敗');
+        imagesLoaded.pearl = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      
+      // 玩家圖片
+      playerImage.onload = function() {
+        imagesLoaded.player = true;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+      playerImage.onerror = function() {
+        console.error('圖片載入失敗');
+        imagesLoaded.player = false;
+        imagesLoadedCount++;
+        checkAllImagesLoaded();
+      };
+    }
+    
+    // 檢查所有圖片是否載入完成
+    function checkAllImagesLoaded() {
+      if (imagesLoadedCount === imagesToLoad) {
+        // 所有圖片載入完成或載入失敗
+        renderGame();
+      }
+    }
+
+    // 重置遊戲狀態
+    function resetGameState() {
+      player.y = CANVAS_HEIGHT / 2 - PLAYER_HEIGHT / 2;
+      pearls = [];
+      score = 0;
+      missed = 0;
+      timeLeft = GAME_TIME;
+      gameOver = false;
+      gameStarted = false;
+      pearlSpeed = INITIAL_PEARL_SPEED;
+      keys = { up: false, down: false };
+
+      pillStatus.textContent = '準備開始';
+      pillStatus.className = 'pill info';
+      pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
+      pillScore.textContent = `分數：${score} / ${TARGET_SCORE}`;
+
+      startBtn.style.display = 'inline-flex';
+      retryBtn.style.display = 'none';
+
+      upBtn.disabled = false;
+      downBtn.disabled = false;
+
+      updateTimeBar();
+    }
+
+    // 開始遊戲
+    function startGame() {
+      if (!gameStarted && !gameOver) {
+        gameStarted = true;
+        startBtn.style.display = 'none';
+        retryBtn.style.display = 'inline-flex';
+        pillStatus.textContent = '遊戲進行中';
+        pillStatus.className = 'pill ok';
+        upBtn.disabled = false;
+        downBtn.disabled = false;
+        lastSecondTime = performance.now();
+        gameLoop();
+      }
+    }
+
+    // 鍵盤按下
+    function handleKeyDown(e) {
+      if (!gameStarted && !gameOver && (e.key === 'ArrowUp' || e.key === 'ArrowDown')) {
+        startGame();
+      }
+      
+      if (gameStarted && !gameOver) {
+        if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+          keys.up = true;
+          keys.down = false;
+        } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+          keys.down = true;
+          keys.up = false;
+        }
+      }
+    }
+
+    // 鍵盤釋放
+    function handleKeyUp(e) {
+      if (e.key === 'ArrowUp' || e.key === 'w' || e.key === 'W') {
+        keys.up = false;
+      } else if (e.key === 'ArrowDown' || e.key === 's' || e.key === 'S') {
+        keys.down = false;
+      }
+    }
+
+    // 更新玩家位置 - 垂直移動
+    function updatePlayer() {
+      if (keys.up && player.y > 0) {
+        player.y -= player.speed;
+      }
+      if (keys.down && player.y < canvas.height - player.height) {
+        player.y += player.speed;
+      }
+    }
+
+    // 生成珍珠 - 從左側隨機高度生成
+    function generatePearl() {
+      // 調整：遊戲初期生成率更低
+      let currentSpawnRate = PEARL_SPAWN_RATE;
+      if (timeLeft > 45) currentSpawnRate *= 0.7; // 前15秒生成率更低
+      
+      if (Math.random() < currentSpawnRate) {
+        pearls.push({
+          x: -PEARL_RADIUS * 2,
+          y: Math.random() * (canvas.height - PEARL_RADIUS * 2) + PEARL_RADIUS,
+          radius: PEARL_RADIUS,
+          speed: pearlSpeed + Math.random() * 1.0, // 減少隨機變化
+          color: `hsl(${Math.random() * 60 + 300}, 70%, 60%)` // 粉紅色系
+        });
+      }
+    }
+
+    // 更新珍珠位置 - 從左向右移動
+    function updatePearls() {
+      for (let i = pearls.length - 1; i >= 0; i--) {
+        const pearl = pearls[i];
+        pearl.x += pearl.speed;
+
+        // 檢測是否接到珍珠
+        // 珍珠與玩家精靈碰撞檢測 - 使用更寬鬆的檢測
+        const playerCenterX = player.x + player.width / 2;
+        const playerCenterY = player.y + player.height / 2;
+        
+        // 調整：增加接取範圍（碰撞檢測更寬鬆）
+        const catchWidth = player.width * 1.2;
+        const catchHeight = player.height * 1.2;
+        
+        if (pearl.x >= player.x - 10 && 
+            pearl.x <= player.x + player.width + 10 && 
+            pearl.y >= player.y - 10 && 
+            pearl.y <= player.y + player.height + 10) {
+          pearls.splice(i, 1);
+          score++;
+          pillScore.textContent = `分數：${score} / ${TARGET_SCORE}`;
+          
+          // 播放得分音效（可選）
+          playScoreSound();
+          
+          if (score >= TARGET_SCORE) {
+            unlockSpirit();
+            gameOver = true;
+            return;
+          }
+          
+          // 調整：每得4分增加速度（原本5分）
+          if (score % 4 === 0 && pearlSpeed < MAX_PEARL_SPEED) {
+            pearlSpeed += 0.3; // 增加幅度更小
+          }
+          continue;
+        }
+
+        // 珍珠飛出右側邊界
+        if (pearl.x > canvas.width + pearl.radius) {
+          pearls.splice(i, 1);
+          missed++;
+          
+          if (missed >= MISSED_LIMIT) {
+            gameOver = true;
+            pillStatus.textContent = '遊戲結束';
+            pillStatus.className = 'pill warn';
+            showToast(`遊戲結束！接住: ${score}顆，錯過: ${missed}顆`);
+            return;
+          }
+        }
+      }
+    }
+    
+    // 播放得分音效（簡單的beep音效）
+    function playScoreSound() {
+      try {
+        // 創建一個簡單的Web Audio API音效
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        const oscillator = audioContext.createOscillator();
+        const gainNode = audioContext.createGain();
+        
+        oscillator.connect(gainNode);
+        gainNode.connect(audioContext.destination);
+        
+        oscillator.frequency.value = 800 + score * 20; // 音調隨分數增加
+        oscillator.type = 'sine';
+        
+        gainNode.gain.setValueAtTime(0.1, audioContext.currentTime);
+        gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.1);
+        
+        oscillator.start(audioContext.currentTime);
+        oscillator.stop(audioContext.currentTime + 0.1);
+      } catch (e) {
+        // 如果音效失敗，靜默處理
+        console.log("音效播放失敗，但不影響遊戲");
+      }
+    }
+
+    // 繪製遊戲
+    function renderGame() {
+      // 清除畫布
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      
+      // 繪製背景 - 使用自定義背景圖
+      if (imagesLoaded.background && backgroundImage.complete) {
+        // 繪製背景圖（平鋪或拉伸以適應畫布）
+        ctx.drawImage(backgroundImage, 0, 0, canvas.width, canvas.height);
+      } else {
+        // 如果背景圖未載入，使用預設背景
+        ctx.fillStyle = '#e3f2fd';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        
+        // 繪製簡單的網格背景
+        drawGrid();
+      }
+      
+      // 繪製飛行軌跡線（從左到右）
+      drawFlightPath();
+      
+      // 繪製珍珠 - 使用自定義珍珠圖片
+      pearls.forEach(pearl => {
+        if (imagesLoaded.pearl && pearlImage.complete) {
+          // 使用珍珠圖片
+          const pearlSize = pearl.radius * 2;
+          ctx.drawImage(
+            pearlImage, 
+            pearl.x - pearl.radius, 
+            pearl.y - pearl.radius, 
+            pearlSize, 
+            pearlSize
+          );
+          
+          // 珍珠尾部軌跡效果
+          ctx.save();
+          ctx.beginPath();
+          ctx.moveTo(pearl.x - pearl.radius * 2, pearl.y);
+          ctx.lineTo(pearl.x, pearl.y);
+          ctx.strokeStyle = 'rgba(240, 98, 146, 0.4)';
+          ctx.lineWidth = 3;
+          ctx.stroke();
+          ctx.restore();
+        } else {
+          // 如果珍珠圖片未載入，使用繪製的珍珠
+          drawPearlGraphic(pearl);
+        }
+      });
+      
+      // 繪製玩家精靈 - 使用自定義精靈圖片
+      drawPlayer();
+      
+      // 繪製分數和錯過數
+      ctx.fillStyle = '#333';
+      ctx.font = 'bold 16px Arial';
+      ctx.fillText(`接住: ${score}`, 10, 25);
+      ctx.fillText(`錯過: ${missed}/${MISSED_LIMIT}`, 10, 50);
+      ctx.fillText(`速度: ${pearlSpeed.toFixed(1)}`, canvas.width - 100, 25);
+      
+      // 繪製目標線（右側）
+      ctx.strokeStyle = '#ff6b6b';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.moveTo(player.x - 10, 0);
+      ctx.lineTo(player.x - 10, canvas.height);
+      ctx.stroke();
+      
+      // 標示"接取區"
+      ctx.fillStyle = '#ff6b6b';
+      ctx.font = 'bold 14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('接取區', player.x - 10, canvas.height - 10);
+      
+      // 遊戲狀態提示
+      if (!gameStarted && !gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText('點擊開始遊戲', canvas.width/2, canvas.height/2);
+        ctx.font = '16px Arial';
+        ctx.fillText('使用上下鍵或按鈕控制大金移動', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText(`目標：${TARGET_SCORE}塊肉乾，容錯：${MISSED_LIMIT}塊`, canvas.width/2, canvas.height/2 + 70);
+      }
+      
+      if (gameOver) {
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.7)';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = '#fff';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        
+        if (score >= TARGET_SCORE) {
+          ctx.fillText('挑戰成功！', canvas.width/2, canvas.height/2 - 30);
+          ctx.font = '20px Arial';
+          ctx.fillText(`接住 ${score} 塊肉乾`, canvas.width/2, canvas.height/2);
+          ctx.font = '18px Arial';
+          ctx.fillText('解鎖精靈中...', canvas.width/2, canvas.height/2 + 40);
+        } else {
+          ctx.fillText('遊戲結束', canvas.width/2, canvas.height/2 - 30);
+          ctx.font = '18px Arial';
+          ctx.fillText(`最終分數: ${score} / ${TARGET_SCORE}`, canvas.width/2, canvas.height/2);
+          ctx.font = '16px Arial';
+          ctx.fillText('點擊重新開始按鈕再試一次', canvas.width/2, canvas.height/2 + 40);
+        }
+      }
+    }
+    
+    // 繪製珍珠圖形（如果圖片未載入）
+    function drawPearlGraphic(pearl) {
+      ctx.save();
+      ctx.beginPath();
+      ctx.arc(pearl.x, pearl.y, pearl.radius, 0, Math.PI * 2);
+      ctx.fillStyle = pearl.color;
+      ctx.fill();
+      ctx.strokeStyle = '#fff';
+      ctx.lineWidth = 2;
+      ctx.stroke();
+      
+      // 珍珠高光
+      ctx.beginPath();
+      ctx.arc(pearl.x - pearl.radius * 0.3, pearl.y - pearl.radius * 0.3, pearl.radius * 0.3, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+      ctx.fill();
+      ctx.restore();
+    }
+    
+    // 繪製玩家精靈（使用自定義圖片）
+    function drawPlayer() {
+      ctx.save();
+      
+      // 繪製精靈圖片（如果可用）
+      if (imagesLoaded.player && playerImage.complete) {
+        // 保持圖片比例，計算合適的繪製尺寸
+        const imgAspectRatio = playerImage.naturalWidth / playerImage.naturalHeight;
+        let drawWidth = player.width;
+        let drawHeight = player.height;
+        
+        // 根據圖片比例調整，保持比例
+        if (imgAspectRatio > 1) {
+          // 寬圖，以寬度為基準
+          drawHeight = drawWidth / imgAspectRatio;
+        } else {
+          // 高圖，以高度為基準
+          drawWidth = drawHeight * imgAspectRatio;
+        }
+        
+        // 居中繪製
+        const drawX = player.x + (player.width - drawWidth) / 2;
+        const drawY = player.y + (player.height - drawHeight) / 2;
+        
+        ctx.drawImage(playerImage, drawX, drawY, drawWidth, drawHeight);
+        
+        // 繪製精靈輪廓（可選）
+        ctx.strokeStyle = 'rgba(76, 175, 80, 0.5)';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(drawX, drawY, drawWidth, drawHeight);
+      } else {
+        // 如果圖片不可用，繪製替代圖形
+        drawPlayerGraphic();
+      }
+      
+      // 繪製移動方向指示器
+      if (keys.up || keys.down) {
+        ctx.fillStyle = keys.up ? '#4CAF50' : '#FF9800';
+        ctx.beginPath();
+        const arrowX = player.x + player.width / 2;
+        const arrowY = keys.up ? player.y - 10 : player.y + player.height + 10;
+        const arrowSize = 8;
+        
+        if (keys.up) {
+          // 向上箭頭
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(arrowX - arrowSize, arrowY + arrowSize);
+          ctx.lineTo(arrowX + arrowSize, arrowY + arrowSize);
+        } else {
+          // 向下箭頭
+          ctx.moveTo(arrowX, arrowY);
+          ctx.lineTo(arrowX - arrowSize, arrowY - arrowSize);
+          ctx.lineTo(arrowX + arrowSize, arrowY - arrowSize);
+        }
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      ctx.restore();
+    }
+    
+    // 繪製玩家替代圖形
+    function drawPlayerGraphic() {
+      // 更大的替代圖形
+      ctx.fillStyle = '#ffb547';
+      ctx.beginPath();
+      // 使用 roundRect 如果支援，否則使用 rect
+      if (ctx.roundRect) {
+        ctx.roundRect(player.x, player.y, player.width, player.height, 15);
+      } else {
+        ctx.rect(player.x, player.y, player.width, player.height);
+      }
+      ctx.fill();
+      
+      // 添加漸變效果
+      const gradient = ctx.createLinearGradient(
+        player.x, player.y, 
+        player.x, player.y + player.height
+      );
+      gradient.addColorStop(0, '#ffb547');
+      gradient.addColorStop(1, '#ff9800');
+      ctx.fillStyle = gradient;
+      ctx.fill();
+      
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 18px Arial';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('精靈', player.x + player.width/2, player.y + player.height/2);
+      
+      // 添加陰影效果
+      ctx.strokeStyle = '#ff9800';
+      ctx.lineWidth = 3;
+      ctx.strokeRect(player.x, player.y, player.width, player.height);
+    }
+    
+    // 繪製網格背景
+    function drawGrid() {
+      ctx.strokeStyle = 'rgba(0, 0, 0, 0.05)';
+      ctx.lineWidth = 1;
+      
+      // 垂直線
+      for (let x = 0; x < canvas.width; x += 40) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, canvas.height);
+        ctx.stroke();
+      }
+      
+      // 水平線
+      for (let y = 0; y < canvas.height; y += 40) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(canvas.width, y);
+        ctx.stroke();
+      }
+    }
+    
+    // 繪製飛行軌跡線
+    function drawFlightPath() {
+      // 左側起點指示
+      ctx.fillStyle = 'rgba(129, 199, 132, 0.3)';
+      ctx.fillRect(0, 0, 30, canvas.height);
+      
+      // 軌跡指示箭頭
+      ctx.fillStyle = 'rgba(129, 199, 132, 0.6)';
+      for (let y = 30; y < canvas.height; y += 60) {
+        ctx.beginPath();
+        ctx.moveTo(20, y);
+        ctx.lineTo(40, y - 10);
+        ctx.lineTo(40, y + 10);
+        ctx.closePath();
+        ctx.fill();
+      }
+      
+      // 飛行方向文字
+      ctx.fillStyle = '#81c784';
+      ctx.font = '14px Arial';
+      ctx.textAlign = 'center';
+      ctx.fillText('大金起點', 25, 20);
+    }
+
+    // 顯示提示
+    function showToast(msg) {
+      toast.textContent = msg; 
+      toast.style.display = 'block';
+      setTimeout(() => { toast.style.display = 'none'; }, 2000);
+    }
+
+    // 解鎖精靈
+    function unlockSpirit() {
+      const spirit = {
+        id: 'spirit_game5', 
+        name: '大金',
+        image: 'images/game-spirit5.png', 
+        page: 'spirit_game5.html',
+        unlockDate: new Date().toISOString(), 
+        score: score,
+        missed: missed,
+        timeLeft: timeLeft
+      };
+      
+      let spirits = [];
+      try { 
+        spirits = JSON.parse(localStorage.getItem('spirits') || '[]'); 
+      } catch(e) { 
+        spirits = []; 
+      }
+      
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        showToast('🎉 成功解鎖挑戰精靈：大金！');
+        pillStatus.textContent = '挑戰成功！';
+        pillStatus.className = 'pill ok';
+      } else {
+        showToast('你已經解鎖過大金了喔！');
+      }
+      
+      setTimeout(() => { 
+        // 如果頁面不存在，則跳轉到主頁
+        try {
+          window.location.href = spirit.page + '#unlocked';
+        } catch(e) {
+          window.location.href = 'index.html';
+        }
+      }, 2000);
+    }
+
+    // 遊戲主循環
+    function gameLoop() {
+      if (gameOver) {
+        renderGame();
+        return;
+      }
+      
+      const currentTime = performance.now();
+      
+      // 更新遊戲狀態
+      if (gameStarted) {
+        updatePlayer();
+        generatePearl();
+        updatePearls();
+        renderGame();
+      }
+      
+      // 更新時間
+      if (currentTime - lastSecondTime >= 1000) {
+        timeLeft--; 
+        lastSecondTime = currentTime; 
+        updateTimeBar();
+        pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
+        
+        if (timeLeft <= 0 && !gameOver) {
+          gameOver = true;
+          pillStatus.textContent = '時間到！';
+          pillStatus.className = 'pill warn';
+          showToast(`時間到！最終分數: ${score}顆`);
+          renderGame();
+          return;
+        }
+      }
+      
+      requestAnimationFrame(gameLoop);
+    }
+
+    // 初始化遊戲
+    window.addEventListener('DOMContentLoaded', () => {
+      initializeGame();
+    });
+  </script>
+</body>
+</html>

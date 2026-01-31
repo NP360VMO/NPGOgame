@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Spirit Introduction - Dajin</title>
+  
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="theme-boba layout-intro-knowledge-actions">
+  <div class="container">
+    <div class="card">
+      <div class="header">
+        <div class="title">Spirit Introduction - Dajin</div>
+        <div class="badge">Street · Happiness · Delicious</div>
+      </div>
+
+      <div class="hero">
+        <div class="img-wrap">
+          <img src="images/game-spirit5.png" alt="Dajin" />
+        </div>
+        <div class="intro">
+          
+<p><strong>🗺️ Introduction:</strong></p>
+<p>Dajin is a regional spirit based on the Hong Kong Tong Dog, with golden fur and gentle eyes, a dog-like spirit!</p>
+<p>He has a simple and cute personality, likes to be close to humans, and is especially used to sleeping near police posts or street corners. He is a warm guardian silently existing in the community.</p>
+
+        </div>
+      </div>
+
+      <div class="section knowledge">
+          <h3>🗺️ Spirit Knowledge</h3>
+          
+<p>As long as someone calls out "Dajin~", he will wake up immediately and run to the caller wagging his tail. Although he seems to sleep all day, he actually has a subtle perception of the surrounding environment and people's emotions.</p>
+<p>It is said that gently rubbing behind his ears will bring a day of good luck and a sense of security.</p>
+
+        </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 Collect Spirit</button>
+  <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+  <a class="btn secondary" href="spirit_game5.html">🌐 中文版本</a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const spirit = {
+      id: 'spirit_game5',
+      name: 'Dajin',
+      image: 'images/game-spirit5.png',
+      page: 'spirit_game5_eng.html'
+    };
+
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Collection successful! Go back to the homepage to check!';
+      } else {
+        document.getElementById('message').innerText = 'You already have Dajin!';
+      }
+    }
+  </script>
+</body>
+</html>
