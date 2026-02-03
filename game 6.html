@@ -43,6 +43,7 @@
       font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, "PingFang HK", "Microsoft JhengHei", sans-serif;
       background: var(--bg);
       color: var(--ink);
+      -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
     }
     .container { max-width: 960px; margin: 0 auto; padding: 20px; }
     .card {
@@ -100,6 +101,8 @@
     .btn {
       appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
       background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
+      user-select: none;
     }
     .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
     .btn:active { transform: translateY(1px); }
@@ -114,20 +117,51 @@
     #virtualControls { display:flex; justify-content:center; margin-top:16px; flex-direction:column; align-items:center; width:100%; }
     #virtualControls .control-row { display:flex; justify-content:center; }
     #virtualControls .control-btn {
-      width:72px; height:72px; border-radius:50%;
-      display:flex; justify-content:center; align-items:center; margin:8px;
-      font-size:28px; user-select:none; -webkit-tap-highlight-color:transparent;
-      border:1px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
-      background: rgba(0,0,0,0.06);
+      width:80px; height:80px; border-radius:50%; /* 加大按鈕尺寸 */
+      display:flex; justify-content:center; align-items:center; margin:10px; /* 增加間距 */
+      font-size:32px; user-select:none; -webkit-tap-highlight-color:transparent;
+      border:2px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
+      background: rgba(255, 255, 255, 0.9); /* 更明顯的背景 */
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 增加陰影 */
+      transition: all 0.1s ease;
+      cursor: pointer;
     }
-    #virtualControls .control-btn:active { background: rgba(0,0,0,0.12); }
-    #virtualControls .control-btn:disabled { background: rgba(0,0,0,0.04); cursor: not-allowed; }
+    #virtualControls .control-btn:active { 
+      background: rgba(0,0,0,0.1); 
+      transform: scale(0.95);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    #virtualControls .control-btn:disabled { 
+      background: rgba(0,0,0,0.04); 
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
 
+    /* 手機優化 */
     @media (max-width: 560px) {
-      .hero { grid-template-columns: 84px 1fr; }
-      .img-wrap img { width: 80px; }
-      #virtualControls .control-btn { width:64px; height:64px; font-size:24px; margin:6px; }
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .img-wrap img { width: 100px; }
+      #virtualControls .control-btn { 
+        width:70px; height:70px; font-size:28px; margin:8px;
+        min-width: 70px; /* 防止按鈕變形 */
+      }
+      .actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 280px; }
+      .status-bar { justify-content: center; }
+      .pill { font-size: 14px; padding: 5px 10px; }
     }
+
+    /* 非常小的手機 */
+    @media (max-width: 380px) {
+      #virtualControls .control-btn { 
+        width:65px; height:65px; font-size:24px; margin:6px;
+      }
+      .container { padding: 12px; }
+      .section { padding: 12px; }
+    }
+
+    /* 防止長按選單 */
+    .no-context { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
   </style>
 </head>
 <body class="theme-warm">
@@ -142,7 +176,7 @@
         <div class="img-wrap"><img src="images/game-spirit4.png" alt="珍奶雞蛋仔"></div>
         <div class="intro">
           <p><strong>玩法：</strong>使用方向鍵或虛擬按鈕控制珍奶雞蛋仔吃珍珠奶茶。在<strong>60秒</strong>內獲得<strong>10分</strong>即可解鎖精靈！</p>
-          <p>注意：撞到牆壁或自己身體會結束遊戲，挑戰你的反應與操控能力！</p>
+          <p><strong>注意：</strong>撞到牆壁或自己身體會結束遊戲。撞牆後有<strong>0.2秒緩衝時間</strong>可調整方向。</p>
           <div class="status-bar">
             <span class="pill info" id="pill-status">準備開始</span>
             <span class="pill" id="pill-score">分數：0 / 10</span>
@@ -191,9 +225,9 @@
     const GRID_SIZE = 15;
     let CELL_SIZE = 30;
 
-    // ✅ 放大比例（你可以微調）
-    const snakeScale = 1.25; // 蛇頭/蛇身放大 25%
-    const foodScale  = 1.35; // 食物放大 35%
+    // ✅ 放大比例
+    const snakeScale = 1.25;
+    const foodScale  = 1.35;
 
     // 元素
     const canvas = document.getElementById('gameCanvas');
@@ -222,6 +256,12 @@
     let lastUpdateTime = 0;
     let lastSecondTime = 0;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // ✅ 新增：撞牆緩衝相關變數
+    let wallHitTime = 0; // 撞牆時間點
+    let isWallHit = false; // 是否撞到牆
+    let wallHitPosition = null; // 撞牆位置
+    const WALL_BUFFER_TIME = 200; // 200毫秒緩衝時間
 
     // 尺寸
     function resizeCanvas() {
@@ -258,42 +298,89 @@
         resetGameState(); startGame(); lastUpdateTime = 0; lastSecondTime = 0;
       });
 
-      // 方向鍵點按
-      document.getElementById('upBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,-1); }, {passive:false});
-      document.getElementById('downBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,1); }, {passive:false});
-      document.getElementById('leftBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(-1,0); }, {passive:false});
-      document.getElementById('rightBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(1,0); }, {passive:false});
-      document.getElementById('upBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(0,-1); });
-      document.getElementById('downBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(0,1); });
-      document.getElementById('leftBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(-1,0); });
-      document.getElementById('rightBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(1,0); });
+      // 方向鍵點按 - 改進手機觸控
+      ['upBtn', 'downBtn', 'leftBtn', 'rightBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        // 觸控事件
+        btn.addEventListener('touchstart', (e) => { 
+          e.preventDefault(); 
+          if (gameStarted && !gameOver && !isWallHit) { // 撞牆時禁用方向鍵
+            const dir = getDirectionFromButton(id);
+            changeDirection(dir.x, dir.y);
+          }
+        }, {passive:false});
+        
+        // 點擊事件（桌面）
+        btn.addEventListener('click', () => { 
+          if (gameStarted && !gameOver && !isWallHit) {
+            const dir = getDirectionFromButton(id);
+            changeDirection(dir.x, dir.y);
+          }
+        });
+        
+        // 防止長按選單
+        btn.addEventListener('contextmenu', (e) => e.preventDefault());
+      });
 
-      // —— 畫布滑動手勢控制 —— //
+      // 滑動手勢控制改進
       let touchStart = null;
+      let lastSwipeTime = 0;
+      const SWIPE_COOLDOWN = 100; // 防止過快連續滑動
+      
       canvas.addEventListener('touchstart', (e) => {
         if (!gameStarted || gameOver || e.touches.length>1) return;
         const t = e.touches[0];
         touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
+        e.preventDefault();
       }, { passive:false });
+      
       canvas.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) e.preventDefault(); // 避免頁面滾動
+        if (gameStarted && !gameOver) e.preventDefault();
       }, { passive:false });
+      
       canvas.addEventListener('touchend', (e) => {
-        if (!touchStart || !gameStarted || gameOver) return;
+        if (!touchStart || !gameStarted || gameOver || isWallHit) return;
+        
+        const now = Date.now();
+        if (now - lastSwipeTime < SWIPE_COOLDOWN) return; // 冷卻時間
+        
         const t = (e.changedTouches && e.changedTouches[0]) || null;
         if (!t) return;
+        
         const dx = t.clientX - touchStart.x;
         const dy = t.clientY - touchStart.y;
         const adx = Math.abs(dx), ady = Math.abs(dy);
-        const dt  = Date.now() - touchStart.time;
-        const MIN_DIST = 18;  // 可調 16~24
+        const dt  = now - touchStart.time;
+        
+        const MIN_DIST = 20;  // 最小滑動距離
         const MIN_TIME = 30;
-        if (dt >= MIN_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
-          if (adx > ady) changeDirection(dx>0 ? 1 : -1, 0);
-          else           changeDirection(0, dy>0 ? 1 : -1);
+        const MAX_TIME = 500; // 最大識別時間
+        
+        if (dt >= MIN_TIME && dt <= MAX_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
+          lastSwipeTime = now;
+          if (adx > ady) {
+            changeDirection(dx>0 ? 1 : -1, 0);
+          } else {
+            changeDirection(0, dy>0 ? 1 : -1);
+          }
         }
         touchStart = null;
       }, { passive:true });
+      
+      // 防止畫布上的默認行為
+      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+      canvas.addEventListener('dragstart', (e) => e.preventDefault());
+    }
+
+    // 根據按鈕ID獲取方向
+    function getDirectionFromButton(btnId) {
+      switch(btnId) {
+        case 'upBtn': return { x: 0, y: -1 };
+        case 'downBtn': return { x: 0, y: 1 };
+        case 'leftBtn': return { x: -1, y: 0 };
+        case 'rightBtn': return { x: 1, y: 0 };
+        default: return { x: 0, y: 0 };
+      }
     }
 
     // 重置
@@ -305,6 +392,8 @@
       timeLeft = 60;
       gameOver = false;
       gameStarted = false;
+      isWallHit = false; // 重置撞牆狀態
+      wallHitTime = 0;
 
       pillStatus.textContent = '準備開始';
       pillStatus.className = 'pill info';
@@ -342,8 +431,29 @@
 
     // 方向
     function changeDirection(x, y) {
-      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return; // 防反向
-      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) direction = { x, y };
+      // 如果正在撞牆緩衝期，允許任何方向改變
+      if (isWallHit) {
+        const now = Date.now();
+        if (now - wallHitTime < WALL_BUFFER_TIME) {
+          // 檢查新方向是否安全（不直接反向）
+          if (!(x !== 0 && direction.x === -x) && !(y !== 0 && direction.y === -y)) {
+            direction = { x, y };
+            isWallHit = false; // 成功改變方向，結束撞牆狀態
+            pillStatus.textContent = '遊戲進行中';
+            pillStatus.className = 'pill ok';
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      // 正常方向改變邏輯
+      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return false; // 防反向
+      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) {
+        direction = { x, y };
+        return true;
+      }
+      return false;
     }
 
     // 食物
@@ -367,16 +477,45 @@
 
     // 更新
     function updateGame() {
-      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0)) return;
+      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0 && !isWallHit)) return;
+      
+      // 檢查撞牆緩衝期是否結束
+      if (isWallHit) {
+        const now = Date.now();
+        if (now - wallHitTime >= WALL_BUFFER_TIME) {
+          // 緩衝時間結束，遊戲結束
+          gameOver = true;
+          pillStatus.textContent = '遊戲結束';
+          pillStatus.className = 'pill warn';
+          showToast(`遊戲結束！最終分數: ${score}`);
+          return;
+        }
+        // 仍在緩衝期，不移動
+        return;
+      }
+      
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-      // 撞牆/自撞
-      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE ||
-          snake.some(seg => seg.x===head.x && seg.y===head.y)) {
+      // 檢查是否撞牆
+      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE) {
+        // 撞牆，進入緩衝期
+        isWallHit = true;
+        wallHitTime = Date.now();
+        wallHitPosition = { ...head };
+        pillStatus.textContent = '危險！快改變方向';
+        pillStatus.className = 'pill warn';
+        
+        // 顯示警告提示
+        showToast('⚠️ 撞牆！快改變方向！');
+        return;
+      }
+
+      // 檢查是否自撞
+      if (snake.some(seg => seg.x===head.x && seg.y===head.y)) {
         gameOver = true;
         pillStatus.textContent = '遊戲結束';
         pillStatus.className = 'pill warn';
-        showToast(`遊戲結束！最終分數: ${score}`);
+        showToast(`遊戲結束！撞到自己了！最終分數: ${score}`);
         return;
       }
 
@@ -388,7 +527,7 @@
         pillScore.textContent = `分數：${score} / 10`;
         food = generateFoodPosition();
         if (score >= 10) {
-          unlockSpirit(); // 一律導向
+          unlockSpirit();
           gameOver = true;
           return;
         }
@@ -399,7 +538,7 @@
       renderGame();
     }
 
-    // 繪製（✅ 放大蛇/食物，並置中）
+    // 繪製
     function renderGame() {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -407,15 +546,25 @@
       // 蛇
       const sW = CELL_SIZE * snakeScale;
       const sH = CELL_SIZE * snakeScale;
-      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2; // 置中偏移
+      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2;
+      
+      // 如果撞牆，讓蛇頭閃爍
+      const headAlpha = isWallHit ? (0.5 + 0.5 * Math.sin(Date.now() / 100)) : 1;
+      
       snake.forEach((seg, i) => {
         const img = i===0 ? snakeHeadImage : snakeBodyImage;
+        if (i === 0 && isWallHit) {
+          ctx.globalAlpha = headAlpha;
+        }
         ctx.drawImage(
           img,
           seg.x*CELL_SIZE - sOff,
           seg.y*CELL_SIZE - sOff,
           sW, sH
         );
+        if (i === 0 && isWallHit) {
+          ctx.globalAlpha = 1;
+        }
       });
 
       // 食物
@@ -428,6 +577,21 @@
         food.y*CELL_SIZE - fOff,
         fW, fH
       );
+      
+      // 如果撞牆，繪製警告邊框
+      if (isWallHit) {
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        
+        // 繪製倒數計時
+        const remainingTime = WALL_BUFFER_TIME - (Date.now() - wallHitTime);
+        const seconds = (remainingTime / 1000).toFixed(1);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${seconds}s`, canvas.width/2, 30);
+      }
     }
 
     // 提示
@@ -436,7 +600,7 @@
       setTimeout(()=>{ toast.style.display='none'; }, 2000);
     }
 
-    // 解鎖 → 不論是否已解鎖過，都會導向
+    // 解鎖
     function unlockSpirit() {
       const spirit = {
         id:'spirit_game4', name:'珍奶雞蛋仔',
@@ -463,9 +627,16 @@
       if (!lastUpdateTime) lastUpdateTime = ts;
       if (!lastSecondTime) lastSecondTime = ts;
 
-      if (ts - lastUpdateTime >= 200) { // 200ms 更新一次移動
-        updateGame(); lastUpdateTime = ts;
+      if (ts - lastUpdateTime >= 200) {
+        updateGame(); 
+        lastUpdateTime = ts;
       }
+      
+      // 如果撞牆，仍然更新渲染以顯示閃爍效果
+      if (isWallHit) {
+        renderGame();
+      }
+      
       if (gameStarted && ts - lastSecondTime >= 1000) {
         timeLeft--; lastSecondTime = ts; updateTimeBar();
         pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
@@ -495,3 +666,4 @@
   </script>
 </body>
 </html>
+[file content end]

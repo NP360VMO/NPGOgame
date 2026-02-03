@@ -1,43 +1,4 @@
-<script type="text/javascript">
-        var gk_isXlsx = false;
-        var gk_xlsxFileLookup = {};
-        var gk_fileData = {};
-        function filledCell(cell) {
-          return cell !== '' && cell != null;
-        }
-        function loadFileData(filename) {
-        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
-            try {
-                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
-                var firstSheetName = workbook.SheetNames[0];
-                var worksheet = workbook.Sheets[firstSheetName];
-
-                // Convert sheet to JSON to filter blank rows
-                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
-                var filteredData = jsonData.filter(row => row.some(filledCell));
-
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
-                var headerRowIndex = filteredData.findIndex((row, index) =>
-                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
-                );
-                // Fallback
-                if (headerRowIndex === -1 || headerRowIndex > 25) {
-                  headerRowIndex = 0;
-                }
-
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
-                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
-                return csv;
-            } catch (e) {
-                console.error(e);
-                return "";
-            }
-        }
-        return gk_fileData[filename] || "";
-        }
-        </script><!DOCTYPE html> 
+<!DOCTYPE html> 
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
@@ -51,13 +12,13 @@
     function gtag(){dataLayer.push(arguments);}
     gtag('js', new Date());
 
-    // Replace with your own GA4 ID
+    // Please change to your own GA4 ID
     gtag('config', 'G-B3740R31MS');
 
-    // Send event when entering game6.html
+    // 👇 Send event when entering game6.html
     gtag('event', 'page_enter', {
       'page_title': 'Game 6',
-      'page_path': '/game6.html'
+      'page_path': '/game6_eng.html'
     });
   </script>
 
@@ -79,9 +40,10 @@
     * { box-sizing: border-box; }
     body {
       margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, "PingFang HK", "Microsoft JhengHei", sans-serif;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, sans-serif;
       background: var(--bg);
       color: var(--ink);
+      -webkit-tap-highlight-color: transparent;
     }
     .container { max-width: 960px; margin: 0 auto; padding: 20px; }
     .card {
@@ -125,10 +87,9 @@
       background: #fff; display: flex; flex-direction: column; align-items: center;
     }
 
-    /* Center canvas container */
+    /* Canvas container */
     #gameContainer{ max-width:100%; margin:10px auto; position:relative; width:100%;
       display:flex; justify-content:center; }
-    /* Canvas prevents browser gesture interference */
     #gameCanvas { background-color: #f0f0f0; border: 1px solid #ccc; display:block; max-width:100%; touch-action:none; }
 
     /* Progress bar */
@@ -139,6 +100,8 @@
     .btn {
       appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
       background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
     }
     .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
     .btn:active { transform: translateY(1px); }
@@ -149,24 +112,55 @@
       display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
     }
 
-    /* Virtual directional controls: enlarged, easy to press */
+    /* Virtual controls */
     #virtualControls { display:flex; justify-content:center; margin-top:16px; flex-direction:column; align-items:center; width:100%; }
     #virtualControls .control-row { display:flex; justify-content:center; }
     #virtualControls .control-btn {
-      width:72px; height:72px; border-radius:50%;
-      display:flex; justify-content:center; align-items:center; margin:8px;
-      font-size:28px; user-select:none; -webkit-tap-highlight-color:transparent;
-      border:1px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
-      background: rgba(0,0,0,0.06);
+      width:80px; height:80px; border-radius:50%;
+      display:flex; justify-content:center; align-items:center; margin:10px;
+      font-size:32px; user-select:none; -webkit-tap-highlight-color:transparent;
+      border:2px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
+      background: rgba(255, 255, 255, 0.9);
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      transition: all 0.1s ease;
+      cursor: pointer;
     }
-    #virtualControls .control-btn:active { background: rgba(0,0,0,0.12); }
-    #virtualControls .control-btn:disabled { background: rgba(0,0,0,0.04); cursor: not-allowed; }
+    #virtualControls .control-btn:active { 
+      background: rgba(0,0,0,0.1); 
+      transform: scale(0.95);
+      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+    }
+    #virtualControls .control-btn:disabled { 
+      background: rgba(0,0,0,0.04); 
+      cursor: not-allowed;
+      opacity: 0.6;
+    }
 
+    /* Mobile optimization */
     @media (max-width: 560px) {
-      .hero { grid-template-columns: 84px 1fr; }
-      .img-wrap img { width: 80px; }
-      #virtualControls .control-btn { width:64px; height:64px; font-size:24px; margin:6px; }
+      .hero { grid-template-columns: 1fr; text-align: center; }
+      .img-wrap img { width: 100px; }
+      #virtualControls .control-btn { 
+        width:70px; height:70px; font-size:28px; margin:8px;
+        min-width: 70px;
+      }
+      .actions { flex-direction: column; align-items: center; }
+      .btn { width: 100%; max-width: 280px; }
+      .status-bar { justify-content: center; }
+      .pill { font-size: 14px; padding: 5px 10px; }
     }
+
+    /* Very small phones */
+    @media (max-width: 380px) {
+      #virtualControls .control-btn { 
+        width:65px; height:65px; font-size:24px; margin:6px;
+      }
+      .container { padding: 12px; }
+      .section { padding: 12px; }
+    }
+
+    /* Prevent long-press menu */
+    .no-context { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
   </style>
 </head>
 <body class="theme-warm">
@@ -174,19 +168,19 @@
     <div class="card">
       <div class="header">
         <div class="title">Challenge Game - Boba Egg Waffle</div>
-        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
+        <div class="badge">🎮 Challenge Mode · Unlock by Winning</div>
       </div>
 
       <div class="hero">
         <div class="img-wrap"><img src="images/game-spirit4.png" alt="Boba Egg Waffle"></div>
         <div class="intro">
-          <p><strong>How to Play:</strong> Guide Boba Egg Waffle to eat boba using arrow keys or virtual buttons. Collect <strong>10 points</strong> in <strong>60 seconds</strong> to unlock the Mon!</p>
-          <p>Adding Tips: Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection.</p>
+  <p><strong>How to Play:</strong> Guide Boba Egg Waffle to eat boba using arrow keys or virtual buttons. Collect <strong>10 points</strong> in <strong>60 seconds</strong> to unlock the Mon!</p>
+          <p><strong>Adding Tips:</strong> Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection. There is a <strong>0.2-second buffer time</strong> after hitting a wall to adjust direction.</p>
           <div class="status-bar">
             <span class="pill info" id="pill-status">Ready to Start</span>
             <span class="pill" id="pill-score">Score: 0 / 10</span>
-            <span class="pill warn" id="pill-timer">Time Left: 60 seconds</span>
-            <a class="btn secondary" href="game 6.html">🌐 中文 </a>
+            <span class="pill warn" id="pill-timer">Time Left: 60 sec</span>
+            <a class="btn secondary" href="game 6.html">🌐 中文版本</a>
           </div>
         </div>
       </div>
@@ -199,7 +193,7 @@
               <canvas id="gameCanvas"></canvas>
             </div>
 
-            <!-- Virtual directional controls -->
+            <!-- Virtual controls -->
             <div id="virtualControls" style="display:none;">
               <div class="control-row">
                 <div class="control-btn" id="upBtn" disabled>↑</div>
@@ -230,9 +224,9 @@
     const GRID_SIZE = 15;
     let CELL_SIZE = 30;
 
-    // Scale factors (adjustable)
-    const snakeScale = 1.25; // Snake head/body scaled up by 25%
-    const foodScale  = 1.35; // Food scaled up by 35%
+    // Scale factors
+    const snakeScale = 1.25;
+    const foodScale  = 1.35;
 
     // Elements
     const canvas = document.getElementById('gameCanvas');
@@ -250,7 +244,7 @@
     const snakeBodyImage = new Image(); snakeBodyImage.src = 'images/snake_body.png';
     const foodImage      = new Image(); foodImage.src = 'images/boba.png';
 
-    // State
+    // Game state
     let snake = [{ x: 10, y: 10 }];
     let food = { x: 15, y: 15 };
     let direction = { x: 0, y: 0 };
@@ -261,8 +255,14 @@
     let lastUpdateTime = 0;
     let lastSecondTime = 0;
     const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+    
+    // Wall hit buffer variables
+    let wallHitTime = 0;
+    let isWallHit = false;
+    let wallHitPosition = null;
+    const WALL_BUFFER_TIME = 200; // 200ms buffer time
 
-    // Canvas sizing
+    // Resize canvas
     function resizeCanvas() {
       const maxWidth = Math.min(window.innerWidth - 40, 600);
       const maxHeight = Math.min(window.innerHeight - 300, 600);
@@ -274,7 +274,7 @@
       renderGame();
     }
 
-    // Time bar
+    // Update time bar
     function updateTimeBar() {
       const percent = (timeLeft / 60) * 100;
       timeBar.style.width = percent + '%';
@@ -282,7 +282,7 @@
       timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
     }
 
-    // Initialize
+    // Initialize game
     function initializeGame() {
       resizeCanvas();
       window.addEventListener('resize', resizeCanvas);
@@ -297,45 +297,92 @@
         resetGameState(); startGame(); lastUpdateTime = 0; lastSecondTime = 0;
       });
 
-      // Directional button controls
-      document.getElementById('upBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,-1); }, {passive:false});
-      document.getElementById('downBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(0,1); }, {passive:false});
-      document.getElementById('leftBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(-1,0); }, {passive:false});
-      document.getElementById('rightBtn').addEventListener('touchstart', (e)=>{ e.preventDefault(); if (gameStarted && !gameOver) changeDirection(1,0); }, {passive:false});
-      document.getElementById('upBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(0,-1); });
-      document.getElementById('downBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(0,1); });
-      document.getElementById('leftBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(-1,0); });
-      document.getElementById('rightBtn').addEventListener('click', ()=>{ if (gameStarted && !gameOver) changeDirection(1,0); });
+      // Virtual button controls
+      ['upBtn', 'downBtn', 'leftBtn', 'rightBtn'].forEach(id => {
+        const btn = document.getElementById(id);
+        // Touch events
+        btn.addEventListener('touchstart', (e) => { 
+          e.preventDefault(); 
+          if (gameStarted && !gameOver && !isWallHit) {
+            const dir = getDirectionFromButton(id);
+            changeDirection(dir.x, dir.y);
+          }
+        }, {passive:false});
+        
+        // Click events (desktop)
+        btn.addEventListener('click', () => { 
+          if (gameStarted && !gameOver && !isWallHit) {
+            const dir = getDirectionFromButton(id);
+            changeDirection(dir.x, dir.y);
+          }
+        });
+        
+        // Prevent context menu
+        btn.addEventListener('contextmenu', (e) => e.preventDefault());
+      });
 
-      // Canvas swipe gesture controls
+      // Improved swipe gesture control
       let touchStart = null;
+      let lastSwipeTime = 0;
+      const SWIPE_COOLDOWN = 100;
+      
       canvas.addEventListener('touchstart', (e) => {
         if (!gameStarted || gameOver || e.touches.length>1) return;
         const t = e.touches[0];
         touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
+        e.preventDefault();
       }, { passive:false });
+      
       canvas.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) e.preventDefault(); // Prevent page scrolling
+        if (gameStarted && !gameOver) e.preventDefault();
       }, { passive:false });
+      
       canvas.addEventListener('touchend', (e) => {
-        if (!touchStart || !gameStarted || gameOver) return;
+        if (!touchStart || !gameStarted || gameOver || isWallHit) return;
+        
+        const now = Date.now();
+        if (now - lastSwipeTime < SWIPE_COOLDOWN) return;
+        
         const t = (e.changedTouches && e.changedTouches[0]) || null;
         if (!t) return;
+        
         const dx = t.clientX - touchStart.x;
         const dy = t.clientY - touchStart.y;
         const adx = Math.abs(dx), ady = Math.abs(dy);
-        const dt  = Date.now() - touchStart.time;
-        const MIN_DIST = 18;  // Adjustable 16~24
+        const dt  = now - touchStart.time;
+        
+        const MIN_DIST = 20;
         const MIN_TIME = 30;
-        if (dt >= MIN_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
-          if (adx > ady) changeDirection(dx>0 ? 1 : -1, 0);
-          else           changeDirection(0, dy>0 ? 1 : -1);
+        const MAX_TIME = 500;
+        
+        if (dt >= MIN_TIME && dt <= MAX_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
+          lastSwipeTime = now;
+          if (adx > ady) {
+            changeDirection(dx>0 ? 1 : -1, 0);
+          } else {
+            changeDirection(0, dy>0 ? 1 : -1);
+          }
         }
         touchStart = null;
       }, { passive:true });
+      
+      // Prevent default behaviors on canvas
+      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
+      canvas.addEventListener('dragstart', (e) => e.preventDefault());
     }
 
-    // Reset
+    // Get direction from button ID
+    function getDirectionFromButton(btnId) {
+      switch(btnId) {
+        case 'upBtn': return { x: 0, y: -1 };
+        case 'downBtn': return { x: 0, y: 1 };
+        case 'leftBtn': return { x: -1, y: 0 };
+        case 'rightBtn': return { x: 1, y: 0 };
+        default: return { x: 0, y: 0 };
+      }
+    }
+
+    // Reset game state
     function resetGameState() {
       snake = [{ x: 10, y: 10 }];
       food = generateFoodPosition();
@@ -344,10 +391,12 @@
       timeLeft = 60;
       gameOver = false;
       gameStarted = false;
+      isWallHit = false;
+      wallHitTime = 0;
 
       pillStatus.textContent = 'Ready to Start';
       pillStatus.className = 'pill info';
-      pillTimer.textContent = `Time Left: ${timeLeft} seconds`;
+      pillTimer.textContent = `Time Left: ${timeLeft} sec`;
       pillScore.textContent = `Score: ${score} / 10`;
 
       startBtn.style.display = 'inline-flex';
@@ -362,7 +411,7 @@
       renderGame();
     }
 
-    // Start
+    // Start game
     function startGame() {
       if (!gameStarted && !gameOver) {
         gameStarted = true;
@@ -379,13 +428,34 @@
       }
     }
 
-    // Direction
+    // Change direction
     function changeDirection(x, y) {
-      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return; // Prevent reverse
-      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) direction = { x, y };
+      // If in wall hit buffer period, allow any direction change
+      if (isWallHit) {
+        const now = Date.now();
+        if (now - wallHitTime < WALL_BUFFER_TIME) {
+          // Check if new direction is safe (not directly opposite)
+          if (!(x !== 0 && direction.x === -x) && !(y !== 0 && direction.y === -y)) {
+            direction = { x, y };
+            isWallHit = false; // Successfully changed direction, end wall hit state
+            pillStatus.textContent = 'Game in Progress';
+            pillStatus.className = 'pill ok';
+            return true;
+          }
+        }
+        return false;
+      }
+      
+      // Normal direction change logic
+      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return false; // Prevent reverse
+      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) {
+        direction = { x, y };
+        return true;
+      }
+      return false;
     }
 
-    // Food
+    // Generate food position
     function generateFoodPosition() {
       let p;
       do { p = { x: Math.floor(Math.random()*GRID_SIZE), y: Math.floor(Math.random()*GRID_SIZE) }; }
@@ -393,7 +463,7 @@
       return p;
     }
 
-    // Keyboard
+    // Keyboard controls
     function handleKeyPress(e) {
       if (!gameStarted && !gameOver) startGame();
       if (gameStarted && !gameOver) {
@@ -404,18 +474,47 @@
       }
     }
 
-    // Update
+    // Update game
     function updateGame() {
-      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0)) return;
+      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0 && !isWallHit)) return;
+      
+      // Check if wall hit buffer period has ended
+      if (isWallHit) {
+        const now = Date.now();
+        if (now - wallHitTime >= WALL_BUFFER_TIME) {
+          // Buffer time ended, game over
+          gameOver = true;
+          pillStatus.textContent = 'Game Over';
+          pillStatus.className = 'pill warn';
+          showToast(`Game Over! Final Score: ${score}`);
+          return;
+        }
+        // Still in buffer period, don't move
+        return;
+      }
+      
       const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
 
-      // Wall/self collision
-      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE ||
-          snake.some(seg => seg.x===head.x && seg.y===head.y)) {
+      // Check if hitting wall
+      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE) {
+        // Hit wall, enter buffer period
+        isWallHit = true;
+        wallHitTime = Date.now();
+        wallHitPosition = { ...head };
+        pillStatus.textContent = 'Danger! Change Direction';
+        pillStatus.className = 'pill warn';
+        
+        // Show warning
+        showToast('⚠️ Wall Hit! Change Direction!');
+        return;
+      }
+
+      // Check if hitting self
+      if (snake.some(seg => seg.x===head.x && seg.y===head.y)) {
         gameOver = true;
         pillStatus.textContent = 'Game Over';
         pillStatus.className = 'pill warn';
-        showToast(`Game Over! Final Score: ${score}`);
+        showToast(`Game Over! Hit yourself! Final Score: ${score}`);
         return;
       }
 
@@ -427,7 +526,7 @@
         pillScore.textContent = `Score: ${score} / 10`;
         food = generateFoodPosition();
         if (score >= 10) {
-          unlockSpirit(); // Always redirect
+          unlockSpirit();
           gameOver = true;
           return;
         }
@@ -438,7 +537,7 @@
       renderGame();
     }
 
-    // Render (scaled snake/food, centered)
+    // Render game
     function renderGame() {
       ctx.fillStyle = '#f0f0f0';
       ctx.fillRect(0, 0, canvas.width, canvas.height);
@@ -446,15 +545,25 @@
       // Snake
       const sW = CELL_SIZE * snakeScale;
       const sH = CELL_SIZE * snakeScale;
-      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2; // Center offset
+      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2;
+      
+      // Make snake head blink if wall hit
+      const headAlpha = isWallHit ? (0.5 + 0.5 * Math.sin(Date.now() / 100)) : 1;
+      
       snake.forEach((seg, i) => {
         const img = i===0 ? snakeHeadImage : snakeBodyImage;
+        if (i === 0 && isWallHit) {
+          ctx.globalAlpha = headAlpha;
+        }
         ctx.drawImage(
           img,
           seg.x*CELL_SIZE - sOff,
           seg.y*CELL_SIZE - sOff,
           sW, sH
         );
+        if (i === 0 && isWallHit) {
+          ctx.globalAlpha = 1;
+        }
       });
 
       // Food
@@ -467,15 +576,30 @@
         food.y*CELL_SIZE - fOff,
         fW, fH
       );
+      
+      // Draw warning border if wall hit
+      if (isWallHit) {
+        ctx.strokeStyle = '#ff0000';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, canvas.width, canvas.height);
+        
+        // Draw countdown timer
+        const remainingTime = WALL_BUFFER_TIME - (Date.now() - wallHitTime);
+        const seconds = (remainingTime / 1000).toFixed(1);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
+        ctx.font = 'bold 24px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(`${seconds}s`, canvas.width/2, 30);
+      }
     }
 
-    // Toast
+    // Show toast message
     function showToast(msg) {
       toast.textContent = msg; toast.style.display = 'block';
       setTimeout(()=>{ toast.style.display='none'; }, 2000);
     }
 
-    // Unlock → Redirect regardless of prior unlock
+    // Unlock spirit
     function unlockSpirit() {
       const spirit = {
         id:'spirit_game4', name:'Boba Egg Waffle',
@@ -488,7 +612,7 @@
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
         showToast('🎉 Successfully Unlocked Challenge Spirit: Boba Egg Waffle!');
-        pillStatus.textContent = 'Challenge Completed!';
+        pillStatus.textContent = 'Challenge Complete!';
         pillStatus.className = 'pill ok';
       } else {
         showToast('You have already unlocked Boba Egg Waffle!');
@@ -496,30 +620,37 @@
       setTimeout(()=>{ window.location.href = spirit.page + '#unlocked'; }, 1500);
     }
 
-    // Loop
+    // Game loop
     function gameLoop(ts) {
       if (gameOver) return;
       if (!lastUpdateTime) lastUpdateTime = ts;
       if (!lastSecondTime) lastSecondTime = ts;
 
-      if (ts - lastUpdateTime >= 200) { // Update movement every 200ms
-        updateGame(); lastUpdateTime = ts;
+      if (ts - lastUpdateTime >= 200) {
+        updateGame(); 
+        lastUpdateTime = ts;
       }
+      
+      // Update rendering to show blinking effect if wall hit
+      if (isWallHit) {
+        renderGame();
+      }
+      
       if (gameStarted && ts - lastSecondTime >= 1000) {
         timeLeft--; lastSecondTime = ts; updateTimeBar();
-        pillTimer.textContent = `Time Left: ${timeLeft} seconds`;
+        pillTimer.textContent = `Time Left: ${timeLeft} sec`;
         if (timeLeft <= 0 && !gameOver) {
           gameOver = true;
-          pillStatus.textContent = 'Time’s Up!';
+          pillStatus.textContent = 'Time Up!';
           pillStatus.className = 'pill warn';
-          showToast(`Time’s Up! Final Score: ${score}`);
+          showToast(`Time Up! Final Score: ${score}`);
           return;
         }
       }
       requestAnimationFrame(gameLoop);
     }
 
-    // Start
+    // Start game after images load
     Promise.all([
       new Promise(r=>{ snakeHeadImage.onload = r; }),
       new Promise(r=>{ snakeBodyImage.onload = r; }),
@@ -529,8 +660,9 @@
       requestAnimationFrame(gameLoop);
     }).catch(err => {
       console.error('Image loading failed:', err);
-      showToast('Failed to load game images, please refresh and try again');
+      showToast('Game images failed to load, please refresh the page');
     });
   </script>
 </body>
 </html>
+[file content end]
