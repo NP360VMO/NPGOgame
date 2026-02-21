@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Feeding Challenge: Dajin is Hungry</title>
+  <title>Feeding Challenge: Doggy Kim is Hungry</title>
 
   <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
@@ -183,14 +183,14 @@
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">Feeding Challenge: Dajin is Hungry</div>
+        <div class="title">Feeding Challenge: Doggy Kim is Hungry</div>
         <div class="badge">🎮 Challenge · Unlock by Winning</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit5.png" alt="Dajin" id="spiritImg"></div>
+        <div class="img-wrap"><img src="images/game-spirit5.png" alt="Doggy Kim" id="spiritImg"></div>
         <div class="intro">
-          <p><strong>Gameplay:</strong> Use the up/down keys or virtual buttons to control Dajin and catch jerky pieces flying from the left. Catch <strong>12 pieces</strong> within <strong>60 seconds</strong> to unlock Dajin!</p>
+          <p><strong>Gameplay:</strong> Use the up/down keys or virtual buttons to control Doggy Kim and catch jerky pieces flying from the left. Catch <strong>12 pieces</strong> within <strong>60 seconds</strong> to unlock Doggy Kim!</p>
           <div class="status-bar">
             <span class="pill info" id="pill-status">Ready to Start</span>
             <span class="pill" id="pill-score">Score: 0 / 12</span>
@@ -241,7 +241,7 @@
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 Unlocked: Dajin!</div>
+  <div class="toast" id="toast">🎉 Unlocked: Doggy Kim!</div>
 
   <script>
     // Game Constants - Horizontal Game
@@ -521,7 +521,7 @@
         checkAllImagesLoaded();
       };
       pearlImage.onerror = function() {
-        console.error('Dajin image loading failed');
+        console.error(' Doggy Kim image loading failed');
         imagesLoaded.pearl = false;
         imagesLoadedCount++;
         checkAllImagesLoaded();
@@ -805,7 +805,7 @@
         ctx.textAlign = 'center';
         ctx.fillText('Click to Start Game', canvas.width/2, canvas.height/2);
         ctx.font = '16px Arial';
-        ctx.fillText('Use Up/Down keys or buttons to move Dajin', canvas.width/2, canvas.height/2 + 40);
+        ctx.fillText('Use Up/Down keys or buttons to move  Doggy Kim', canvas.width/2, canvas.height/2 + 40);
         ctx.fillText(`Target: ${TARGET_SCORE} jerky pieces, Tolerance: ${MISSED_LIMIT} pieces`, canvas.width/2, canvas.height/2 + 70);
       }
       
@@ -990,7 +990,7 @@
       ctx.fillStyle = '#81c784';
       ctx.font = '14px Arial';
       ctx.textAlign = 'center';
-      ctx.fillText('Dajin Start', 25, 20);
+      ctx.fillText(' Doggy Kim Start', 25, 20);
     }
 
     // Show Toast
@@ -1004,9 +1004,9 @@
     function unlockSpirit() {
       const spirit = {
         id: 'spirit_game5', 
-        name: 'Dajin',
+        name: 'Doggy Kim',
         image: 'images/game-spirit5.png', 
-        page: 'spirit_game5.html',
+        page: 'spirit_game5_eng.html',
         unlockDate: new Date().toISOString(), 
         score: score,
         missed: missed,
@@ -1023,11 +1023,11 @@
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 Challenge Spirit Unlocked: Dajin!');
+        showToast('🎉 Challenge Spirit Unlocked:  Doggy Kim!');
         pillStatus.textContent = 'Challenge Complete!';
         pillStatus.className = 'pill ok';
       } else {
-        showToast('You have already unlocked Dajin!');
+        showToast('You have already unlocked  Doggy Kim!');
       }
       
       setTimeout(() => { 

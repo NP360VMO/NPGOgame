@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>昂坪 GO</title>
+  <title>昂坪360 GO</title>
 
   <!-- ✅ Google tag (gtag.js) — 換成測量 ID -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
@@ -106,7 +106,7 @@
   <a href="index_eng.html" class="audio-ctl" style="text-decoration: none;">🌐 English Version</a>
 </div>
 
-      <div class="home-title">昂坪 GO</div>
+      <div class="home-title">昂坪360 GO</div>
       <div class="home-sub">在昂坪市集追尋精靈的隱秘身影，解鎖更多神秘線索，開啟一場奇幻冒險！</div>
       
   <!-- === 可收合：遊戲玩法（與 index 視覺一致） === -->
@@ -247,7 +247,7 @@
     }
 
     function updateRedeemUI() {
-      const eligible = (collected.length >= 6); // 門檻：6隻或以上
+      const eligible = (collected.length >= 6); // 門檻：7隻或以上
       const redeemed = isRedeemed();
       redeemArea.innerHTML = '';
       if (!eligible) return;
@@ -277,7 +277,7 @@
 
       const note = document.createElement('div');
       note.className = 'redeem-note';
-      note.textContent = '（收集滿 6 隻或以上方可兌換；由工作人員操作）';
+      note.textContent = '（收集滿 7 隻或以上方可兌換；由工作人員操作）';
       redeemArea.appendChild(btn); redeemArea.appendChild(note);
     }
 
@@ -300,8 +300,8 @@
             </a>`;
           container.appendChild(div);
         });
-        if (collected.length >= 6 && collected.length < total) {
-          hintElement.innerHTML = '恭喜收集到 6 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
+        if (collected.length >= 8 && collected.length < total) {
+          hintElement.innerHTML = '恭喜收集到 8 隻精靈！請於17:00前到動感影院預約櫃位兌換禮物';
         } else if (collected.length === total && total > 0) {
           hintElement.innerHTML = '🏆 恭喜收集完成！於17:00前到動感影院預約櫃位兌換限定禮物';
         }
