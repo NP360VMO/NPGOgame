@@ -595,7 +595,30 @@
       }
     }
     /* === 插入結束 === */
-
+@media (max-width: 768px) {
+  .dex-section,
+  .dex-grid,
+  .dex-card {
+    overflow: visible !important;
+    height: auto !important;
+    max-height: none !important;
+  }
+  .dex-grid {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 12px !important;
+  }
+  .dex-card {
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 12px !important;
+    box-sizing: border-box !important;
+  }
+  .dex-card img {
+    max-width: 100% !important;
+    height: auto !important;
+  }
+}
   </style>
 </head>
 <body class="theme-sky">
