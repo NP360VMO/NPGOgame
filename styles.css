@@ -190,7 +190,7 @@ ul li { margin: 6px 0; line-height: 1.7; font-size: clamp(14px, 2.4vw, 16px); }
   --badge-border: #e4d2bf;
   --section-bg: #fbf6f0;
   --section-border: #ecdcc8;
-  
+  }
   /* ============================================================
    
 }
