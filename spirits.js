@@ -57,6 +57,14 @@
     "page": "spirit_game4.html",
     "type": "🎮 挑戰系",
     "prompt": "遊玩市集涼亭尋找珍奶雞蛋仔挑戰任務以解鎖此精靈！Unlock this NPmon by completing the Boba Egg Waffle Challenge at the Pavilion!"
+  },
+  {
+    "id": "spirit_game5",
+    "name": "大金 Doggy Kim",
+    "image": "images/game-spirit5.png",
+    "page": "spirit_game5.html",
+    "type": "🎮 挑戰系",
+    "prompt": "遊玩纜車探知館尋找大金挑戰任務以解鎖此精靈！Unlock this NPmon by completing the Doggy Kim Challenge at the Cable Car Discovery Center!"
   }
 ];
 })();
