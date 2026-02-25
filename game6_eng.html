@@ -175,7 +175,7 @@
         <div class="img-wrap"><img src="images/game-spirit4.png" alt="Boba Egg Waffle"></div>
         <div class="intro">
   <p><strong>How to Play:</strong> Guide Boba Egg Waffle to eat boba using arrow keys or virtual buttons. Collect <strong>10 points</strong> in <strong>60 seconds</strong> to unlock the Mon!</p>
-          <p><strong>Adding Tips:</strong> Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection. There is a <strong>0.2-second buffer time</strong> after hitting a wall to adjust direction.</p>
+          <p><strong>Adding Tips:</strong> Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection. There is a <strong>0.5-second buffer time</strong> after hitting a wall to adjust direction.</p>
           <div class="status-bar">
             <span class="pill info" id="pill-status">Ready to Start</span>
             <span class="pill" id="pill-score">Score: 0 / 10</span>
@@ -260,7 +260,7 @@
     let wallHitTime = 0;
     let isWallHit = false;
     let wallHitPosition = null;
-    const WALL_BUFFER_TIME = 200; // 200ms buffer time
+    const WALL_BUFFER_TIME = 500; // 200ms buffer time
 
     // Resize canvas
     function resizeCanvas() {
@@ -626,7 +626,7 @@
       if (!lastUpdateTime) lastUpdateTime = ts;
       if (!lastSecondTime) lastSecondTime = ts;
 
-      if (ts - lastUpdateTime >= 200) {
+      if (ts - lastUpdateTime >= 220) {
         updateGame(); 
         lastUpdateTime = ts;
       }

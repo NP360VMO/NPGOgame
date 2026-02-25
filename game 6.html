@@ -176,7 +176,7 @@
         <div class="img-wrap"><img src="images/game-spirit4.png" alt="珍奶雞蛋仔"></div>
         <div class="intro">
           <p><strong>玩法：</strong>使用方向鍵或虛擬按鈕控制珍奶雞蛋仔吃珍珠奶茶。在<strong>60秒</strong>內獲得<strong>10分</strong>即可解鎖精靈！</p>
-          <p><strong>注意：</strong>撞到牆壁或自己身體會結束遊戲。撞牆後有<strong>0.2秒緩衝時間</strong>可調整方向。</p>
+          <p><strong>注意：</strong>撞到牆壁或自己身體會結束遊戲。撞牆後有<strong>0.5秒緩衝時間</strong>可調整方向。</p>
           <div class="status-bar">
             <span class="pill info" id="pill-status">準備開始</span>
             <span class="pill" id="pill-score">分數：0 / 10</span>
@@ -261,7 +261,7 @@
     let wallHitTime = 0; // 撞牆時間點
     let isWallHit = false; // 是否撞到牆
     let wallHitPosition = null; // 撞牆位置
-    const WALL_BUFFER_TIME = 200; // 200毫秒緩衝時間
+    const WALL_BUFFER_TIME = 500; // 200毫秒緩衝時間
 
     // 尺寸
     function resizeCanvas() {
@@ -627,7 +627,7 @@
       if (!lastUpdateTime) lastUpdateTime = ts;
       if (!lastSecondTime) lastSecondTime = ts;
 
-      if (ts - lastUpdateTime >= 200) {
+      if (ts - lastUpdateTime >= 220) {
         updateGame(); 
         lastUpdateTime = ts;
       }
