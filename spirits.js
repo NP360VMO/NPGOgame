@@ -28,7 +28,7 @@
   },
   {
     "id": "spirit_game1",
-    "name": "黃哞哞 Golden Moon Mon",
+    "name": "黃哞哞 Golden Moo Moo",
     "image": "images/game-spirit1.png",
     "page": "spirit_game1.html",
     "type": "🎮 挑戰系",
