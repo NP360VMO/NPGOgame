@@ -3,179 +3,75 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>挑戰遊戲｜小黃彈彈 彈跳球</title>
+  <title>精靈介紹 - 小黃彈彈</title>
+  
   <link rel="stylesheet" href="styles.css">
-  <style>
-.stage{position:relative;max-width:720px;margin:0 auto;border-radius:16px;background:linear-gradient(180deg,#cdefff,#f8ffff)}.canvas-wrap{position:relative;padding:10px}canvas{background:#ffffff;border:2px solid #cfe4ff;border-radius:12px;display:block;margin:0 auto;box-shadow:0 10px 22px rgba(0,0,0,.06)}.hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px}.hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.hint .bubble{background:rgba(255,255,255,.9);border:1px solid var(--section-border);border-radius:14px;padding:8px 12px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn:active{transform:translateY(1px)}@media (max-width:560px){
-      .hero{grid-template-columns:84px 1fr}
-</style>
 </head>
-<body class="theme-sky">
+<body class="theme-grass layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">挑戰遊戲 - 小黃彈彈（彈跳球）</div>
-        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+        <div class="title">精靈介紹 - 小黃彈彈</div>
+        <div class="badge">忠誠 · 快樂 · 活力</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit2.png" alt="小黃彈彈"></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit2.png" alt="小黃彈彈" />
+        </div>
         <div class="intro">
-          <p><strong>玩法：</strong>控制擋板令小狗彈起追蝴蝶；得分達 <strong>5 分</strong> 即可解鎖。</p>
-          <p>滑鼠左右移動（或觸控拖動）即可控制擋板。</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">尚未開始</span>
-            <span class="pill ok" id="pill-score">得分：0 / 5</span>
-            <a class="btn secondary" href="game 2_eng.html">🌐 English Version </a>
-          </div>
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>小黃彈彈是一隻愛跳、愛跑、愛追蝴蝶的開朗小狗。牠會帶你用跳躍的方式認識昂坪的每個角落，活力無窮！</p>
+<p>擁有柔軟的金黃色毛髮，閃爍如晨光；眼睛大而圓潤，宛如琥珀；尾巴蓬鬆如棉花糖，總是歡快地搖擺。</p>
+<p>被視為「忠誠與快樂之靈」，象徵無私的陪伴與簡單幸福，擁有讓人感到安心的小魔法。</p>
+
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="stage">
-            <div class="hud">
-              <span class="pill">🎯 命中蝴蝶可得 1 分</span>
-              <span class="pill">🛡 擋板反彈不中會跌落</span>
-            </div>
-            <div class="canvas-wrap">
-              <canvas id="gameCanvas" width="300" height="400"></canvas>
-              <div class="hint" id="hint"><div class="bubble">← → 滑鼠移動控制（手機：拖動）</div></div>
-            </div>
-          </div>
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>中國最古老的犬種之一起源可追溯至數千年前的馴化歷史。中國南方（包括香港所在的珠三角地區）是全球家犬的重要起源地之一，本土犬具備豐富遺傳多樣性。</p>
+<p>在香港，黃狗俗稱「小黃」，常見於鄉村或郊區（如大嶼山的村落），擔任看家護院角色，偶爾也會在昂坪巷弄間現身。</p>
 
-          <div class="actions">
-            <button class="btn" id="btn-start">▶️ 開始遊戲</button>
-            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 重新開始</button>
-          </div>
         </div>
 
-        <div class="actions">
-          <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
-          <a class="btn secondary" href="index.html">🔙 返回主頁</a>
-        </div>
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+  <a class="btn secondary" href="spirit_game2_eng.html">🌐 English Version </a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 已解鎖：小黃彈彈！</div>
-
   <script>
-    // 圖片載入
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const statusEl = document.getElementById("pill-status");
-    const scoreEl  = document.getElementById("pill-score");
-    const btnStart = document.getElementById("btn-start");
-    const btnRetry = document.getElementById("btn-retry");
-    const hint     = document.getElementById("hint");
+    const spirit = {
+      id: 'spirit_game2',
+      name: '小黃彈彈',
+      image: 'images/game-spirit2.png',
+      page: 'spirit_game2.html'
+    };
 
-    const ballImg = new Image();  ballImg.src = '彈彈球.png';
-    const starImg = new Image();  starImg.src = '星星.png';
-
-    let ball, paddle, star, starHitbox, score, gameLoop, waitingForPaddle, showingUnlockMessage, playing;
-
-    function initVars(){
-      ball = { x: 150, y: 200, radius: 30, dx: 2.2, dy: -3.2 };
-      paddle = { x: 110, width: 80, height: 10 };
-      star = { x: 100, y: 50, size: 120 };
-      starHitbox = { width: 32, height: 32 };
-      score = 0; waitingForPaddle = false; showingUnlockMessage = false; playing = false;
-      scoreEl.textContent = "得分：0 / 5";
-      statusEl.textContent = "尚未開始";
-      hint.style.display = 'flex';
-    }
-
-    initVars();
-
-    // 控制：滑鼠 + 觸控
-    function setPaddleByClientX(clientX){
-      const rect = canvas.getBoundingClientRect();
-      paddle.x = clientX - rect.left - paddle.width / 2;
-    }
-    document.addEventListener("mousemove", e => { if(playing) setPaddleByClientX(e.clientX); });
-    canvas.addEventListener("touchmove", e => { if(!playing) return; e.preventDefault(); setPaddleByClientX(e.touches[0].clientX); }, {passive:false});
-
-    function drawBall(){ ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius*2, ball.radius*2); }
-    function drawPaddle(){ ctx.fillStyle = "#0e74d0"; ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height); }
-    function drawStar(){
-      if (!waitingForPaddle) {
-        ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // 調試 Hitbox 時可開啟：
-        // ctx.strokeStyle = "rgba(255,0,0,0.6)";
-        // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
-      }
-    }
-
-    function resetStar(){
-      const maxX = canvas.width - star.size;
-      const maxY = (canvas.height / 2) - star.size;
-      star.x = Math.random() * maxX;
-      star.y = Math.random() * maxY;
-    }
-
-    function moveBall(){
-      ball.x += ball.dx; ball.y += ball.dy;
-      if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
-      if (ball.y < ball.radius) ball.dy *= -1;
-
-      // 擋板碰撞
-      if (ball.y + ball.radius > canvas.height - paddle.height - 10 &&
-          ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-        ball.dy *= -1;
-        if (waitingForPaddle) { resetStar(); waitingForPaddle = false; }
-      }
-
-      // 星星碰撞（以 Hitbox 為準）
-      if (!waitingForPaddle &&
-          ball.x + ball.radius > star.x + (star.size - starHitbox.width)/2 &&
-          ball.x - ball.radius < star.x + (star.size - starHitbox.width)/2 + starHitbox.width &&
-          ball.y + ball.radius > star.y + (star.size - starHitbox.height)/2 &&
-          ball.y - ball.radius < star.y + (star.size - starHitbox.height)/2 + starHitbox.height) {
-        score++; waitingForPaddle = true;
-        scoreEl.textContent = `得分：${score} / 5`;
-        statusEl.textContent = '命中！彈回去再追下一隻～';
-        if (score >= 5) { unlockSpirit(); return; }
-      }
-
-      if (ball.y > canvas.height) { stopGame(); statusEl.textContent = "💥 遊戲結束，請再試一次！"; btnRetry.style.display='inline-flex'; }
-    }
-
-    function draw(){
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBall(); drawPaddle(); drawStar(); moveBall();
-    }
-
-    function startGame(){
-      initVars(); resetStar();
-      statusEl.textContent = "遊戲開始！"; hint.style.display='none';
-      playing = true; btnStart.style.display='none'; btnRetry.style.display='none';
-      clearInterval(gameLoop); gameLoop = setInterval(draw, 20);
-    }
-
-    function stopGame(){ clearInterval(gameLoop); playing = false; }
-
-    function toast(msg){
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.style.display='block';
-      setTimeout(()=> t.style.display='none', 1600);
-    }
-
-    // ✅ 解鎖後 2 秒自動跳轉到精靈頁
-    function unlockSpirit(){
-      const spirit = { id:'spirit_game2', name:'小黃彈彈', image:'images/game-spirit2.png', page:'spirit_game2.html' };
+    function collect() {
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        toast('🎉 已解鎖：小黃彈彈！'); statusEl.textContent='🎉 成功解鎖挑戰精靈：小黃彈彈！';
-      } else { statusEl.textContent='你已經擁有呢位精靈喇！'; }
-
-      stopGame(); // 停止畫面更新
-      setTimeout(()=>{ window.location.href = spirit.page; }, 2000); // 自動跳轉
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
+      } else {
+        document.getElementById('message').innerText = '你已經擁有小黃彈彈了喔！';
+      }
     }
-
-    document.getElementById("btn-start").addEventListener("click", startGame);
-    document.getElementById("btn-retry").addEventListener("click", startGame);
   </script>
 </body>
 </html>

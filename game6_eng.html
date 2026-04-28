@@ -1,668 +1,111 @@
-<!DOCTYPE html> 
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>Challenge Game - Boba Egg Waffle</title>
-
-    <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    // Please change to your own GA4 ID
-    gtag('config', 'G-B3740R31MS');
-
-    // 👇 Send event when entering game6.html
-    gtag('event', 'page_enter', {
-      'page_title': 'Game 6',
-      'page_path': '/game6_eng.html'
-    });
-  </script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mon Profile - Boba Egg Waffle</title>
+  
   <link rel="stylesheet" href="styles.css">
-
-  <style>
-    :root {
-      --bg: #f7f3ea;
-      --ink: #2f2a25;
-      --card: #fffdf9;
-      --accent: #ffb547;
-      --accent-ink: #6b400a;
-      --section-bg: #fff9f0;
-      --section-border: #e7d9c5;
-      --ok: #15a36d;
-      --warn: #e04848;
-      --info: #2b6eea;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      -webkit-tap-highlight-color: transparent;
-    }
-    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--section-border);
-      border-radius: 20px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-    }
-    .header {
-      display: flex; justify-content: space-between; gap: 12px; align-items: center;
-      padding: 18px 20px; border-bottom: 1px solid var(--section-border);
-    }
-    .title { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
-    .badge {
-      font-weight: 700; background: #fff1d8; border: 1px solid #ffd9a0; color: #7a4a00;
-      border-radius: 999px; padding: 6px 10px;
-    }
-    .hero {
-      display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 18px 20px;
-      border-bottom: 1px solid var(--section-border);
-      background: linear-gradient(to bottom, rgba(255, 248, 236, 0.8), rgba(255, 255, 255, 0.6)), url("images/background.png");
-      background-size: cover; background-position: center;
-    }
-    .img-wrap { display: flex; align-items: center; justify-content: center; }
-    .img-wrap img { width: 96px; height: auto; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12)); }
-    .intro p { margin: 0.35rem 0; }
-    .status-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-    .pill {
-      border: 2px solid var(--section-border); background: #fff; border-radius: 999px;
-      padding: 6px 12px; font-weight: 800;
-    }
-    .pill.ok { border-color: #bfe6d6; color: var(--ok); }
-    .pill.warn { border-color: #ffd1d1; color: var(--warn); }
-    .pill.info { border-color: #cfe0ff; color: var(--info); }
-
-    .section { padding: 18px 20px; }
-    .game-wrap { background: var(--section-bg); border: 1px dashed var(--section-border); border-radius: 16px; padding: 12px; }
-    .play-area {
-      position: relative; border-radius: 12px; min-height: 360px; max-width: 720px; margin: 0 auto;
-      background: #fff; display: flex; flex-direction: column; align-items: center;
-    }
-
-    /* Canvas container */
-    #gameContainer{ max-width:100%; margin:10px auto; position:relative; width:100%;
-      display:flex; justify-content:center; }
-    #gameCanvas { background-color: #f0f0f0; border: 1px solid #ccc; display:block; max-width:100%; touch-action:none; }
-
-    /* Progress bar */
-    .progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 12px; }
-    .bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #8ad398, #ffd166); }
-
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
-    .btn {
-      appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
-      background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-      -webkit-tap-highlight-color: transparent;
-      user-select: none;
-    }
-    .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
-    .btn:active { transform: translateY(1px); }
-
-    .toast {
-      position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px;
-      background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 900;
-      display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    }
-
-    /* Virtual controls */
-    #virtualControls { display:flex; justify-content:center; margin-top:16px; flex-direction:column; align-items:center; width:100%; }
-    #virtualControls .control-row { display:flex; justify-content:center; }
-    #virtualControls .control-btn {
-      width:80px; height:80px; border-radius:50%;
-      display:flex; justify-content:center; align-items:center; margin:10px;
-      font-size:32px; user-select:none; -webkit-tap-highlight-color:transparent;
-      border:2px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
-      background: rgba(255, 255, 255, 0.9);
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      transition: all 0.1s ease;
-      cursor: pointer;
-    }
-    #virtualControls .control-btn:active { 
-      background: rgba(0,0,0,0.1); 
-      transform: scale(0.95);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-    #virtualControls .control-btn:disabled { 
-      background: rgba(0,0,0,0.04); 
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    /* Mobile optimization */
-    @media (max-width: 560px) {
-      .hero { grid-template-columns: 1fr; text-align: center; }
-      .img-wrap img { width: 100px; }
-      #virtualControls .control-btn { 
-        width:70px; height:70px; font-size:28px; margin:8px;
-        min-width: 70px;
-      }
-      .actions { flex-direction: column; align-items: center; }
-      .btn { width: 100%; max-width: 280px; }
-      .status-bar { justify-content: center; }
-      .pill { font-size: 14px; padding: 5px 10px; }
-    }
-
-    /* Very small phones */
-    @media (max-width: 380px) {
-      #virtualControls .control-btn { 
-        width:65px; height:65px; font-size:24px; margin:6px;
-      }
-      .container { padding: 12px; }
-      .section { padding: 12px; }
-    }
-
-    /* Prevent long-press menu */
-    .no-context { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
-  </style>
 </head>
-<body class="theme-warm">
+<body class="theme-boba layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">Challenge Game - Boba Egg Waffle</div>
-        <div class="badge">🎮 Challenge Mode · Unlock by Winning</div>
+        <div class="title">Mon Profile - Boba Egg Waffle</div>
+        <div class="badge">Street Food · Happiness · Delicious</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit4.png" alt="Boba Egg Waffle"></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit4.png" alt="Boba Egg Waffle" />
+        </div>
         <div class="intro">
-  <p><strong>How to Play:</strong> Guide Boba Egg Waffle to eat boba using arrow keys or virtual buttons. Collect <strong>10 points</strong> in <strong>60 seconds</strong> to unlock the Mon!</p>
-          <p><strong>Adding Tips:</strong> Plan your moves to avoid trapping yourself. Stay quick and precise to maximize boba collection. There is a <strong>0.5-second buffer time</strong> after hitting a wall to adjust direction.</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">Ready to Start</span>
-            <span class="pill" id="pill-score">Score: 0 / 10</span>
-            <span class="pill warn" id="pill-timer">Time Left: 60 sec</span>
-            <a class="btn secondary" href="game 6.html">🌐 中文版本</a>
-          </div>
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Hop into the fun with Boba Egg Waffle, the super-cute foodie buddy who’s totally obsessed with trendy egg waffle culture! This lively pal’s ready to zoom you through a snake game adventure, diving headfirst into the yummiest street snacks!</p>
+          <p>With a knack for turning basic ingredients into drool-worthy treats, Boba Egg Waffle tweaks drink sweetness and waffle crunch to match your mood, all with a giggly, mischievous vibe. Catch his busting moves near buzzing night markets or bubble tea joints, sprinkling sparkly happiness magic into every crispy, bubbly bite!</p>
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="play-area">
-            <div class="progress"><div class="bar" id="timeBar" style="width: 100%"></div></div>
-            <div id="gameContainer">
-              <canvas id="gameCanvas"></canvas>
-            </div>
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Bubble Tea & Egg Waffle Fun</h3>
+        <p>Bubble tea popped up in Taiwan in the 1980s, mixing frothy tea with chewy tapioca pearls for a super fun drink that’s now a worldwide fave!</p>
+        <p>Egg waffles were born in Hong Kong in the 1950s when clever vendors turned broken eggs and batter into crispy, bubbly treats. Now they’re the cutest stars of Hong Kong’s street food scene!</p>
+      </div>
 
-            <!-- Virtual controls -->
-            <div id="virtualControls" style="display:none;">
-              <div class="control-row">
-                <div class="control-btn" id="upBtn" disabled>↑</div>
-              </div>
-              <div class="control-row">
-                <div class="control-btn" id="leftBtn" disabled>←</div>
-                <div class="control-btn" id="downBtn" disabled>↓</div>
-                <div class="control-btn" id="rightBtn" disabled>→</div>
-              </div>
-            </div>
-          </div>
+      <div class="grid">
+        
+      </div>
 
-          <div class="actions">
-            <button class="btn" id="startBtn">▶️ Start Game</button>
-            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 Restart</button>
-            <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
-          </div>
-        </div>
-        <div class="actions"><a class="btn secondary" href="index_eng.html">🔙 Back to Home</a></div>
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game4.html">🌐 中文 </a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 Unlocked: Boba Egg Waffle!</div>
-
   <script>
-    // Game constants
-    const GRID_SIZE = 15;
-    let CELL_SIZE = 30;
+    const spirit = {
+      id: 'spirit_game4',
+      name: 'Boba Egg Waffle',
+      image: 'images/game-spirit4.png',
+      page: 'spirit_game4_eng.html'
+    };
 
-    // Scale factors
-    const snakeScale = 1.25;
-    const foodScale  = 1.35;
-
-    // Elements
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const pillStatus = document.getElementById('pill-status');
-    const pillTimer  = document.getElementById('pill-timer');
-    const pillScore  = document.getElementById('pill-score');
-    const timeBar    = document.getElementById('timeBar');
-    const startBtn   = document.getElementById('startBtn');
-    const retryBtn   = document.getElementById('retryBtn');
-    const toast      = document.getElementById('toast');
-
-    // Images
-    const snakeHeadImage = new Image(); snakeHeadImage.src = 'images/snake_head.png';
-    const snakeBodyImage = new Image(); snakeBodyImage.src = 'images/snake_body.png';
-    const foodImage      = new Image(); foodImage.src = 'images/boba.png';
-
-    // Game state
-    let snake = [{ x: 10, y: 10 }];
-    let food = { x: 15, y: 15 };
-    let direction = { x: 0, y: 0 };
-    let score = 0;
-    let timeLeft = 60;
-    let gameOver = false;
-    let gameStarted = false;
-    let lastUpdateTime = 0;
-    let lastSecondTime = 0;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    // Wall hit buffer variables
-    let wallHitTime = 0;
-    let isWallHit = false;
-    let wallHitPosition = null;
-    const WALL_BUFFER_TIME = 500; // 200ms buffer time
-
-    // Resize canvas
-    function resizeCanvas() {
-      const maxWidth = Math.min(window.innerWidth - 40, 600);
-      const maxHeight = Math.min(window.innerHeight - 300, 600);
-      const size = Math.min(maxWidth, maxHeight);
-      CELL_SIZE = Math.floor(size / GRID_SIZE);
-      canvas.width = GRID_SIZE * CELL_SIZE;
-      canvas.height = GRID_SIZE * CELL_SIZE;
-      document.getElementById('virtualControls').style.display = isMobile ? 'flex' : 'none';
-      renderGame();
-    }
-
-    // Update time bar
-    function updateTimeBar() {
-      const percent = (timeLeft / 60) * 100;
-      timeBar.style.width = percent + '%';
-      const hue = Math.max(0, Math.min(120, percent * 1.2));
-      timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
-    }
-
-    // Initialize game
-    function initializeGame() {
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      resetGameState();
-
-      document.addEventListener('keydown', handleKeyPress);
-
-      startBtn.addEventListener('click', startGame);
-      startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); });
-
-      retryBtn.addEventListener('click', () => {
-        resetGameState(); startGame(); lastUpdateTime = 0; lastSecondTime = 0;
-      });
-
-      // Virtual button controls
-      ['upBtn', 'downBtn', 'leftBtn', 'rightBtn'].forEach(id => {
-        const btn = document.getElementById(id);
-        // Touch events
-        btn.addEventListener('touchstart', (e) => { 
-          e.preventDefault(); 
-          if (gameStarted && !gameOver && !isWallHit) {
-            const dir = getDirectionFromButton(id);
-            changeDirection(dir.x, dir.y);
-          }
-        }, {passive:false});
-        
-        // Click events (desktop)
-        btn.addEventListener('click', () => { 
-          if (gameStarted && !gameOver && !isWallHit) {
-            const dir = getDirectionFromButton(id);
-            changeDirection(dir.x, dir.y);
-          }
-        });
-        
-        // Prevent context menu
-        btn.addEventListener('contextmenu', (e) => e.preventDefault());
-      });
-
-      // Improved swipe gesture control
-      let touchStart = null;
-      let lastSwipeTime = 0;
-      const SWIPE_COOLDOWN = 100;
-      
-      canvas.addEventListener('touchstart', (e) => {
-        if (!gameStarted || gameOver || e.touches.length>1) return;
-        const t = e.touches[0];
-        touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
-        e.preventDefault();
-      }, { passive:false });
-      
-      canvas.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) e.preventDefault();
-      }, { passive:false });
-      
-      canvas.addEventListener('touchend', (e) => {
-        if (!touchStart || !gameStarted || gameOver || isWallHit) return;
-        
-        const now = Date.now();
-        if (now - lastSwipeTime < SWIPE_COOLDOWN) return;
-        
-        const t = (e.changedTouches && e.changedTouches[0]) || null;
-        if (!t) return;
-        
-        const dx = t.clientX - touchStart.x;
-        const dy = t.clientY - touchStart.y;
-        const adx = Math.abs(dx), ady = Math.abs(dy);
-        const dt  = now - touchStart.time;
-        
-        const MIN_DIST = 20;
-        const MIN_TIME = 30;
-        const MAX_TIME = 500;
-        
-        if (dt >= MIN_TIME && dt <= MAX_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
-          lastSwipeTime = now;
-          if (adx > ady) {
-            changeDirection(dx>0 ? 1 : -1, 0);
-          } else {
-            changeDirection(0, dy>0 ? 1 : -1);
-          }
-        }
-        touchStart = null;
-      }, { passive:true });
-      
-      // Prevent default behaviors on canvas
-      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-      canvas.addEventListener('dragstart', (e) => e.preventDefault());
-    }
-
-    // Get direction from button ID
-    function getDirectionFromButton(btnId) {
-      switch(btnId) {
-        case 'upBtn': return { x: 0, y: -1 };
-        case 'downBtn': return { x: 0, y: 1 };
-        case 'leftBtn': return { x: -1, y: 0 };
-        case 'rightBtn': return { x: 1, y: 0 };
-        default: return { x: 0, y: 0 };
-      }
-    }
-
-    // Reset game state
-    function resetGameState() {
-      snake = [{ x: 10, y: 10 }];
-      food = generateFoodPosition();
-      direction = { x: 0, y: 0 };
-      score = 0;
-      timeLeft = 60;
-      gameOver = false;
-      gameStarted = false;
-      isWallHit = false;
-      wallHitTime = 0;
-
-      pillStatus.textContent = 'Ready to Start';
-      pillStatus.className = 'pill info';
-      pillTimer.textContent = `Time Left: ${timeLeft} sec`;
-      pillScore.textContent = `Score: ${score} / 10`;
-
-      startBtn.style.display = 'inline-flex';
-      retryBtn.style.display = 'none';
-
-      document.getElementById('upBtn').disabled = true;
-      document.getElementById('downBtn').disabled = true;
-      document.getElementById('leftBtn').disabled = true;
-      document.getElementById('rightBtn').disabled = true;
-
-      updateTimeBar();
-      renderGame();
-    }
-
-    // Start game
-    function startGame() {
-      if (!gameStarted && !gameOver) {
-        gameStarted = true;
-        startBtn.style.display = 'none';
-        retryBtn.style.display = 'inline-flex';
-        pillStatus.textContent = 'Game in Progress';
-        pillStatus.className = 'pill ok';
-        document.getElementById('upBtn').disabled = false;
-        document.getElementById('downBtn').disabled = false;
-        document.getElementById('leftBtn').disabled = false;
-        document.getElementById('rightBtn').disabled = false;
-        lastUpdateTime = 0; lastSecondTime = 0;
-        requestAnimationFrame(gameLoop);
-      }
-    }
-
-    // Change direction
-    function changeDirection(x, y) {
-      // If in wall hit buffer period, allow any direction change
-      if (isWallHit) {
-        const now = Date.now();
-        if (now - wallHitTime < WALL_BUFFER_TIME) {
-          // Check if new direction is safe (not directly opposite)
-          if (!(x !== 0 && direction.x === -x) && !(y !== 0 && direction.y === -y)) {
-            direction = { x, y };
-            isWallHit = false; // Successfully changed direction, end wall hit state
-            pillStatus.textContent = 'Game in Progress';
-            pillStatus.className = 'pill ok';
-            return true;
-          }
-        }
-        return false;
-      }
-      
-      // Normal direction change logic
-      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return false; // Prevent reverse
-      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) {
-        direction = { x, y };
-        return true;
-      }
-      return false;
-    }
-
-    // Generate food position
-    function generateFoodPosition() {
-      let p;
-      do { p = { x: Math.floor(Math.random()*GRID_SIZE), y: Math.floor(Math.random()*GRID_SIZE) }; }
-      while (snake.some(s => s.x===p.x && s.y===p.y));
-      return p;
-    }
-
-    // Keyboard controls
-    function handleKeyPress(e) {
-      if (!gameStarted && !gameOver) startGame();
-      if (gameStarted && !gameOver) {
-        if (e.key === 'ArrowUp') changeDirection(0,-1);
-        else if (e.key === 'ArrowDown') changeDirection(0,1);
-        else if (e.key === 'ArrowLeft') changeDirection(-1,0);
-        else if (e.key === 'ArrowRight') changeDirection(1,0);
-      }
-    }
-
-    // Update game
-    function updateGame() {
-      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0 && !isWallHit)) return;
-      
-      // Check if wall hit buffer period has ended
-      if (isWallHit) {
-        const now = Date.now();
-        if (now - wallHitTime >= WALL_BUFFER_TIME) {
-          // Buffer time ended, game over
-          gameOver = true;
-          pillStatus.textContent = 'Game Over';
-          pillStatus.className = 'pill warn';
-          showToast(`Game Over! Final Score: ${score}`);
-          return;
-        }
-        // Still in buffer period, don't move
-        return;
-      }
-      
-      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-      // Check if hitting wall
-      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE) {
-        // Hit wall, enter buffer period
-        isWallHit = true;
-        wallHitTime = Date.now();
-        wallHitPosition = { ...head };
-        pillStatus.textContent = 'Danger! Change Direction';
-        pillStatus.className = 'pill warn';
-        
-        // Show warning
-        showToast('⚠️ Wall Hit! Change Direction!');
-        return;
-      }
-
-      // Check if hitting self
-      if (snake.some(seg => seg.x===head.x && seg.y===head.y)) {
-        gameOver = true;
-        pillStatus.textContent = 'Game Over';
-        pillStatus.className = 'pill warn';
-        showToast(`Game Over! Hit yourself! Final Score: ${score}`);
-        return;
-      }
-
-      snake.unshift(head);
-
-      // Eat food
-      if (head.x === food.x && head.y === food.y) {
-        score += 1;
-        pillScore.textContent = `Score: ${score} / 10`;
-        food = generateFoodPosition();
-        if (score >= 10) {
-          unlockSpirit();
-          gameOver = true;
-          return;
-        }
-      } else {
-        snake.pop();
-      }
-
-      renderGame();
-    }
-
-    // Render game
-    function renderGame() {
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // Snake
-      const sW = CELL_SIZE * snakeScale;
-      const sH = CELL_SIZE * snakeScale;
-      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2;
-      
-      // Make snake head blink if wall hit
-      const headAlpha = isWallHit ? (0.5 + 0.5 * Math.sin(Date.now() / 100)) : 1;
-      
-      snake.forEach((seg, i) => {
-        const img = i===0 ? snakeHeadImage : snakeBodyImage;
-        if (i === 0 && isWallHit) {
-          ctx.globalAlpha = headAlpha;
-        }
-        ctx.drawImage(
-          img,
-          seg.x*CELL_SIZE - sOff,
-          seg.y*CELL_SIZE - sOff,
-          sW, sH
-        );
-        if (i === 0 && isWallHit) {
-          ctx.globalAlpha = 1;
-        }
-      });
-
-      // Food
-      const fW = CELL_SIZE * foodScale;
-      const fH = CELL_SIZE * foodScale;
-      const fOff = (CELL_SIZE * (foodScale - 1)) / 2;
-      ctx.drawImage(
-        foodImage,
-        food.x*CELL_SIZE - fOff,
-        food.y*CELL_SIZE - fOff,
-        fW, fH
-      );
-      
-      // Draw warning border if wall hit
-      if (isWallHit) {
-        ctx.strokeStyle = '#ff0000';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(0, 0, canvas.width, canvas.height);
-        
-        // Draw countdown timer
-        const remainingTime = WALL_BUFFER_TIME - (Date.now() - wallHitTime);
-        const seconds = (remainingTime / 1000).toFixed(1);
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${seconds}s`, canvas.width/2, 30);
-      }
-    }
-
-    // Show toast message
-    function showToast(msg) {
-      toast.textContent = msg; toast.style.display = 'block';
-      setTimeout(()=>{ toast.style.display='none'; }, 2000);
-    }
-
-    // Unlock spirit
-    function unlockSpirit() {
-      const spirit = {
-        id:'spirit_game4', name:'Boba Egg Waffle',
-        image:'images/game-spirit4.png', page:'spirit_game4_eng.html',
-        unlockDate:new Date().toISOString(), score:score
-      };
-      let spirits = [];
-      try { spirits = JSON.parse(localStorage.getItem('spirits') || '[]'); } catch(e){ spirits = []; }
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 Successfully Unlocked Challenge Spirit: Boba Egg Waffle!');
-        pillStatus.textContent = 'Challenge Complete!';
-        pillStatus.className = 'pill ok';
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
       } else {
-        showToast('You have already unlocked Boba Egg Waffle!');
+        document.getElementById('message').innerText = 'You already own Boba Egg Waffle!';
       }
-      setTimeout(()=>{ window.location.href = spirit.page + '#unlocked'; }, 1500);
     }
-
-    // Game loop
-    function gameLoop(ts) {
-      if (gameOver) return;
-      if (!lastUpdateTime) lastUpdateTime = ts;
-      if (!lastSecondTime) lastSecondTime = ts;
-
-      if (ts - lastUpdateTime >= 220) {
-        updateGame(); 
-        lastUpdateTime = ts;
-      }
-      
-      // Update rendering to show blinking effect if wall hit
-      if (isWallHit) {
-        renderGame();
-      }
-      
-      if (gameStarted && ts - lastSecondTime >= 1000) {
-        timeLeft--; lastSecondTime = ts; updateTimeBar();
-        pillTimer.textContent = `Time Left: ${timeLeft} sec`;
-        if (timeLeft <= 0 && !gameOver) {
-          gameOver = true;
-          pillStatus.textContent = 'Time Up!';
-          pillStatus.className = 'pill warn';
-          showToast(`Time Up! Final Score: ${score}`);
-          return;
-        }
-      }
-      requestAnimationFrame(gameLoop);
-    }
-
-    // Start game after images load
-    Promise.all([
-      new Promise(r=>{ snakeHeadImage.onload = r; }),
-      new Promise(r=>{ snakeBodyImage.onload = r; }),
-      new Promise(r=>{ foodImage.onload = r; })
-    ]).then(() => {
-      initializeGame();
-      requestAnimationFrame(gameLoop);
-    }).catch(err => {
-      console.error('Image loading failed:', err);
-      showToast('Game images failed to load, please refresh the page');
-    });
   </script>
 </body>
 </html>
-[file content end]

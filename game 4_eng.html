@@ -1,280 +1,111 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Challenge Game | Dim sum Boy</title>
+  <title>Mon Profile - Dim Sum Boy</title>
+  
   <link rel="stylesheet" href="styles.css">
-  <style>
-.stage{display:flex;flex-direction:column;align-items:center;gap:10px}.grid{display:grid;grid-template-columns:repeat(8, 50px);gap:6px;user-select:none}.cell{
-      width:50px;height:50px;display:flex;align-items:center;justify-content:center;
-      font-size:26px;background:#ffffff;border:1px solid #e8e2d6;border-radius:10px;
-      cursor:pointer;transition:transform .08s ease, box-shadow .12s ease, border-color .12s ease;
-      box-shadow:0 2px 8px rgba(0,0,0,.05)
-    }.cell:hover{transform:translateY(-1px)}.cell.selected{border:2px solid #ffb547;box-shadow:0 4px 14px rgba(255,181,71,.25)}.cell.clearing{animation:pop .2s ease both, fade .18s ease forwards}
-    @keyframes fade{to{opacity:.25; transform:scale(.8);}}@keyframes pop{from{transform:scale(.85);opacity:.4}to{transform:scale(1.1);opacity:1}}
-
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}.btn:active{transform:translateY(1px)}.hint{margin-top:4px;color:#7a4a00;font-weight:700}@media (max-width:560px){
-      .hero{grid-template-columns:84px 1fr}.grid{gap:5px}.cell{width:44px;height:44px;font-size:24px}
-</style>
 </head>
-<body class="theme-dimsum">
+<body class="theme-dimsum layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">Challenge Game - Dimsum Boy </div>
-        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
+        <div class="title">Mon Profile - Dim Sum Boy</div>
+        <div class="badge">Togetherness · Sharing · Happiness</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit3.png" alt="Dimsum Boy"></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit3.png" alt="Dim Sum Boy" />
+        </div>
         <div class="intro">
-          <p><strong>How to Play:</strong> Match form <strong>3 or more in a row or column </strong> by swapping adjacent tiles to clear them. ; Earn score <strong>200 points</strong> within the time limit to unlock Dimsum Boy.</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">Not Started</span>
-            <span class="pill ok" id="pill-score">Score: 0 / 200</span>
-            <span class="pill warn" id="pill-time">Time: 30s</span>
-          </div>
-          <div class="hint">💡 Adding Tips: Pop over 3 tiles at once for extra points!</div>
-          <a class="btn secondary" href="game 4.html">🌐 中文 </a>
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Say hello to Dim Sum Boy, the giggly delivery champ who’s totally obsessed with dim sum and can’t wait to dish out the fun in a cute match-three game!</p>
+          <p>This adorable fella’s got a warm, steamy vibe like a fresh bamboo steamer and see-through skin that’s as delicate as a shrimp dumpling wrapper. You’ll spot him zipping around bustling teahouses and markets, tossing a sprinkle of happy magic into every dim sum and tea. As the “Spirit of Togetherness and Sharing,” Dim Sum Boy’s all about cozy family vibes, making every yummy basket burst with joy and giggles!</p>
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="stage">
-            <div id="grid" class="grid" aria-label="match-3 grid"></div>
-            <div class="actions">
-              <button class="btn" id="btn-start">▶️ Start Game</button>
-              <button class="btn secondary" id="btn-retry" style="display:none;">🔁 Restart</button>
-            </div>
-          </div>
-        </div>
-        <div class="actions">
-          <a class="btn secondary" href="dex_eng.html#dex">📖 Back to Dex</a>
-          <a class="btn secondary" href="index_eng.html">🔙 Back to Home</a>
-        </div>
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Dim Sum Magic</h3>
+        <p>Dim sum vibes started shining in Guangdong, southern China, way back in the Tang Dynasty (or even earlier)! Teahouses were the classic hangout, dishing out tea and tiny sweet snacks for tired travelers, which grew into the awesome dim sum culture we love today.</p>
+        <p>Cantonese dim sum is all about that fancy, yummy charm, with over a thousand dishes! Think steamed shrimp dumplings, siu mai, and fluffy char siu bao, cooked with steamin’, fryin’, and bakin’ magic. They’re the heart and soul of this delicious party!</p>
+      </div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game3.html">🌐 中文 </a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 Unlocked: Dimsum Boy!</div>
-
   <script>
-    const GRID_SIZE = 8;
-    const TYPES = ['🥟','🥮','🥠','🍡','🍤'];
-    const gridEl = document.getElementById('grid');
-    const pillScore = document.getElementById('pill-score');
-    const pillTime  = document.getElementById('pill-time');
-    const pillStatus= document.getElementById('pill-status');
-    const btnStart  = document.getElementById('btn-start');
-    const btnRetry  = document.getElementById('btn-retry');
+    const spirit = {
+      id: 'spirit_game3',
+      name: 'Dim Sum Boy',
+      image: 'images/game-spirit3.png',
+      page: 'spirit_game3_eng.html'
+    };
 
-    let grid = [], score = 0, timeLeft = 30, timerId = null, running = false, selected = null;
-
-    function makeCell(x,y,val){
-      const d = document.createElement('div');
-      d.className = 'cell';
-      d.dataset.x = x; d.dataset.y = y;
-      d.textContent = val;
-      d.addEventListener('click', onCellClick, {passive:true});
-      d.addEventListener('touchstart', (e)=>{ e.preventDefault(); onCellClick({target:d}); }, {passive:false});
-      return d;
-    }
-
-    function render(){
-      gridEl.innerHTML = '';
-      for(let i=0;i<GRID_SIZE;i++){
-        for(let j=0;j<GRID_SIZE;j++){
-          const d = makeCell(i,j,grid[i][j]);
-          if(selected && selected.x===i && selected.y===j) d.classList.add('selected');
-          gridEl.appendChild(d);
-        }
-      }
-      pillScore.textContent = `Score: ${score} / 200`;
-      pillTime.textContent  = `Time: ${timeLeft}s`;
-    }
-
-    function initGrid(){
-      grid = Array.from({length:GRID_SIZE}, ()=> Array.from({length:GRID_SIZE}, ()=> TYPES[Math.floor(Math.random()*TYPES.length)]));
-      // Clear initial matches
-      while (hasMatches()){
-        const _tmp=eliminate(false); if(_tmp && _tmp.marks){ for(let i=0;i<GRID_SIZE;i++){ for(let j=0;j<GRID_SIZE;j++){ if(_tmp.marks[i][j]) grid[i][j]=null; } } }
-        drop();
-      }
-      render();
-    }
-
-    function isAdj(a,b){ return (Math.abs(a.x-b.x)===1 && a.y===b.y) || (Math.abs(a.y-b.y)===1 && a.x===b.x); }
-
-    function onCellClick(e){
-      if(!running) return;
-      const x = +e.target.dataset.x, y = +e.target.dataset.y;
-      if(!selected){
-        selected = {x,y}; render();
-      } else {
-        const prev = selected; selected = null;
-        if (isAdj({x,y}, prev) && swapAndCheck({x,y}, prev)){
-          chainResolve();
-        } else render();
-      }
-    }
-
-    function swapAndCheck(a,b){
-      [grid[a.x][a.y], grid[b.x][b.y]] = [grid[b.x][b.y], grid[a.x][a.y]];
-      if(!hasMatches()){
-        [grid[a.x][a.y], grid[b.x][b.y]] = [grid[b.x][b.y], grid[a.x][a.y]];
-        return false;
-      }
-      return true;
-    }
-
-    function hasMatches(){
-      for(let i=0;i<GRID_SIZE;i++){
-        for(let j=0;j<GRID_SIZE-2;j++){
-          if(grid[i][j] && grid[i][j]===grid[i][j+1] && grid[i][j]===grid[i][j+2]) return true;
-        }
-      }
-      for(let j=0;j<GRID_SIZE;j++){
-        for(let i=0;i<GRID_SIZE-2;i++){
-          if(grid[i][j] && grid[i][j]===grid[i+1][j] && grid[i][j]===grid[i+2][j]) return true;
-        }
-      }
-      return false;
-    }
-
-    
-    function eliminate(addScore = true){
-      // phase 1: find matches
-      const marks = Array.from({length:GRID_SIZE}, ()=> Array(GRID_SIZE).fill(false));
-      let any = false;
-      // row
-      for(let i=0;i<GRID_SIZE;i++){
-        for(let j=0;j<GRID_SIZE-2;j++){
-          const v = grid[i][j];
-          if(v && v===grid[i][j+1] && v===grid[i][j+2]){
-            let len=3; while(j+len<GRID_SIZE && grid[i][j+len]===v) len++;
-            for(let k=0;k<len;k++) marks[i][j+k]=true;
-            j += len-1; any = true;
-          }
-        }
-      }
-      // col
-      for(let j=0;j<GRID_SIZE;j++){
-        for(let i=0;i<GRID_SIZE-2;i++){
-          const v=grid[i][j];
-          if(v && v===grid[i+1][j] && v===grid[i+2][j]){
-            let len=3; while(i+len<GRID_SIZE && grid[i+len][j]===v) len++;
-            for(let k=0;k<len;k++) marks[i+k][j]=true;
-            i += len-1; any = true;
-          }
-        }
-      }
-      if(!any) return 0;
-      // add score & mark DOM
-      let cleared = 0;
-      for(let i=0;i<GRID_SIZE;i++){
-        for(let j=0;j<GRID_SIZE;j++){
-          if(marks[i][j]){
-            cleared++;
-            if(addScore) score += 10; // Simplified: +10 per clear (can add bonus for length)
-          }
-        }
-      }
-      // render with .clearing
-      render();
-      // add .clearing classes
-      document.querySelectorAll('.cell').forEach(d=>{
-        const x=+d.dataset.x, y=+d.dataset.y;
-        if(marks[x][y]) d.classList.add('clearing');
-      });
-      return {cleared, marks};
-    }
-
-
-    function drop(){
-      for(let j=0;j<GRID_SIZE;j++){
-        let empty = GRID_SIZE-1;
-        for(let i=GRID_SIZE-1;i>=0;i--){
-          if(grid[i][j]){
-            grid[empty][j]=grid[i][j];
-            if(i!==empty) grid[i][j]=null;
-            empty--;
-          }
-        }
-        for(let i=0;i<=empty;i++){
-          grid[i][j] = TYPES[Math.floor(Math.random()*TYPES.length)];
-        }
-      }
-    }
-
-    function delay(ms){ return new Promise(res=>setTimeout(res, ms)); }
-    async function chainResolve(){
-      // Chain clear: continue if there are matches
-      do{
-        const res = eliminate(true);
-        if(res && res.marks){
-          await delay(160);
-          // phase 2: null & drop
-          for(let i=0;i<GRID_SIZE;i++){
-            for(let j=0;j<GRID_SIZE;j++){
-              if(res.marks[i][j]) grid[i][j]=null;
-            }
-          }
-          drop();
-          render();
-          await delay(80);
-        }
-      } while (hasMatches());
-      if(score>=200){ unlock(); }
-    }
-
-    function tick(){
-      timeLeft--;
-      pillTime.textContent = `Time: ${timeLeft}s`;
-      if(timeLeft<=0){ stop('⏱️ Time’s up! Try again'); return; }
-      setTimeout(tick,1000);
-    }
-
-    function start(){
-      running = true; score = 0; timeLeft = 30; selected = null;
-      pillStatus.textContent='Game Started!'; btnStart.style.display='none'; btnRetry.style.display='none';
-      initGrid();
-      setTimeout(tick,1000);
-    }
-
-    function stop(msg){
-      running = false; pillStatus.textContent = msg; btnRetry.style.display='inline-flex';
-    }
-
-    function toast(msg){
-      const t = document.getElementById('toast'); t.textContent = msg; t.style.display='block';
-      setTimeout(()=> t.style.display='none', 1600);
-    }
-
-    // ✅ Unlock and redirect to spirit page after 2 seconds
-    function unlock(){
-      running = false;
-      const spirit = { id:'spirit_game3', name:'Dimsum Boy', image:'images/game-spirit3.png', page:'spirit_game3_eng.html',
-        unlockDate:new Date().toISOString(), score:score };
+    function collect() {
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
-      if(!spirits.some(s=>s.id===spirit.id)){
-        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        toast('🎉 Unlocked: Dimsum Boy!'); pillStatus.textContent='🎉 Successfully unlocked challenge spirit: Dimsum Boy!';
+      if (!spirits.some(s => s.id === spirit.id)) {
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
       } else {
-        pillStatus.textContent='You have already unlocked Dimsum Boy!';
+        document.getElementById('message').innerText = 'You already own Dim Sum Boy!';
       }
-      btnRetry.style.display='inline-flex';
-
-      // Redirect after 2 seconds (adjustable)
-      setTimeout(()=>{ window.location.href = spirit.page; }, 2000);
     }
-
-    btnStart.addEventListener('click', start);
-    btnRetry.addEventListener('click', start);
-    // Pre-generate grid (interactions ignored before start)
-    initGrid();
-    pillStatus.textContent = 'Click "Start Game" to play!';
   </script>
 </body>
 </html>

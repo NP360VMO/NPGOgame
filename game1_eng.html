@@ -42,261 +42,83 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Challenge Game | Golden Moo Moo</title>
+  <title>Spirit Profile - Golden Moo Moo</title>
   <link rel="stylesheet" href="styles.css">
-  <style>
-    :root{
-      --bg: #f7f3ea;
-      --ink: #2f2a25;
-      --card: #fffdf9;
-      --accent: #ffb547;
-      --accent-ink:#6b400a;
-      --section-bg:#fff9f0;
-      --section-border:#e7d9c5;
-      --ok:#15a36d;
-      --warn:#e04848;
-      --info:#2b6eea;
-    }
-    *{box-sizing:border-box}
-    body{margin:0;font-family:system-ui,-apple-system,Segoe UI,Roboto,Noto Sans,Arial,"PingFang HK","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--ink);}
-    .container{max-width:960px;margin:0 auto;padding:20px}
-    .card{background:var(--card);border:1px solid var(--section-border);border-radius:20px;box-shadow:0 12px 28px rgba(0,0,0,.06);overflow:hidden}
-    .header{display:flex;justify-content:space-between;gap:12px;align-items:center;padding:18px 20px;border-bottom:1px solid var(--section-border)}
-    .title{font-size:20px;font-weight:900;letter-spacing:.5px}
-    .badge{font-weight:700;background:#fff1d8;border:1px solid #ffd9a0;color:#7a4a00;border-radius:999px;padding:6px 10px}
-    .hero{display:grid;grid-template-columns:120px 1fr;gap:14px;padding:18px 20px;border-bottom:1px solid var(--section-border);background:
-      linear-gradient(to bottom,rgba(255,248,236,.8),rgba(255,255,255,.6)),url('images/background.png');background-size:cover;background-position:center}
-    .img-wrap{display:flex;align-items:center;justify-content:center}
-    .img-wrap img{width:96px;height:auto;filter:drop-shadow(0 10px 20px rgba(0,0,0,.12))}
-    .intro p{margin:.35rem 0}
-    .status-bar{display:flex;gap:10px;flex-wrap:wrap;margin-top:8px}
-    .pill{border:2px solid var(--section-border);background:#fff;border-radius:999px;padding:6px 12px;font-weight:800}
-    .pill.ok{border-color: #bfe6d6;color:var(--ok)}
-    .pill.warn{border-color: #ffd1d1;color:var(--warn)}
-    .pill.info{border-color: #cfe0ff;color:var(--info)}
-
-    .section{padding:18px 20px}
-    .game-wrap{background:var(--section-bg);border:1px dashed var(--section-border);border-radius:16px;padding:12px}
-    .play-area{position:relative;border-radius:12px;min-height:360px;max-width:720px;margin:0 auto;background:#fff;}
-    #gameArea{position:relative;width:100%;height:420px;overflow:hidden;border-radius:12px}
-
-    /* Top progress bar */
-    .progress{position:absolute;left:0;top:0;width:100%;height:8px;background:#f1f1f1}
-    .bar{height:100%;width:100%;transform-origin:left center;background:linear-gradient(90deg,#8ad398,#ffd166);}
-
-    /* Target animation */
-    #target{width:100px;height:100px;position:absolute;display:none;cursor:pointer;user-select:none;-webkit-user-drag:none;touch-action:manipulation;
-      filter:drop-shadow(0 10px 22px rgba(0,0,0,.16))}
-    .pop{animation:pop .18s ease-out}
-    @keyframes pop{from{transform:scale(.7);opacity:.4}to{transform:scale(1);opacity:1}}
-
-    .actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;margin-top:12px}
-    .btn{appearance:none;border:0;cursor:pointer;font-weight:800;padding:10px 16px;border-radius:12px;background:var(--accent);color:#fff;box-shadow:0 8px 20px rgba(0,0,0,.12)}
-    .btn.secondary{background:#fff;border:1px solid var(--section-border);color:var(--ink)}
-    .btn:active{transform:translateY(1px)}
-
-    .toast{position:fixed;left:50%;transform:translateX(-50%);bottom:20px;background:var(--accent);color:#fff;padding:10px 14px;border-radius:12px;
-      font-weight:900;display:none;z-index:1000;box-shadow:0 8px 24px rgba(0,0,0,.18)}
-
-    @media (max-width:560px){
-      .hero{grid-template-columns:84px 1fr}
-      .img-wrap img{width:80px}
-      #gameArea{height:360px}
-      #target{width:84px;height:84px}
-    }
-  </style>
 </head>
 <body class="theme-warm layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">Challenge Game -  Golden Moo Moo</div>
-        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
+        <div class="title">Mon Profile - Golden Moo Moo</div>
+        <div class="badge">Diligent · Guardian · Steady</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit1.png" alt="Golden Moo Moo"></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit1.png" alt="Golden Moo Moo" />
+        </div>
         <div class="intro">
-          <p><strong>How to Play:</strong>You must click  <strong>Golden Moo Moo</strong> within <strong>1.5 seconds</strong> of  him appearing. Land <strong>10 consecutive clicks</strong> within <strong>20 seconds</strong> to unlock the next stage.</p>
-          <p>The more successful clicks, the shorter the appearance time; test your reaction!</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">Not Started</span>
-            <span class="pill" id="pill-success">Success: 0 / 10</span>
-            <span class="pill warn" id="pill-timer">Time Left: 20 seconds</span>
-            <a class="btn secondary" href="game1.html">🌐 中文 </a>
-          </div>
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Hey there, Golden Moo Mon—our super-speedy guardian of Ngong Ping’s wild forests and the heartwarming best friend of our whole village! This joyful pup steals the hearts of everyone who encounters him; we've woven an unbreakable, soul-deep bond with him, and oh, how we cherish and adore him endlessly!</p>
+          <p>With his chunky build and radiant golden-yellow fur shimmering like a sun-kissed rice field, plus those adorable curved horns that whisper "cool!", his tender “Spirit of Diligence and Guardianship.” He pours its heartfelt magic into fueling hard work and nurturing the land, sparking explosive crop growth and wrapping weary travelers in a warm, invigorating energy hug!</p>
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="play-area">
-            <div class="progress"><div class="bar" id="timeBar"></div></div>
-            <div id="gameArea">
-              <img src="images/game-spirit1.png" id="target" alt="Golden Moo Moo">
-            </div>
-          </div>
-          <div class="actions">
-            <button class="btn" id="btn-start">▶️ Start Game</button>
-            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 Restart</button>
-            <a class="btn secondary" href="dex_eng.html#dex">📖 Back to Dex</a>
-          </div>
-        </div>
-        <div class="actions"><a class="btn secondary" href="index_eng.html">🔙 Back to Home</a></div>
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Southern Yellow Cattle</h3>
+        <p>The Southern Yellow Cattle is a super cute member of China’s three big yellow cattle breeds, hanging out in southern spots like Guangdong, Fujian, Hainan, and even around Lantau Island!</p>
+        <p>These adorable feral cattle love to wander the fields in Lantau’s cozy rural areas, like Mui Wo and Lamma Island. Spot them chilling in the grass, adding a sweet, natural vibe to your travels!</p>
       </div>
+
+      <div class="grid actions-info">
+        <div class="section">
+          <h3>✅ Proper Ways to Interact with Cattle</h3>
+          <ul>
+            <li>Stay calm and quiet, avoiding loud shouts or impulsive actions to prevent startling the cattle.</li>
+            <li>Keep a safe distance from the cattle, and do not touch, chase, or pat them, especially calves; mother cows may attack to protect their young.</li>
+          </ul>
+        </div>
+        <div class="section">
+          <h3>🚫 Behaviors to Avoid Around Cattle</h3>
+          <ul>
+            <li>Do not feed them any food, including vegetables, meat, or processed foods.</li>
+            <li>Avoid using flash photography, especially in low-light conditions, to prevent startling them.</li>
+            <li>Do not make loud noises, create disturbances, or harass cattle with objects.</li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game1.html">🌐 中文 </a>
+            </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
+              </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 Unlocked: Golden Moo Moo!</div>
-
   <script>
-    // Theme synchronization (if theme selected on homepage)
-    (function syncTheme(){
-      const saved = localStorage.getItem('np_theme');
-      if (!saved) return;
-      document.body.classList.remove('theme-sky','theme-grass','theme-warm','theme-dimsum','theme-boba');
-      document.body.classList.add(saved);
-    })();
+    const spirit = {
+      id: 'spirit_game1',
+      name: 'Golden Moo Moo',
+      image: 'images/game-spirit1.png',
+      page: 'spirit_game1_eng.html'
+    };
 
-    let success = 0, timeoutId, totalTime = 20, intervalId, showDelay = 1500, running = false;
-
-    const target = document.getElementById('target');
-    const pillStatus = document.getElementById('pill-status');
-    const pillTimer  = document.getElementById('pill-timer');
-    const pillSuccess = document.getElementById('pill-success');
-    const timeBar = document.getElementById('timeBar');
-    const gameArea = document.getElementById('gameArea');
-    const btnStart = document.getElementById('btn-start');
-    const btnRetry = document.getElementById('btn-retry');
-    let lastTs = 0;
-
-    function setTimeBar(){
-      const pct = Math.max(0,totalTime/20)*100;
-      timeBar.style.width = pct + '%';
-      const hue = Math.max(0, Math.min(120, pct*1.2)); // 0~120 (green→yellow→red)
-      timeBar.style.background = `linear-gradient(90deg,hsl(${hue},60%,55%),#ffd166)`;
-    }
-
-    function updateTimerDisplay(){ 
-      pillTimer.textContent = `Time Left: ${Math.ceil(Math.max(0,totalTime))} seconds`; 
-      setTimeBar();
-    }
-    
-    function timerLoop(ts){
-      if(!running) return;
-      if(!lastTs) lastTs = ts;
-      const dt = (ts - lastTs) / 1000;
-      lastTs = ts;
-      totalTime -= dt;
-      updateTimerDisplay();
-      if(totalTime <= 0){
-        endGame('⏱️ Time’s Up! Try Again');
-        return;
-      }
-      requestAnimationFrame(timerLoop);
-    }
-
-    function endGame(message){
-      clearInterval(intervalId);
-      clearTimeout(timeoutId);
-      target.style.display = 'none';
-      running = false;
-      pillStatus.textContent = message;
-      btnRetry.style.display = 'inline-flex';   // Allow immediate restart when time’s up
-      btnStart.style.display = 'none';
-    }
-
-    function showTarget(){
-      const areaRect = gameArea.getBoundingClientRect();
-      const size = target.getBoundingClientRect();
-      const margin = 29; // Boundary buffer
-      const x = margin + Math.random() * Math.max(0, areaRect.width  - size.width  - margin*2);
-      const y = margin + Math.random() * Math.max(0, areaRect.height - size.height - margin*2);
-      target.style.left = x + 'px';
-      target.style.top  = y + 'px';
-      target.style.display = 'block';
-      target.classList.remove('pop');
-      void target.offsetWidth; // Retrigger animation
-      target.classList.add('pop');
-
-      timeoutId = setTimeout(() => {
-        // Too slow: provide immediate restart option
-        target.style.display = 'none';
-        pillStatus.textContent = 'Too Slow! Try Again';
-        success = 0;
-        pillSuccess.textContent = `Success: ${success} / 10`;
-        btnRetry.style.display = 'inline-flex'; // Immediate restart available
-      }, showDelay);
-    }
-
-    function handleInteraction(){
-      if (!running) return;
-      clearTimeout(timeoutId);
-      target.style.display = 'none';
-      success++;
-      pillSuccess.textContent = `Success: ${success} / 10`;
-      showDelay = Math.max(400, showDelay - 50);
-      if (success >= 10) {
-        clearInterval(intervalId);
-        unlockSpirit();
-      } else {
-        pillStatus.textContent = `Success ${success} times, keep going!`;
-        setTimeout(showTarget, 420);
-      }
-    }
-
-    target.onclick = handleInteraction;
-    target.ontouchstart = (e)=>{ e.preventDefault(); handleInteraction(); };
-
-    function startGame(){
-      success = 0; totalTime = 20; showDelay = 1500; running = true;
-      pillStatus.textContent = 'Game Started! Get ready to click Golden Moo Moo';
-      updateTimerDisplay();
-      pillSuccess.textContent = `Success: 0 / 10`;
-      btnStart.style.display = 'none';
-      btnRetry.style.display = 'none';
-      clearInterval(intervalId); clearTimeout(timeoutId);
-      setTimeBar();
-      lastTs = 0; requestAnimationFrame(timerLoop);
-      showTarget();
-    }
-
-    function showToast(msg){
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.style.display='block';
-      setTimeout(()=> t.style.display='none', 1600);
-    }
-
-    function unlockSpirit(){
-      const spirit = { id:'spirit_game1', name:'Golden Moo Moo', image:'images/game-spirit1.png', page:'spirit_game1_eng.html',
-        unlockDate:new Date().toISOString(), score:success };
+    function collect() {
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 Unlocked: Golden Moo Moo!'); pillStatus.textContent = '🎉 Successfully Unlocked Challenge Spirit: Golden Moo Moo!';
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
       } else {
-        pillStatus.textContent = 'You have already unlocked Golden Moo Moo!';
+        document.getElementById('message').innerText = 'You already own Golden Moo Moo!';
       }
-
-      target.style.display = 'none'; running = false; clearInterval(intervalId);
-
-      // Redirect to spirit page after 2 seconds
-      setTimeout(() => {
-        window.location.href = 'spirit_game1_eng.html';
-      }, 2000);
     }
-
-    // Buttons
-    btnStart.addEventListener('click', startGame);
-    btnRetry.addEventListener('click', startGame);
-
-    // Optional: Press space to quick restart (when game is not running)
-    document.addEventListener('keydown', (e)=>{
-      if(e.code==='Space' && !running){
-        e.preventDefault();
-        startGame();
-      }
-    });
   </script>
 </body>
 </html>

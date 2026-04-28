@@ -1,181 +1,111 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Challenge Game｜Little Yellow BB</title>
+  <title>Mon Profile - Little Yellow BB </title>
+  
   <link rel="stylesheet" href="styles.css">
-  <style>
-.stage{position:relative;max-width:720px;margin:0 auto;border-radius:16px;background:linear-gradient(180deg,#cdefff,#f8ffff)}.canvas-wrap{position:relative;padding:10px}canvas{background:#ffffff;border:2px solid #cfe4ff;border-radius:12px;display:block;margin:0 auto;box-shadow:0 10px 22px rgba(0,0,0,.06)}.hud{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin:10px 0 12px}.hint{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}.hint .bubble{background:rgba(255,255,255,.9);border:1px solid var(--section-border);border-radius:14px;padding:8px 12px;font-weight:800;box-shadow:0 8px 20px rgba(0,0,0,.08)}.btn:active{transform:translateY(1px)}@media (max-width:560px){
-      .hero{grid-template-columns:84px 1fr}
-</style>
 </head>
-<body class="theme-sky">
+<body class="theme-grass layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">Challenge Game - Little Yellow BB </div>
-        <div class="badge">🎮 Challenge Series · Unlock by Winning</div>
+        <div class="title">Mon Profile - Little Yellow BB</div>
+        <div class="badge">Loyal · Joyful · Energetic</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit2.png" alt="Little Yellow BB "></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit2.png" alt="Little Yellow BB" />
+        </div>
         <div class="intro">
-          <p><strong>How to Play:</strong> You must uide Little Yellow BB in chasing butterflies by bouncing her with the paddle. When you reach score <strong>5 points</strong> to unlock the next stage.</p>
-          <p>Tips: Slide your mouse left or right (or drag with your finger) to move the paddle!</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">Not Started</span>
-            <span class="pill ok" id="pill-score">Score: 0 / 5</span>
-            <a class="btn secondary" href="game222.html">🌐 中文 </a>
-          </div>
+          <p><strong>🗺️ Introduction:</strong></p>
+          <p>Meet Little Yellow BB, the cutest puppy ever, bouncing around Ngong Ping with endless energy! She loves nothing more than chasing butterflies and zipping through every corner, ready to take you on a super fun adventure!</p>
+          <p>Sporting soft, golden-yellow fur that shines like morning sunshine, big sparkly amber eyes, and a fluffy tail that wags like cotton candy, this pup’s pure joy! Known as the “Spirit of Loyalty and Joy,” she spreads cozy, happy vibes with her gentle magic, making everyone around her smile!</p>
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="stage">
-            <div class="hud">
-              <span class="pill">🎯 Hit butterfly to get 1 point</span>
-              <span class="pill">🛡 Miss the paddle and you'll fall</span>
-            </div>
-            <div class="canvas-wrap">
-              <canvas id="gameCanvas" width="300" height="400"></canvas>
-              <div class="hint" id="hint"><div class="bubble">← → Mouse to move (Mobile: Drag)</div></div>
-            </div>
-          </div>
+      <div class="section knowledge">
+        <h3>🗺️ Mon Scoop: Little Yellow BB</h3>
+        <p>Little Yellows, some of the oldest pups in China, have been loyal buddies for thousands of years! Southern China, including the Pearl River Delta near Hong Kong, is a hotspot where these adorable dogs first became our pals, showing off tons of unique traits.</p>
+        <p>In Hong Kong, these cute “Little Yellows” roam rural spots like Lantau Island’s villages, acting as trusty guard dogs. You might even spot them trotting through Ngong Ping’s alleys, adding a sprinkle of charm to your adventure!</p>
+      </div>
 
-          <div class="actions">
-            <button class="btn" id="btn-start">▶️ Start Game</button>
-            <button class="btn secondary" id="btn-retry" style="display:none;">🔁 Try Again</button>
-          </div>
-        </div>
+      <div class="grid">
+        
+      </div>
 
-        <div class="actions">
-          <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
-          <a class="btn secondary" href="index_eng.html">🔙 Back to Home</a>
-        </div>
+      <div class="actions">
+        <button class="btn" onclick="collect()">💫 Collect NPmon</button>
+        <a class="btn secondary" href="dex_eng.html">📖 Back to Dex</a>
+        <a class="btn secondary" href="spirit_game2.html">🌐 中文 </a>
+      </div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index_eng.html">🔙 Back to Home</a>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 Unlocked: Little Yellow BB !</div>
-
   <script>
-    // Image loading
-    const canvas = document.getElementById("gameCanvas");
-    const ctx = canvas.getContext("2d");
-    const statusEl = document.getElementById("pill-status");
-    const scoreEl  = document.getElementById("pill-score");
-    const btnStart = document.getElementById("btn-start");
-    const btnRetry = document.getElementById("btn-retry");
-    const hint     = document.getElementById("hint");
+    const spirit = {
+      id: 'spirit_game2',
+      name: 'Little Yellow BB',
+      image: 'images/game-spirit2.png',
+      page: 'spirit_game2_eng.html'
+    };
 
-    const ballImg = new Image();  ballImg.src = '彈彈球.png';
-    const starImg = new Image();  starImg.src = '星星.png';
-
-    let ball, paddle, star, starHitbox, score, gameLoop, waitingForPaddle, showingUnlockMessage, playing;
-
-    function initVars(){
-      ball = { x: 150, y: 200, radius: 30, dx: 2.2, dy: -3.2 };
-      paddle = { x: 110, width: 80, height: 10 };
-      star = { x: 100, y: 50, size: 120 };
-      starHitbox = { width: 32, height: 32 };
-      score = 0; waitingForPaddle = false; showingUnlockMessage = false; playing = false;
-      scoreEl.textContent = "Score: 0 / 5";
-      statusEl.textContent = "Not Started";
-      hint.style.display = 'flex';
-    }
-
-    initVars();
-
-    // Controls: Mouse + Touch
-    function setPaddleByClientX(clientX){
-      const rect = canvas.getBoundingClientRect();
-      paddle.x = clientX - rect.left - paddle.width / 2;
-    }
-    document.addEventListener("mousemove", e => { if(playing) setPaddleByClientX(e.clientX); });
-    canvas.addEventListener("touchmove", e => { if(!playing) return; e.preventDefault(); setPaddleByClientX(e.touches[0].clientX); }, {passive:false});
-
-    function drawBall(){ ctx.drawImage(ballImg, ball.x - ball.radius, ball.y - ball.radius, ball.radius*2, ball.radius*2); }
-    function drawPaddle(){ ctx.fillStyle = "#0e74d0"; ctx.fillRect(paddle.x, canvas.height - paddle.height - 10, paddle.width, paddle.height); }
-    function drawStar(){
-      if (!waitingForPaddle) {
-        ctx.drawImage(starImg, star.x, star.y, star.size, star.size);
-        // Enable for Hitbox debugging:
-        // ctx.strokeStyle = "rgba(255,0,0,0.6)";
-        // ctx.strokeRect(star.x + (star.size - starHitbox.width)/2, star.y + (star.size - starHitbox.height)/2, starHitbox.width, starHitbox.height);
-      }
-    }
-
-    function resetStar(){
-      const maxX = canvas.width - star.size;
-      const maxY = (canvas.height / 2) - star.size;
-      star.x = Math.random() * maxX;
-      star.y = Math.random() * maxY;
-    }
-
-    function moveBall(){
-      ball.x += ball.dx; ball.y += ball.dy;
-      if (ball.x < ball.radius || ball.x > canvas.width - ball.radius) ball.dx *= -1;
-      if (ball.y < ball.radius) ball.dy *= -1;
-
-      // Paddle collision
-      if (ball.y + ball.radius > canvas.height - paddle.height - 10 &&
-          ball.x > paddle.x && ball.x < paddle.x + paddle.width) {
-        ball.dy *= -1;
-        if (waitingForPaddle) { resetStar(); waitingForPaddle = false; }
-      }
-
-      // Star collision (based on Hitbox)
-      if (!waitingForPaddle &&
-          ball.x + ball.radius > star.x + (star.size - starHitbox.width)/2 &&
-          ball.x - ball.radius < star.x + (star.size - starHitbox.width)/2 + starHitbox.width &&
-          ball.y + ball.radius > star.y + (star.size - starHitbox.height)/2 &&
-          ball.y - ball.radius < star.y + (star.size - starHitbox.height)/2 + starHitbox.height) {
-        score++; waitingForPaddle = true;
-        scoreEl.textContent = `Score: ${score} / 5`;
-        statusEl.textContent = 'Hit! Bounce back for the next one～';
-        if (score >= 5) { unlockSpirit(); return; }
-      }
-
-      if (ball.y > canvas.height) { stopGame(); statusEl.textContent = "💥 Game Over, please try again!"; btnRetry.style.display='inline-flex'; }
-    }
-
-    function draw(){
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      drawBall(); drawPaddle(); drawStar(); moveBall();
-    }
-
-    function startGame(){
-      initVars(); resetStar();
-      statusEl.textContent = "Game Started!"; hint.style.display='none';
-      playing = true; btnStart.style.display='none'; btnRetry.style.display='none';
-      clearInterval(gameLoop); gameLoop = setInterval(draw, 20);
-    }
-
-    function stopGame(){ clearInterval(gameLoop); playing = false; }
-
-    function toast(msg){
-      const t = document.getElementById('toast');
-      t.textContent = msg; t.style.display='block';
-      setTimeout(()=> t.style.display='none', 1600);
-    }
-
-    // ✅ Automatically redirect to spirit page 2 seconds after unlocking
-    function unlockSpirit(){
-      const spirit = { id:'spirit_game2', name:'Little Yellow BB', image:'images/game-spirit2.png', page:'spirit_game2_eng.html' };
+    function collect() {
       let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
-        spirits.push(spirit); localStorage.setItem('spirits', JSON.stringify(spirits));
-        toast('🎉 Unlocked: Little Yellow BB!'); statusEl.textContent='🎉 Successfully unlocked challenge NPmon: Little Yellow BB!';
-      } else { statusEl.textContent='You already have this NPmon!'; }
-
-      stopGame(); // Stop screen updates
-      setTimeout(()=>{ window.location.href = spirit.page; }, 2000); // Auto redirect
+        spirits.push(spirit);
+        localStorage.setItem('spirits', JSON.stringify(spirits));
+        document.getElementById('message').innerText = '🎉 Successfully collected! Check it out on the homepage!';
+      } else {
+        document.getElementById('message').innerText = 'You already own Little Yellow BB!';
+      }
     }
-
-    document.getElementById("btn-start").addEventListener("click", startGame);
-    document.getElementById("btn-retry").addEventListener("click", startGame);
   </script>
 </body>
 </html>

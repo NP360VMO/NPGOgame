@@ -1,669 +1,77 @@
-<!DOCTYPE html> 
+<!DOCTYPE html>
 <html lang="zh">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"/>
-  <title>貪吃挑戰：珍奶雞蛋仔肚餓了</title>
-
-    <!-- Google tag (gtag.js) -->
-  <script async src="https://www.googletagmanager.com/gtag/js?id=G-B3740R31MS"></script>
-  <script>
-    window.dataLayer = window.dataLayer || [];
-    function gtag(){dataLayer.push(arguments);}
-    gtag('js', new Date());
-
-    // 請改成你自己的 GA4 ID
-    gtag('config', 'G-B3740R31MS');
-
-    // 👇 當進入 game6.html 就送出事件
-    gtag('event', 'page_enter', {
-      'page_title': 'Game 6',
-      'page_path': '/game6.html'
-    });
-  </script>
-
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>精靈介紹 - 珍奶雞蛋仔</title>
+  
   <link rel="stylesheet" href="styles.css">
-
-  <style>
-    :root {
-      --bg: #f7f3ea;
-      --ink: #2f2a25;
-      --card: #fffdf9;
-      --accent: #ffb547;
-      --accent-ink: #6b400a;
-      --section-bg: #fff9f0;
-      --section-border: #e7d9c5;
-      --ok: #15a36d;
-      --warn: #e04848;
-      --info: #2b6eea;
-    }
-    * { box-sizing: border-box; }
-    body {
-      margin: 0;
-      font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Arial, "PingFang HK", "Microsoft JhengHei", sans-serif;
-      background: var(--bg);
-      color: var(--ink);
-      -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
-    }
-    .container { max-width: 960px; margin: 0 auto; padding: 20px; }
-    .card {
-      background: var(--card);
-      border: 1px solid var(--section-border);
-      border-radius: 20px;
-      box-shadow: 0 12px 28px rgba(0, 0, 0, 0.06);
-      overflow: hidden;
-    }
-    .header {
-      display: flex; justify-content: space-between; gap: 12px; align-items: center;
-      padding: 18px 20px; border-bottom: 1px solid var(--section-border);
-    }
-    .title { font-size: 20px; font-weight: 900; letter-spacing: 0.5px; }
-    .badge {
-      font-weight: 700; background: #fff1d8; border: 1px solid #ffd9a0; color: #7a4a00;
-      border-radius: 999px; padding: 6px 10px;
-    }
-    .hero {
-      display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 18px 20px;
-      border-bottom: 1px solid var(--section-border);
-      background: linear-gradient(to bottom, rgba(255, 248, 236, 0.8), rgba(255, 255, 255, 0.6)), url("images/background.png");
-      background-size: cover; background-position: center;
-    }
-    .img-wrap { display: flex; align-items: center; justify-content: center; }
-    .img-wrap img { width: 96px; height: auto; filter: drop-shadow(0 10px 20px rgba(0, 0, 0, 0.12)); }
-    .intro p { margin: 0.35rem 0; }
-    .status-bar { display: flex; gap: 10px; flex-wrap: wrap; margin-top: 8px; }
-    .pill {
-      border: 2px solid var(--section-border); background: #fff; border-radius: 999px;
-      padding: 6px 12px; font-weight: 800;
-    }
-    .pill.ok { border-color: #bfe6d6; color: var(--ok); }
-    .pill.warn { border-color: #ffd1d1; color: var(--warn); }
-    .pill.info { border-color: #cfe0ff; color: var(--info); }
-
-    .section { padding: 18px 20px; }
-    .game-wrap { background: var(--section-bg); border: 1px dashed var(--section-border); border-radius: 16px; padding: 12px; }
-    .play-area {
-      position: relative; border-radius: 12px; min-height: 360px; max-width: 720px; margin: 0 auto;
-      background: #fff; display: flex; flex-direction: column; align-items: center;
-    }
-
-    /* 讓畫布容器置中 */
-    #gameContainer{ max-width:100%; margin:10px auto; position:relative; width:100%;
-      display:flex; justify-content:center; }
-    /* 畫布本身阻止瀏覽器手勢干擾 */
-    #gameCanvas { background-color: #f0f0f0; border: 1px solid #ccc; display:block; max-width:100%; touch-action:none; }
-
-    /* 進度條 */
-    .progress { position: relative; width: 100%; height: 8px; background: #f1f1f1; border-radius: 4px; margin-bottom: 12px; }
-    .bar { height: 100%; width: 100%; transform-origin: left center; border-radius: 4px; background: linear-gradient(90deg, #8ad398, #ffd166); }
-
-    .actions { display: flex; gap: 10px; flex-wrap: wrap; justify-content: center; margin-top: 12px; }
-    .btn {
-      appearance: none; border: 0; cursor: pointer; font-weight: 800; padding: 10px 16px; border-radius: 12px;
-      background: var(--accent); color: #fff; box-shadow: 0 8px 20px rgba(0, 0, 0, 0.12);
-      -webkit-tap-highlight-color: transparent; /* 移除點擊高亮 */
-      user-select: none;
-    }
-    .btn.secondary { background: #fff; border: 1px solid var(--section-border); color: var(--ink); }
-    .btn:active { transform: translateY(1px); }
-
-    .toast {
-      position: fixed; left: 50%; transform: translateX(-50%); bottom: 20px;
-      background: var(--accent); color: #fff; padding: 10px 14px; border-radius: 12px; font-weight: 900;
-      display: none; z-index: 1000; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.18);
-    }
-
-    /* —— 虛擬方向鍵：放大、好按 —— */
-    #virtualControls { display:flex; justify-content:center; margin-top:16px; flex-direction:column; align-items:center; width:100%; }
-    #virtualControls .control-row { display:flex; justify-content:center; }
-    #virtualControls .control-btn {
-      width:80px; height:80px; border-radius:50%; /* 加大按鈕尺寸 */
-      display:flex; justify-content:center; align-items:center; margin:10px; /* 增加間距 */
-      font-size:32px; user-select:none; -webkit-tap-highlight-color:transparent;
-      border:2px solid var(--section-border); color: var(--ink); font-weight:900; touch-action:manipulation;
-      background: rgba(255, 255, 255, 0.9); /* 更明顯的背景 */
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1); /* 增加陰影 */
-      transition: all 0.1s ease;
-      cursor: pointer;
-    }
-    #virtualControls .control-btn:active { 
-      background: rgba(0,0,0,0.1); 
-      transform: scale(0.95);
-      box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
-    }
-    #virtualControls .control-btn:disabled { 
-      background: rgba(0,0,0,0.04); 
-      cursor: not-allowed;
-      opacity: 0.6;
-    }
-
-    /* 手機優化 */
-    @media (max-width: 560px) {
-      .hero { grid-template-columns: 1fr; text-align: center; }
-      .img-wrap img { width: 100px; }
-      #virtualControls .control-btn { 
-        width:70px; height:70px; font-size:28px; margin:8px;
-        min-width: 70px; /* 防止按鈕變形 */
-      }
-      .actions { flex-direction: column; align-items: center; }
-      .btn { width: 100%; max-width: 280px; }
-      .status-bar { justify-content: center; }
-      .pill { font-size: 14px; padding: 5px 10px; }
-    }
-
-    /* 非常小的手機 */
-    @media (max-width: 380px) {
-      #virtualControls .control-btn { 
-        width:65px; height:65px; font-size:24px; margin:6px;
-      }
-      .container { padding: 12px; }
-      .section { padding: 12px; }
-    }
-
-    /* 防止長按選單 */
-    .no-context { -webkit-touch-callout: none; -webkit-user-select: none; user-select: none; }
-  </style>
 </head>
-<body class="theme-warm">
+<body class="theme-boba layout-intro-knowledge-actions">
   <div class="container">
     <div class="card">
       <div class="header">
-        <div class="title">挑戰遊戲 - 珍奶雞蛋仔</div>
-        <div class="badge">🎮 挑戰系 · 勝出可解鎖</div>
+        <div class="title">精靈介紹 - 珍奶雞蛋仔</div>
+        <div class="badge">街頭 · 幸福 · 美味</div>
       </div>
 
       <div class="hero">
-        <div class="img-wrap"><img src="images/game-spirit4.png" alt="珍奶雞蛋仔"></div>
+        <div class="img-wrap">
+          <img src="images/game-spirit4.png" alt="珍奶雞蛋仔" />
+        </div>
         <div class="intro">
-          <p><strong>玩法：</strong>使用方向鍵或虛擬按鈕控制珍奶雞蛋仔吃珍珠奶茶。在<strong>60秒</strong>內獲得<strong>10分</strong>即可解鎖精靈！</p>
-          <p><strong>注意：</strong>撞到牆壁或自己身體會結束遊戲。撞牆後有<strong>0.5秒緩衝時間</strong>可調整方向。</p>
-          <div class="status-bar">
-            <span class="pill info" id="pill-status">準備開始</span>
-            <span class="pill" id="pill-score">分數：0 / 10</span>
-            <span class="pill warn" id="pill-timer">剩餘時間：60 秒</span>
-            <a class="btn secondary" href="game6_eng.html">🌐 English Version </a>
-          </div>
+          
+<p><strong>🗺️ 簡介：</strong></p>
+<p>珍奶雞蛋仔是一隻熱愛街頭美食文化的為食仔，會帶你用貪吃蛇的方式探索街頭美食！</p>
+<p>牠能將平凡食材化作美味點心，亦能感知食用者情緒，調整飲品甜度與雞蛋仔的酥脆度；性格溫和卻帶點頑皮。</p>
+<p>據說牠棲息於熱鬧夜市或手搖飲店附近，總愛在雞蛋仔烤盤旁跳舞，為食物注入幸福魔法。</p>
+
         </div>
       </div>
 
-      <div class="section">
-        <div class="game-wrap">
-          <div class="play-area">
-            <div class="progress"><div class="bar" id="timeBar" style="width: 100%"></div></div>
-            <div id="gameContainer">
-              <canvas id="gameCanvas"></canvas>
-            </div>
+      <div class="section knowledge">
+          <h3>🗺️ 精靈小知識</h3>
+          
+<p>珍珠奶茶誕生於 1980 年代的台灣，結合泡沫紅茶與 Q 彈珍珠，迅速風靡全球。</p>
+<p>雞蛋仔起源於 1950 年代的香港，據傳由戰後小販善用破損雞蛋與麵糊創作而成，成為香港街頭文化代表。</p>
 
-            <!-- 虛擬方向鍵 -->
-            <div id="virtualControls" style="display:none;">
-              <div class="control-row">
-                <div class="control-btn" id="upBtn" disabled>↑</div>
-              </div>
-              <div class="control-row">
-                <div class="control-btn" id="leftBtn" disabled>←</div>
-                <div class="control-btn" id="downBtn" disabled>↓</div>
-                <div class="control-btn" id="rightBtn" disabled>→</div>
-              </div>
-            </div>
-          </div>
-
-          <div class="actions">
-            <button class="btn" id="startBtn">▶️ 開始遊戲</button>
-            <button class="btn secondary" id="retryBtn" style="display:none;">🔁 重新開始</button>
-            <a class="btn secondary" href="dex.html#dex">📖 返回圖鑑</a>
-          </div>
         </div>
-        <div class="actions"><a class="btn secondary" href="index.html">🔙 返回主頁</a></div>
+
+      <div class="grid">
+        
+      </div>
+
+      <div class="actions">
+  <button class="btn" onclick="collect()">💫 收集精靈</button>
+  <a class="btn secondary" href="dex.html">📖 返回圖鑑</a>
+  <a class="btn secondary" href="spirit_game4_eng.html">🌐 English Version </a>
+</div>
+      <p id="message"></p>
+
+      <div class="footer">
+        <a href="index.html">🔙 返回主頁</a>
       </div>
     </div>
   </div>
 
-  <div class="toast" id="toast">🎉 已解鎖：珍奶雞蛋仔！</div>
-
   <script>
-    // 遊戲常量
-    const GRID_SIZE = 15;
-    let CELL_SIZE = 30;
+    const spirit = {
+      id: 'spirit_game4',
+      name: '珍奶雞蛋仔',
+      image: 'images/game-spirit4.png',
+      page: 'spirit_game4.html'
+    };
 
-    // ✅ 放大比例
-    const snakeScale = 1.25;
-    const foodScale  = 1.35;
-
-    // 元素
-    const canvas = document.getElementById('gameCanvas');
-    const ctx = canvas.getContext('2d');
-    const pillStatus = document.getElementById('pill-status');
-    const pillTimer  = document.getElementById('pill-timer');
-    const pillScore  = document.getElementById('pill-score');
-    const timeBar    = document.getElementById('timeBar');
-    const startBtn   = document.getElementById('startBtn');
-    const retryBtn   = document.getElementById('retryBtn');
-    const toast      = document.getElementById('toast');
-
-    // 圖片
-    const snakeHeadImage = new Image(); snakeHeadImage.src = 'images/snake_head.png';
-    const snakeBodyImage = new Image(); snakeBodyImage.src = 'images/snake_body.png';
-    const foodImage      = new Image(); foodImage.src = 'images/boba.png';
-
-    // 狀態
-    let snake = [{ x: 10, y: 10 }];
-    let food = { x: 15, y: 15 };
-    let direction = { x: 0, y: 0 };
-    let score = 0;
-    let timeLeft = 60;
-    let gameOver = false;
-    let gameStarted = false;
-    let lastUpdateTime = 0;
-    let lastSecondTime = 0;
-    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-    
-    // ✅ 新增：撞牆緩衝相關變數
-    let wallHitTime = 0; // 撞牆時間點
-    let isWallHit = false; // 是否撞到牆
-    let wallHitPosition = null; // 撞牆位置
-    const WALL_BUFFER_TIME = 500; // 200毫秒緩衝時間
-
-    // 尺寸
-    function resizeCanvas() {
-      const maxWidth = Math.min(window.innerWidth - 40, 600);
-      const maxHeight = Math.min(window.innerHeight - 300, 600);
-      const size = Math.min(maxWidth, maxHeight);
-      CELL_SIZE = Math.floor(size / GRID_SIZE);
-      canvas.width = GRID_SIZE * CELL_SIZE;
-      canvas.height = GRID_SIZE * CELL_SIZE;
-      document.getElementById('virtualControls').style.display = isMobile ? 'flex' : 'none';
-      renderGame();
-    }
-
-    // 時間條
-    function updateTimeBar() {
-      const percent = (timeLeft / 60) * 100;
-      timeBar.style.width = percent + '%';
-      const hue = Math.max(0, Math.min(120, percent * 1.2));
-      timeBar.style.background = `linear-gradient(90deg, hsl(${hue}, 60%, 55%), #ffd166)`;
-    }
-
-    // 初始化
-    function initializeGame() {
-      resizeCanvas();
-      window.addEventListener('resize', resizeCanvas);
-      resetGameState();
-
-      document.addEventListener('keydown', handleKeyPress);
-
-      startBtn.addEventListener('click', startGame);
-      startBtn.addEventListener('touchstart', (e) => { e.preventDefault(); startGame(); });
-
-      retryBtn.addEventListener('click', () => {
-        resetGameState(); startGame(); lastUpdateTime = 0; lastSecondTime = 0;
-      });
-
-      // 方向鍵點按 - 改進手機觸控
-      ['upBtn', 'downBtn', 'leftBtn', 'rightBtn'].forEach(id => {
-        const btn = document.getElementById(id);
-        // 觸控事件
-        btn.addEventListener('touchstart', (e) => { 
-          e.preventDefault(); 
-          if (gameStarted && !gameOver && !isWallHit) { // 撞牆時禁用方向鍵
-            const dir = getDirectionFromButton(id);
-            changeDirection(dir.x, dir.y);
-          }
-        }, {passive:false});
-        
-        // 點擊事件（桌面）
-        btn.addEventListener('click', () => { 
-          if (gameStarted && !gameOver && !isWallHit) {
-            const dir = getDirectionFromButton(id);
-            changeDirection(dir.x, dir.y);
-          }
-        });
-        
-        // 防止長按選單
-        btn.addEventListener('contextmenu', (e) => e.preventDefault());
-      });
-
-      // 滑動手勢控制改進
-      let touchStart = null;
-      let lastSwipeTime = 0;
-      const SWIPE_COOLDOWN = 100; // 防止過快連續滑動
-      
-      canvas.addEventListener('touchstart', (e) => {
-        if (!gameStarted || gameOver || e.touches.length>1) return;
-        const t = e.touches[0];
-        touchStart = { x: t.clientX, y: t.clientY, time: Date.now() };
-        e.preventDefault();
-      }, { passive:false });
-      
-      canvas.addEventListener('touchmove', (e) => {
-        if (gameStarted && !gameOver) e.preventDefault();
-      }, { passive:false });
-      
-      canvas.addEventListener('touchend', (e) => {
-        if (!touchStart || !gameStarted || gameOver || isWallHit) return;
-        
-        const now = Date.now();
-        if (now - lastSwipeTime < SWIPE_COOLDOWN) return; // 冷卻時間
-        
-        const t = (e.changedTouches && e.changedTouches[0]) || null;
-        if (!t) return;
-        
-        const dx = t.clientX - touchStart.x;
-        const dy = t.clientY - touchStart.y;
-        const adx = Math.abs(dx), ady = Math.abs(dy);
-        const dt  = now - touchStart.time;
-        
-        const MIN_DIST = 20;  // 最小滑動距離
-        const MIN_TIME = 30;
-        const MAX_TIME = 500; // 最大識別時間
-        
-        if (dt >= MIN_TIME && dt <= MAX_TIME && (adx > MIN_DIST || ady > MIN_DIST)) {
-          lastSwipeTime = now;
-          if (adx > ady) {
-            changeDirection(dx>0 ? 1 : -1, 0);
-          } else {
-            changeDirection(0, dy>0 ? 1 : -1);
-          }
-        }
-        touchStart = null;
-      }, { passive:true });
-      
-      // 防止畫布上的默認行為
-      canvas.addEventListener('contextmenu', (e) => e.preventDefault());
-      canvas.addEventListener('dragstart', (e) => e.preventDefault());
-    }
-
-    // 根據按鈕ID獲取方向
-    function getDirectionFromButton(btnId) {
-      switch(btnId) {
-        case 'upBtn': return { x: 0, y: -1 };
-        case 'downBtn': return { x: 0, y: 1 };
-        case 'leftBtn': return { x: -1, y: 0 };
-        case 'rightBtn': return { x: 1, y: 0 };
-        default: return { x: 0, y: 0 };
-      }
-    }
-
-    // 重置
-    function resetGameState() {
-      snake = [{ x: 10, y: 10 }];
-      food = generateFoodPosition();
-      direction = { x: 0, y: 0 };
-      score = 0;
-      timeLeft = 60;
-      gameOver = false;
-      gameStarted = false;
-      isWallHit = false; // 重置撞牆狀態
-      wallHitTime = 0;
-
-      pillStatus.textContent = '準備開始';
-      pillStatus.className = 'pill info';
-      pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
-      pillScore.textContent = `分數：${score} / 10`;
-
-      startBtn.style.display = 'inline-flex';
-      retryBtn.style.display = 'none';
-
-      document.getElementById('upBtn').disabled = true;
-      document.getElementById('downBtn').disabled = true;
-      document.getElementById('leftBtn').disabled = true;
-      document.getElementById('rightBtn').disabled = true;
-
-      updateTimeBar();
-      renderGame();
-    }
-
-    // 開始
-    function startGame() {
-      if (!gameStarted && !gameOver) {
-        gameStarted = true;
-        startBtn.style.display = 'none';
-        retryBtn.style.display = 'inline-flex';
-        pillStatus.textContent = '遊戲進行中';
-        pillStatus.className = 'pill ok';
-        document.getElementById('upBtn').disabled = false;
-        document.getElementById('downBtn').disabled = false;
-        document.getElementById('leftBtn').disabled = false;
-        document.getElementById('rightBtn').disabled = false;
-        lastUpdateTime = 0; lastSecondTime = 0;
-        requestAnimationFrame(gameLoop);
-      }
-    }
-
-    // 方向
-    function changeDirection(x, y) {
-      // 如果正在撞牆緩衝期，允許任何方向改變
-      if (isWallHit) {
-        const now = Date.now();
-        if (now - wallHitTime < WALL_BUFFER_TIME) {
-          // 檢查新方向是否安全（不直接反向）
-          if (!(x !== 0 && direction.x === -x) && !(y !== 0 && direction.y === -y)) {
-            direction = { x, y };
-            isWallHit = false; // 成功改變方向，結束撞牆狀態
-            pillStatus.textContent = '遊戲進行中';
-            pillStatus.className = 'pill ok';
-            return true;
-          }
-        }
-        return false;
-      }
-      
-      // 正常方向改變邏輯
-      if ((x !== 0 && direction.x === -x) || (y !== 0 && direction.y === -y)) return false; // 防反向
-      if ((x !== 0 && direction.x === 0) || (y !== 0 && direction.y === 0)) {
-        direction = { x, y };
-        return true;
-      }
-      return false;
-    }
-
-    // 食物
-    function generateFoodPosition() {
-      let p;
-      do { p = { x: Math.floor(Math.random()*GRID_SIZE), y: Math.floor(Math.random()*GRID_SIZE) }; }
-      while (snake.some(s => s.x===p.x && s.y===p.y));
-      return p;
-    }
-
-    // 鍵盤
-    function handleKeyPress(e) {
-      if (!gameStarted && !gameOver) startGame();
-      if (gameStarted && !gameOver) {
-        if (e.key === 'ArrowUp') changeDirection(0,-1);
-        else if (e.key === 'ArrowDown') changeDirection(0,1);
-        else if (e.key === 'ArrowLeft') changeDirection(-1,0);
-        else if (e.key === 'ArrowRight') changeDirection(1,0);
-      }
-    }
-
-    // 更新
-    function updateGame() {
-      if (gameOver || !gameStarted || (direction.x===0 && direction.y===0 && !isWallHit)) return;
-      
-      // 檢查撞牆緩衝期是否結束
-      if (isWallHit) {
-        const now = Date.now();
-        if (now - wallHitTime >= WALL_BUFFER_TIME) {
-          // 緩衝時間結束，遊戲結束
-          gameOver = true;
-          pillStatus.textContent = '遊戲結束';
-          pillStatus.className = 'pill warn';
-          showToast(`遊戲結束！最終分數: ${score}`);
-          return;
-        }
-        // 仍在緩衝期，不移動
-        return;
-      }
-      
-      const head = { x: snake[0].x + direction.x, y: snake[0].y + direction.y };
-
-      // 檢查是否撞牆
-      if (head.x<0 || head.x>=GRID_SIZE || head.y<0 || head.y>=GRID_SIZE) {
-        // 撞牆，進入緩衝期
-        isWallHit = true;
-        wallHitTime = Date.now();
-        wallHitPosition = { ...head };
-        pillStatus.textContent = '危險！快改變方向';
-        pillStatus.className = 'pill warn';
-        
-        // 顯示警告提示
-        showToast('⚠️ 撞牆！快改變方向！');
-        return;
-      }
-
-      // 檢查是否自撞
-      if (snake.some(seg => seg.x===head.x && seg.y===head.y)) {
-        gameOver = true;
-        pillStatus.textContent = '遊戲結束';
-        pillStatus.className = 'pill warn';
-        showToast(`遊戲結束！撞到自己了！最終分數: ${score}`);
-        return;
-      }
-
-      snake.unshift(head);
-
-      // 吃食物
-      if (head.x === food.x && head.y === food.y) {
-        score += 1;
-        pillScore.textContent = `分數：${score} / 10`;
-        food = generateFoodPosition();
-        if (score >= 10) {
-          unlockSpirit();
-          gameOver = true;
-          return;
-        }
-      } else {
-        snake.pop();
-      }
-
-      renderGame();
-    }
-
-    // 繪製
-    function renderGame() {
-      ctx.fillStyle = '#f0f0f0';
-      ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-      // 蛇
-      const sW = CELL_SIZE * snakeScale;
-      const sH = CELL_SIZE * snakeScale;
-      const sOff = (CELL_SIZE * (snakeScale - 1)) / 2;
-      
-      // 如果撞牆，讓蛇頭閃爍
-      const headAlpha = isWallHit ? (0.5 + 0.5 * Math.sin(Date.now() / 100)) : 1;
-      
-      snake.forEach((seg, i) => {
-        const img = i===0 ? snakeHeadImage : snakeBodyImage;
-        if (i === 0 && isWallHit) {
-          ctx.globalAlpha = headAlpha;
-        }
-        ctx.drawImage(
-          img,
-          seg.x*CELL_SIZE - sOff,
-          seg.y*CELL_SIZE - sOff,
-          sW, sH
-        );
-        if (i === 0 && isWallHit) {
-          ctx.globalAlpha = 1;
-        }
-      });
-
-      // 食物
-      const fW = CELL_SIZE * foodScale;
-      const fH = CELL_SIZE * foodScale;
-      const fOff = (CELL_SIZE * (foodScale - 1)) / 2;
-      ctx.drawImage(
-        foodImage,
-        food.x*CELL_SIZE - fOff,
-        food.y*CELL_SIZE - fOff,
-        fW, fH
-      );
-      
-      // 如果撞牆，繪製警告邊框
-      if (isWallHit) {
-        ctx.strokeStyle = '#ff0000';
-        ctx.lineWidth = 3;
-        ctx.strokeRect(0, 0, canvas.width, canvas.height);
-        
-        // 繪製倒數計時
-        const remainingTime = WALL_BUFFER_TIME - (Date.now() - wallHitTime);
-        const seconds = (remainingTime / 1000).toFixed(1);
-        ctx.fillStyle = 'rgba(255, 0, 0, 0.7)';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(`${seconds}s`, canvas.width/2, 30);
-      }
-    }
-
-    // 提示
-    function showToast(msg) {
-      toast.textContent = msg; toast.style.display = 'block';
-      setTimeout(()=>{ toast.style.display='none'; }, 2000);
-    }
-
-    // 解鎖
-    function unlockSpirit() {
-      const spirit = {
-        id:'spirit_game4', name:'珍奶雞蛋仔',
-        image:'images/game-spirit4.png', page:'spirit_game4.html',
-        unlockDate:new Date().toISOString(), score:score
-      };
-      let spirits = [];
-      try { spirits = JSON.parse(localStorage.getItem('spirits') || '[]'); } catch(e){ spirits = []; }
+    function collect() {
+      let spirits = JSON.parse(localStorage.getItem('spirits') || '[]');
       if (!spirits.some(s => s.id === spirit.id)) {
         spirits.push(spirit);
         localStorage.setItem('spirits', JSON.stringify(spirits));
-        showToast('🎉 成功解鎖挑戰精靈：珍奶雞蛋仔！');
-        pillStatus.textContent = '挑戰成功！';
-        pillStatus.className = 'pill ok';
+        document.getElementById('message').innerText = '🎉 收集成功！返回主頁查看吧！';
       } else {
-        showToast('你已經解鎖過珍奶雞蛋仔了喔！');
+        document.getElementById('message').innerText = '你已經擁有珍奶雞蛋仔了喔！';
       }
-      setTimeout(()=>{ window.location.href = spirit.page + '#unlocked'; }, 1500);
     }
-
-    // 迴圈
-    function gameLoop(ts) {
-      if (gameOver) return;
-      if (!lastUpdateTime) lastUpdateTime = ts;
-      if (!lastSecondTime) lastSecondTime = ts;
-
-      if (ts - lastUpdateTime >= 220) {
-        updateGame(); 
-        lastUpdateTime = ts;
-      }
-      
-      // 如果撞牆，仍然更新渲染以顯示閃爍效果
-      if (isWallHit) {
-        renderGame();
-      }
-      
-      if (gameStarted && ts - lastSecondTime >= 1000) {
-        timeLeft--; lastSecondTime = ts; updateTimeBar();
-        pillTimer.textContent = `剩餘時間：${timeLeft} 秒`;
-        if (timeLeft <= 0 && !gameOver) {
-          gameOver = true;
-          pillStatus.textContent = '時間到！';
-          pillStatus.className = 'pill warn';
-          showToast(`時間到！最終分數: ${score}`);
-          return;
-        }
-      }
-      requestAnimationFrame(gameLoop);
-    }
-
-    // 啟動
-    Promise.all([
-      new Promise(r=>{ snakeHeadImage.onload = r; }),
-      new Promise(r=>{ snakeBodyImage.onload = r; }),
-      new Promise(r=>{ foodImage.onload = r; })
-    ]).then(() => {
-      initializeGame();
-      requestAnimationFrame(gameLoop);
-    }).catch(err => {
-      console.error('圖片加載失敗:', err);
-      showToast('遊戲圖片加載失敗，請刷新頁面重試');
-    });
   </script>
 </body>
 </html>
-[file content end]
